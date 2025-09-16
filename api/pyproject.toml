@@ -1,0 +1,116 @@
+[build-system]
+requires = ["setuptools", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "customer-feedback-analyzer-api"
+version = "3.1.0"
+description = "Customer AI Driven Feedback Analyzer - API Backend"
+requires-python = ">=3.11"
+
+[tool.black]
+line-length = 88
+target-version = ['py311']
+include = '\.pyi?$'
+extend-exclude = '''
+/(
+  # directories
+  \.eggs
+  | \.git
+  | \.hg
+  | \.mypy_cache
+  | \.tox
+  | \.venv
+  | build
+  | dist
+)/
+'''
+
+[tool.mypy]
+python_version = "3.11"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = true
+disallow_incomplete_defs = true
+check_untyped_defs = true
+disallow_untyped_decorators = true
+no_implicit_optional = true
+warn_redundant_casts = true
+warn_unused_ignores = true
+warn_no_return = true
+warn_unreachable = true
+strict_equality = true
+
+[[tool.mypy.overrides]]
+module = [
+    "celery.*",
+    "flower.*",
+    "plotly.*",
+]
+ignore_missing_imports = true
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py", "*_test.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+addopts = [
+    "--strict-markers",
+    "--strict-config",
+    "--verbose",
+    "--tb=short",
+    "--cov=app",
+    "--cov-report=term-missing",
+    "--cov-report=html",
+    "--cov-fail-under=80"
+]
+markers = [
+    "slow: marks tests as slow (deselect with '-m \"not slow\"')",
+    "integration: marks tests as integration tests",
+    "unit: marks tests as unit tests",
+]
+
+# CRITICAL PROJECT RULE: NO EMOJIS ALLOWED
+# This section enforces the strict no-emoji policy
+[tool.emoji-checker]
+enabled = true
+fail_on_emoji = true
+check_comments = true
+check_strings = true
+check_docstrings = true
+emoji_patterns = [
+    # Common emoji unicode ranges
+    "[\U0001F600-\U0001F64F]",  # emoticons
+    "[\U0001F300-\U0001F5FF]",  # symbols & pictographs
+    "[\U0001F680-\U0001F6FF]",  # transport & map symbols
+    "[\U0001F700-\U0001F77F]",  # alchemical symbols
+    "[\U0001F780-\U0001F7FF]",  # geometric shapes extended
+    "[\U0001F800-\U0001F8FF]",  # supplemental arrows-c
+    "[\U0002600-\U000026FF]",  # miscellaneous symbols
+    "[\U0002700-\U000027BF]",  # dingbats
+    "[\U0001F900-\U0001F9FF]",  # supplemental symbols and pictographs
+    "[\U0001FA70-\U0001FAFF]",  # symbols and pictographs extended-a
+]
+
+[tool.coverage.run]
+source = ["app"]
+omit = [
+    "*/tests/*",
+    "*/test_*",
+    "*/__init__.py",
+    "*/conftest.py",
+]
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "def __repr__",
+    "if self.debug:",
+    "if settings.DEBUG",
+    "raise AssertionError",
+    "raise NotImplementedError",
+    "if 0:",
+    "if __name__ == .__main__.:",
+    "class .*\bProtocol\):",
+    "@(abc\.)?abstractmethod",
+]

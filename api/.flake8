@@ -1,0 +1,34 @@
+[flake8]
+max-line-length = 88
+extend-ignore =
+    E203,  # whitespace before ':'
+    E501,  # line too long (handled by black)
+    W503,  # line break before binary operator
+exclude =
+    .git,
+    __pycache__,
+    .venv,
+    venv,
+    env,
+    build,
+    dist,
+    .tox
+
+# CRITICAL: Custom rules to prevent emojis
+# This regex pattern matches common emoji unicode ranges
+# U+1F600-U+1F64F (emoticons)
+# U+1F300-U+1F5FF (symbols & pictographs)
+# U+1F680-U+1F6FF (transport & map symbols)
+# U+1F700-U+1F77F (alchemical symbols)
+# U+1F780-U+1F7FF (geometric shapes extended)
+# U+1F800-U+1F8FF (supplemental arrows-c)
+# U+2600-U+26FF (miscellaneous symbols)
+# U+2700-U+27BF (dingbats)
+per-file-ignores =
+    __init__.py:F401
+
+# Enable additional checks
+select = E,W,F,C90,N
+
+# Custom error codes for project rules:
+# E999: Custom emoji detection (will be implemented via plugin)

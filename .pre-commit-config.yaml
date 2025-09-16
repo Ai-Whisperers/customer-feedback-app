@@ -1,0 +1,105 @@
+# Pre-commit hooks configuration
+# See https://pre-commit.com for more information
+repos:
+  # Python linting and formatting
+  - repo: https://github.com/psf/black
+    rev: 24.10.0
+    hooks:
+      - id: black
+        name: black (python)
+        args: [--line-length=88]
+
+  - repo: https://github.com/pycqa/flake8
+    rev: 7.1.1
+    hooks:
+      - id: flake8
+        name: flake8 (python)
+
+  - repo: https://github.com/pre-commit/mirrors-mypy
+    rev: v1.13.0
+    hooks:
+      - id: mypy
+        name: mypy (python)
+        additional_dependencies: [types-all]
+
+  # JavaScript/TypeScript linting
+  - repo: https://github.com/pre-commit/mirrors-eslint
+    rev: v9.13.0
+    hooks:
+      - id: eslint
+        name: eslint (typescript)
+        files: \.(ts|tsx|js|jsx)$
+        types: [file]
+        additional_dependencies:
+          - eslint@9.13.0
+          - "@typescript-eslint/eslint-plugin@8.11.0"
+          - "@typescript-eslint/parser@8.11.0"
+
+  # General file checks
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v5.0.0
+    hooks:
+      - id: trailing-whitespace
+        name: trim trailing whitespace
+      - id: end-of-file-fixer
+        name: fix end of files
+      - id: check-yaml
+        name: check yaml
+      - id: check-toml
+        name: check toml
+      - id: check-json
+        name: check json
+      - id: check-merge-conflict
+        name: check for merge conflicts
+      - id: check-added-large-files
+        name: check for added large files
+      - id: mixed-line-ending
+        name: check line endings
+
+  # CRITICAL: Custom emoji detection hook
+  - repo: local
+    hooks:
+      - id: no-emojis
+        name: CRITICAL - No emojis allowed in codebase
+        entry: python tools/check-no-emojis.py
+        language: system
+        files: \.(py|ts|tsx|js|jsx|md|txt|json|yaml|yml)$
+        stages: [commit, push]
+        always_run: false
+        pass_filenames: true
+        fail_fast: true
+        verbose: true
+
+  # Documentation checks
+  - repo: https://github.com/igorshubovych/markdownlint-cli
+    rev: v0.42.0
+    hooks:
+      - id: markdownlint
+        name: markdownlint
+        args: [--config, .markdownlint.json]
+
+  # Additional security checks
+  - repo: https://github.com/Yelp/detect-secrets
+    rev: v1.5.0
+    hooks:
+      - id: detect-secrets
+        name: detect secrets
+        args: ['--baseline', '.secrets.baseline']
+
+# Global configuration
+default_stages: [commit]
+fail_fast: false
+minimum_pre_commit_version: "3.0.0"
+
+# CI configuration
+ci:
+  autofix_commit_msg: |
+    [pre-commit.ci] auto fixes from pre-commit hooks
+
+    for more information, see https://pre-commit.ci
+  autofix_prs: true
+  autoupdate_branch: ''
+  autoupdate_commit_msg: '[pre-commit.ci] pre-commit autoupdate'
+  autoupdate_schedule: weekly
+  skip: [no-emojis]  # Skip emoji check in CI for now
+  submodules: false
