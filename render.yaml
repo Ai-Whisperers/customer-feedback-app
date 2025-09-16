@@ -1,0 +1,137 @@
+# Render Blueprint Configuration
+# Customer AI Driven Feedback Analyzer v3.1.0
+
+services:
+  # FastAPI Backend Service
+  - type: web
+    name: feedback-analyzer-api
+    runtime: python
+    region: oregon
+    plan: standard
+    buildCommand: |
+      cd api
+      pip install --upgrade pip
+      pip install -r requirements.txt
+    startCommand: |
+      cd api
+      uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11
+      - key: OPENAI_API_KEY
+        sync: false
+      - key: AI_MODEL
+        value: gpt-4o-mini
+      - key: REDIS_URL
+        fromService:
+          type: redis
+          name: feedback-analyzer-redis
+          property: connectionString
+      - key: CELERY_BROKER_URL
+        fromService:
+          type: redis
+          name: feedback-analyzer-redis
+          property: connectionString
+      - key: CELERY_RESULT_BACKEND
+        fromService:
+          type: redis
+          name: feedback-analyzer-redis
+          property: connectionString
+      - key: MAX_FILE_SIZE_MB
+        value: 10
+      - key: ALLOWED_EXTENSIONS
+        value: "csv,xlsx,xls"
+      - key: MAX_BATCH_SIZE
+        value: 50
+      - key: MAX_RPS
+        value: 8
+      - key: TASK_EXPIRY_SECONDS
+        value: 3600
+    healthCheckPath: /api/health
+    autoDeploy: true
+
+  # Celery Worker Service
+  - type: worker
+    name: feedback-analyzer-worker
+    runtime: python
+    region: oregon
+    plan: standard
+    buildCommand: |
+      cd api
+      pip install --upgrade pip
+      pip install -r requirements.txt
+    startCommand: |
+      cd api
+      celery -A app.workers.celery_app worker --loglevel=info --concurrency=2
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11
+      - key: OPENAI_API_KEY
+        sync: false
+      - key: AI_MODEL
+        value: gpt-4o-mini
+      - key: REDIS_URL
+        fromService:
+          type: redis
+          name: feedback-analyzer-redis
+          property: connectionString
+      - key: CELERY_BROKER_URL
+        fromService:
+          type: redis
+          name: feedback-analyzer-redis
+          property: connectionString
+      - key: CELERY_RESULT_BACKEND
+        fromService:
+          type: redis
+          name: feedback-analyzer-redis
+          property: connectionString
+      - key: MAX_BATCH_SIZE
+        value: 50
+      - key: MAX_RPS
+        value: 8
+    autoDeploy: true
+
+  # BFF/Frontend Service
+  - type: web
+    name: feedback-analyzer-web
+    runtime: node
+    region: oregon
+    plan: standard
+    buildCommand: |
+      cd web
+      npm install
+      cd client
+      npm install
+      npm run build
+      cd ..
+      npm run build
+    startCommand: |
+      cd web
+      npm run start:prod
+    envVars:
+      - key: NODE_VERSION
+        value: 20
+      - key: NODE_ENV
+        value: production
+      - key: API_PROXY_TARGET
+        fromService:
+          type: web
+          name: feedback-analyzer-api
+          envVarKey: RENDER_INTERNAL_URL
+      - key: PORT
+        value: 3000
+    routes:
+      - type: rewrite
+        source: /api/*
+        destination: /*
+    healthCheckPath: /health
+    autoDeploy: true
+
+# Redis Database
+databases:
+  - name: feedback-analyzer-redis
+    type: redis
+    region: oregon
+    plan: starter
+    maxmemoryPolicy: allkeys-lru
+    ipAllowList: []

@@ -4,16 +4,13 @@
   "private": true,
   "description": "Customer AI Driven Feedback Analyzer - Frontend & BFF",
   "scripts": {
-    "dev": "vite",
-    "build": "tsc && vite build && tsc server/server.ts --outDir dist/server",
-    "preview": "vite preview",
+    "dev": "tsx server/server.ts",
+    "dev:client": "cd client && npm run dev",
+    "build": "cd client && npm run build && cd .. && tsc server/server.ts --outDir dist",
+    "start:prod": "node dist/server.js",
     "server": "tsx server/server.ts",
-    "start": "node dist/server/server.js",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
-    "type-check": "tsc --noEmit",
-    "test": "vitest",
-    "test:ui": "vitest --ui",
-    "test:coverage": "vitest --coverage"
+    "type-check": "tsc --noEmit"
   },
   "dependencies": {
     "react": "^18.3.1",
