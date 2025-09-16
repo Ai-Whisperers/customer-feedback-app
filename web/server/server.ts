@@ -89,7 +89,8 @@ app.use('/api', apiProxy);
 
 // Serve static files in production
 if (IS_PRODUCTION) {
-  const buildPath = path.join(__dirname, '..', 'dist');
+  // Client build is in ../client/dist from the compiled server location
+  const buildPath = path.join(__dirname, '..', 'client', 'dist');
 
   // Serve static assets
   app.use(express.static(buildPath, {
