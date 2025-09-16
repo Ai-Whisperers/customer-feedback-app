@@ -10,8 +10,8 @@
     "build:render": "cd client && npm install && npm run build && cd .. && npx tsc server/server.ts --outDir dist --esModuleInterop --module commonjs --target es2020",
     "start:prod": "node dist/server.js",
     "server": "tsx server/server.ts",
-    "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
-    "type-check": "tsc --noEmit"
+    "lint": "cd client && npm run lint",
+    "type-check": "cd client && tsc --noEmit"
   },
   "dependencies": {
     "react": "^18.3.1",

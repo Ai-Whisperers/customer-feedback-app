@@ -8,13 +8,8 @@ services:
     runtime: python
     region: oregon
     plan: standard
-    buildCommand: |
-      cd api
-      pip install --upgrade pip
-      pip install -r requirements.txt
-    startCommand: |
-      cd api
-      uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    buildCommand: cd api && bash build.sh
+    startCommand: cd api && bash start.sh
     envVars:
       - key: PYTHON_VERSION
         value: 3.11
@@ -47,6 +42,10 @@ services:
         value: 8
       - key: TASK_EXPIRY_SECONDS
         value: 3600
+      - key: API_WORKERS
+        value: 1
+      - key: LOG_LEVEL
+        value: info
     healthCheckPath: /api/health
     autoDeploy: true
 
@@ -56,13 +55,8 @@ services:
     runtime: python
     region: oregon
     plan: standard
-    buildCommand: |
-      cd api
-      pip install --upgrade pip
-      pip install -r requirements.txt
-    startCommand: |
-      cd api
-      celery -A app.workers.celery_app worker --loglevel=info --concurrency=2
+    buildCommand: cd api && bash build-worker.sh
+    startCommand: cd api && bash start-worker.sh
     envVars:
       - key: PYTHON_VERSION
         value: 3.11
@@ -89,6 +83,12 @@ services:
         value: 50
       - key: MAX_RPS
         value: 8
+      - key: CELERY_WORKER_CONCURRENCY
+        value: 2
+      - key: CELERY_MAX_TASKS_PER_CHILD
+        value: 100
+      - key: CELERY_LOG_LEVEL
+        value: info
     autoDeploy: true
 
   # BFF/Frontend Service
@@ -97,17 +97,8 @@ services:
     runtime: node
     region: oregon
     plan: standard
-    buildCommand: |
-      cd web
-      npm install
-      cd client
-      npm install
-      npm run build
-      cd ..
-      npm run build
-    startCommand: |
-      cd web
-      npm run start:prod
+    buildCommand: cd web && bash build.sh
+    startCommand: cd web && bash start.sh
     envVars:
       - key: NODE_VERSION
         value: 20

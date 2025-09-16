@@ -1,0 +1,18 @@
+# Web Service Requirements
+# Node.js service - No Python dependencies required
+# This file exists for documentation purposes
+
+# The web service uses Node.js and npm packages defined in package.json
+# Build process:
+# 1. npm install (install Node dependencies)
+# 2. cd client && npm install (install React app dependencies)
+# 3. cd client && npm run build (build React app)
+# 4. tsc server/server.ts (compile TypeScript server)
+# 5. node dist/server.js (run production server)
+
+# Required environment variables:
+# - PORT: Server port (default: 3000)
+# - API_PROXY_TARGET: Backend API URL
+# - NODE_ENV: Set to "production" for production builds
+
+# Node version requirement: >=18.0.0

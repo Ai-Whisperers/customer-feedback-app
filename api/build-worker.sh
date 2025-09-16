@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
-# Build script for API service on Render
-# Customer AI Driven Feedback Analyzer - API Build
+# Build script for Celery Worker service on Render
+# Customer AI Driven Feedback Analyzer - Worker Build
 
 set -e
 
 echo "====================================="
-echo "Starting API build process..."
+echo "Starting Worker build process..."
 echo "====================================="
 
 # Display Python version
@@ -21,17 +21,11 @@ pip install -r requirements.txt
 
 # Verify critical dependencies
 echo "Verifying critical dependencies..."
-python -c "import fastapi; print(f'FastAPI version: {fastapi.__version__}')"
-python -c "import uvicorn; print(f'Uvicorn version: {uvicorn.__version__}')"
 python -c "import celery; print(f'Celery version: {celery.__version__}')"
 python -c "import redis; print(f'Redis version: {redis.__version__}')"
 python -c "import openai; print(f'OpenAI version: {openai.__version__}')"
 python -c "import pandas; print(f'Pandas version: {pandas.__version__}')"
 
-# Verify app can be imported
-echo "Verifying app imports..."
-python -c "from app.main import app; print('FastAPI app imported successfully')"
-
 echo "====================================="
-echo "API build completed successfully!"
+echo "Worker build completed successfully!"
 echo "====================================="
