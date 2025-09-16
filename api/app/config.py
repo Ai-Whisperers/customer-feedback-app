@@ -1,7 +1,7 @@
 """Application configuration using Pydantic Settings."""
 
 import os
-from typing import List, Optional
+from typing import Optional
 from pydantic import Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
@@ -20,11 +20,6 @@ class Settings(BaseSettings):
     DEBUG: bool = Field(default=True)
     SECRET_KEY: str = Field(min_length=32)
 
-    # API Configuration
-    API_HOST: str = Field(default="0.0.0.0")
-    API_PORT: int = Field(default=8000)
-    API_WORKERS: int = Field(default=1)
-
     # OpenAI Configuration
     OPENAI_API_KEY: str = Field(min_length=1)
     AI_MODEL: str = Field(default="gpt-4o-mini")
@@ -41,25 +36,14 @@ class Settings(BaseSettings):
 
     # Rate Limiting
     MAX_RPS: int = Field(default=8)
-    MAX_CONCURRENT_TASKS: int = Field(default=10)
 
-    # Worker Configuration
+    # Celery Worker Configuration
     CELERY_WORKER_CONCURRENCY: int = Field(default=4)
-    CELERY_TASK_MAX_RETRIES: int = Field(default=3)
 
     # Optional
     SENTRY_DSN: Optional[str] = Field(default=None)
     LOG_LEVEL: str = Field(default="INFO")
     DATABASE_URL: Optional[str] = Field(default=None)
-
-    # CORS
-    ALLOWED_ORIGINS: List[str] = Field(
-        default=[
-            "http://localhost:3000",
-            "http://localhost:3001",
-            "https://*.onrender.com"
-        ]
-    )
 
     @property
     def file_max_bytes(self) -> int:
