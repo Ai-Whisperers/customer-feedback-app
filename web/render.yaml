@@ -1,0 +1,12 @@
+# Render Configuration for Web Service
+# Customer AI Driven Feedback Analyzer - Frontend & BFF
+
+services:
+  - type: web
+    name: feedback-analyzer-web
+    runtime: node
+    buildCommand: npm install && cd client && npm install && npm run build && cd ..
+    startCommand: npm run start:prod
+    envVarGroups:
+      - feedback-analyzer-env-group
+    healthCheckPath: /health

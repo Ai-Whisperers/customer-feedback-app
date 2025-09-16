@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "tsx server/server.ts",
     "dev:client": "cd client && npm run dev",
-    "build": "cd client && npm run build && cd .. && tsc server/server.ts --outDir dist",
+    "build": "cd client && npm run build && cd .. && tsc server/server.ts --outDir dist --esModuleInterop --module commonjs --target es2020",
     "start:prod": "node dist/server.js",
     "server": "tsx server/server.ts",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
