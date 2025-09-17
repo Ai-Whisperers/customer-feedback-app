@@ -23,7 +23,7 @@ class Settings(BaseSettings):
     PORT: int = Field(default=8000)
 
     # OpenAI Configuration
-    OPENAI_API_KEY: str = Field(min_length=1)
+    OPENAI_API_KEY: str = Field(default="", min_length=0)  # Allow empty for health checks
     AI_MODEL: str = Field(default="gpt-4o-mini")
 
     # Redis Configuration
