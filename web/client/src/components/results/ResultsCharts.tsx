@@ -40,7 +40,7 @@ export const ResultsCharts: React.FC<ResultsChartsProps> = ({ results }) => {
     },
     margin: { t: 40, b: 40, l: 40, r: 40 },
     showlegend: true,
-    hovermode: 'closest',
+    hovermode: 'closest' as const,
   };
 
   const emotionsChart = useMemo(() => {
@@ -62,7 +62,7 @@ export const ResultsCharts: React.FC<ResultsChartsProps> = ({ results }) => {
             },
           },
           text: sortedEmotions.map(([, value]) => `${(value * 100).toFixed(1)}%`),
-          textposition: 'outside',
+          textposition: 'outside' as const,
           hovertemplate: '%{x}<br>Probabilidad: %{y:.2%}<extra></extra>',
         },
       ],
@@ -73,11 +73,11 @@ export const ResultsCharts: React.FC<ResultsChartsProps> = ({ results }) => {
           font: { size: 18 },
         },
         xaxis: {
-          title: 'Emociones',
+          title: { text: 'Emociones' },
           gridcolor: 'rgba(229, 231, 235, 0.3)',
         },
         yaxis: {
-          title: 'Probabilidad',
+          title: { text: 'Probabilidad' },
           gridcolor: 'rgba(229, 231, 235, 0.3)',
           tickformat: '.0%',
         },
@@ -87,7 +87,7 @@ export const ResultsCharts: React.FC<ResultsChartsProps> = ({ results }) => {
 
   const npsChart = useMemo(() => {
     const { promoters, passives, detractors } = results.summary.nps;
-    const total = promoters + passives + detractors;
+    // const total = promoters + passives + detractors; // Total not used in visualization
 
     return {
       data: [
@@ -103,7 +103,7 @@ export const ResultsCharts: React.FC<ResultsChartsProps> = ({ results }) => {
             },
           },
           texttemplate: '%{label}<br>%{value} (%{percent})',
-          textposition: 'outside',
+          textposition: 'outside' as const,
           hovertemplate: '%{label}<br>Cantidad: %{value}<br>Porcentaje: %{percent}<extra></extra>',
         },
       ],
@@ -135,7 +135,7 @@ export const ResultsCharts: React.FC<ResultsChartsProps> = ({ results }) => {
             },
           },
           text: topPainPoints.map(pp => pp.freq.toString()).reverse(),
-          textposition: 'outside',
+          textposition: 'outside' as const,
           hovertemplate: '%{y}<br>Frecuencia: %{x}<extra></extra>',
         },
       ],
@@ -146,11 +146,11 @@ export const ResultsCharts: React.FC<ResultsChartsProps> = ({ results }) => {
           font: { size: 18 },
         },
         xaxis: {
-          title: 'Frecuencia',
+          title: { text: 'Frecuencia' },
           gridcolor: 'rgba(229, 231, 235, 0.3)',
         },
         yaxis: {
-          title: '',
+          title: { text: '' },
           gridcolor: 'rgba(229, 231, 235, 0.3)',
         },
       },
@@ -186,7 +186,7 @@ export const ResultsCharts: React.FC<ResultsChartsProps> = ({ results }) => {
             },
           },
           text: Object.values(riskRanges).map(v => v.toString()),
-          textposition: 'outside',
+          textposition: 'outside' as const,
           hovertemplate: '%{x}<br>Cantidad: %{y}<extra></extra>',
         },
       ],
@@ -199,11 +199,11 @@ export const ResultsCharts: React.FC<ResultsChartsProps> = ({ results }) => {
           font: { size: 18 },
         },
         xaxis: {
-          title: 'Nivel de Riesgo',
+          title: { text: 'Nivel de Riesgo' },
           gridcolor: 'rgba(229, 231, 235, 0.3)',
         },
         yaxis: {
-          title: 'Cantidad de Clientes',
+          title: { text: 'Cantidad de Clientes' },
           gridcolor: 'rgba(229, 231, 235, 0.3)',
         },
       },

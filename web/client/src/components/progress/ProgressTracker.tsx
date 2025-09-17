@@ -33,7 +33,7 @@ export const ProgressTracker: React.FC<ProgressTrackerProps> = ({
       case 'failed':
         return 'danger';
       default:
-        return 'secondary';
+        return 'primary';
     }
   };
 

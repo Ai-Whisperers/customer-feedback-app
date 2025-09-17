@@ -10,7 +10,7 @@ type AppState = 'idle' | 'uploading' | 'processing' | 'completed' | 'error';
 export const AnalyzerPage: React.FC = () => {
   const [appState, setAppState] = useState<AppState>('idle');
   const [taskId, setTaskId] = useState<string>('');
-  const [progress, setProgress] = useState(0);
+  const [, setProgress] = useState(0);
   const [results, setResults] = useState<any>(null);
   const [error, setError] = useState<string>('');
 
@@ -53,13 +53,7 @@ export const AnalyzerPage: React.FC = () => {
     }, 2000);
   };
 
-  const handleExport = async (format: 'csv' | 'xlsx') => {
-    try {
-      await getResults(taskId, format);
-    } catch (err) {
-      throw new Error('Error al exportar los resultados');
-    }
-  };
+  // Export function is handled directly by ResultsVisualization component
 
   const handleReset = () => {
     setAppState('idle');
@@ -88,15 +82,8 @@ export const AnalyzerPage: React.FC = () => {
           {appState === 'idle' && (
             <div className="animate-fadeIn">
               <FileUpload
-                onUploadSuccess={(response) => {
-                  setTaskId(response.task_id);
-                  setAppState('processing');
-                  pollStatus(response.task_id);
-                }}
-                onUploadError={(err) => {
-                  setError(err);
-                  setAppState('error');
-                }}
+                onFileSelect={handleFileUpload}
+                isLoading={false}
               />
             </div>
           )}
