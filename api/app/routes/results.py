@@ -19,7 +19,7 @@ redis_client = redis.from_url(settings.REDIS_URL)
 @router.get("/{task_id}")
 async def get_results(
     task_id: str = Path(..., description="Task ID from upload endpoint"),
-    format: str = Query("json", regex="^(json|summary)$", description="Response format"),
+    format: str = Query("json", pattern="^(json|summary)$", description="Response format"),
     include_rows: bool = Query(True, description="Include per-row analysis")
 ):
     """

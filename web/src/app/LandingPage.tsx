@@ -11,16 +11,16 @@ export const LandingPage: React.FC = () => {
         <section className="text-center py-20">
           <h1 className="text-5xl md:text-7xl font-bold mb-6">
             <span className="bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 bg-clip-text text-transparent">
-              Customer Feedback
+              Analizador de Comentarios
             </span>
             <br />
             <span className="bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
-              AI Analyzer
+              con IA
             </span>
           </h1>
 
           <p className="text-xl md:text-2xl text-gray-600 dark:text-gray-300 mb-8 max-w-3xl mx-auto">
-            Transform customer feedback into actionable insights with advanced AI analysis
+            Transforma los comentarios de clientes en insights accionables con análisis avanzado de IA
           </p>
 
           <div className="flex gap-4 justify-center">
@@ -29,14 +29,14 @@ export const LandingPage: React.FC = () => {
               size="lg"
               onClick={() => window.location.href = '/analyzer'}
             >
-              Start Analyzing
+              Comenzar Análisis
             </GlassButton>
             <GlassButton
               variant="secondary"
               size="lg"
               onClick={() => window.location.href = '/about'}
             >
-              Learn More
+              Saber Más
             </GlassButton>
           </div>
         </section>
@@ -45,7 +45,7 @@ export const LandingPage: React.FC = () => {
         <section className="py-20">
           <h2 className="text-3xl md:text-4xl font-bold text-center mb-12">
             <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-              Powerful Features
+              Características Potentes
             </span>
           </h2>
 
@@ -58,10 +58,10 @@ export const LandingPage: React.FC = () => {
                   </svg>
                 </div>
                 <h3 className="text-xl font-semibold mb-2 text-gray-800 dark:text-gray-100">
-                  AI-Powered Analysis
+                  Análisis con IA
                 </h3>
                 <p className="text-gray-600 dark:text-gray-300">
-                  Leverage GPT-4 to extract emotions, pain points, and churn risk from customer feedback
+                  Usa GPT-4 para extraer emociones, puntos de dolor y riesgo de abandono de los comentarios
                 </p>
               </div>
             </GlassCard>
@@ -74,10 +74,10 @@ export const LandingPage: React.FC = () => {
                   </svg>
                 </div>
                 <h3 className="text-xl font-semibold mb-2 text-gray-800 dark:text-gray-100">
-                  Rich Visualizations
+                  Visualizaciones Avanzadas
                 </h3>
                 <p className="text-gray-600 dark:text-gray-300">
-                  Interactive charts and dashboards to visualize sentiment patterns and NPS scores
+                  Gráficos interactivos y dashboards para visualizar patrones de sentimiento y puntajes NPS
                 </p>
               </div>
             </GlassCard>
@@ -90,10 +90,10 @@ export const LandingPage: React.FC = () => {
                   </svg>
                 </div>
                 <h3 className="text-xl font-semibold mb-2 text-gray-800 dark:text-gray-100">
-                  Export Results
+                  Exportar Resultados
                 </h3>
                 <p className="text-gray-600 dark:text-gray-300">
-                  Download analysis results in CSV or Excel format for further processing
+                  Descarga los resultados del análisis en formato CSV o Excel para procesamiento adicional
                 </p>
               </div>
             </GlassCard>
@@ -108,25 +108,25 @@ export const LandingPage: React.FC = () => {
                 <div className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
                   16
                 </div>
-                <p className="text-gray-600 dark:text-gray-300 mt-2">Emotions Analyzed</p>
+                <p className="text-gray-600 dark:text-gray-300 mt-2">Emociones Analizadas</p>
               </div>
               <div>
                 <div className="text-4xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
                   3000+
                 </div>
-                <p className="text-gray-600 dark:text-gray-300 mt-2">Comments/Batch</p>
+                <p className="text-gray-600 dark:text-gray-300 mt-2">Comentarios/Lote</p>
               </div>
               <div>
                 <div className="text-4xl font-bold bg-gradient-to-r from-pink-600 to-red-600 bg-clip-text text-transparent">
                   30s
                 </div>
-                <p className="text-gray-600 dark:text-gray-300 mt-2">Processing Time</p>
+                <p className="text-gray-600 dark:text-gray-300 mt-2">Tiempo de Procesamiento</p>
               </div>
               <div>
                 <div className="text-4xl font-bold bg-gradient-to-r from-green-600 to-blue-600 bg-clip-text text-transparent">
                   2
                 </div>
-                <p className="text-gray-600 dark:text-gray-300 mt-2">Languages</p>
+                <p className="text-gray-600 dark:text-gray-300 mt-2">Idiomas</p>
               </div>
             </div>
           </GlassCard>
@@ -137,11 +137,11 @@ export const LandingPage: React.FC = () => {
           <GlassCard variant="gradient" padding="xl">
             <h2 className="text-3xl md:text-4xl font-bold mb-6">
               <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-                Ready to Get Started?
+                ¿Listo para Comenzar?
               </span>
             </h2>
             <p className="text-xl text-gray-600 dark:text-gray-300 mb-8 max-w-2xl mx-auto">
-              Upload your customer feedback data and get instant AI-powered insights
+              Carga tus datos de comentarios de clientes y obtén insights instantáneos con IA
             </p>
             <GlassButton
               variant="primary"
@@ -149,7 +149,7 @@ export const LandingPage: React.FC = () => {
               onClick={() => window.location.href = '/analyzer'}
               className="text-lg px-8 py-4"
             >
-              Start Free Analysis
+              Iniciar Análisis Gratuito
             </GlassButton>
           </GlassCard>
         </section>

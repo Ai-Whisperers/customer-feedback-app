@@ -11,11 +11,11 @@ export const AboutPage: React.FC = () => {
         <header className="text-center py-12">
           <h1 className="text-4xl md:text-5xl font-bold mb-4">
             <span className="bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
-              About Customer Feedback Analyzer
+              Acerca del Analizador de Comentarios
             </span>
           </h1>
           <p className="text-xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto">
-            Advanced AI-powered analysis for customer insights
+            Análisis avanzado con IA para insights de clientes
           </p>
         </header>
 
@@ -23,17 +23,17 @@ export const AboutPage: React.FC = () => {
         <section className="py-12">
           <GlassCard variant="gradient" padding="xl">
             <h2 className="text-2xl md:text-3xl font-bold mb-6 text-gray-800 dark:text-gray-100">
-              Project Overview
+              Descripción del Proyecto
             </h2>
             <div className="space-y-4 text-gray-600 dark:text-gray-300">
               <p className="text-lg">
-                Customer AI Driven Feedback Analyzer is a cutting-edge application designed to transform
-                raw customer feedback into actionable business insights using advanced artificial intelligence.
+                Customer AI Driven Feedback Analyzer es una aplicación de vanguardia diseñada para transformar
+                comentarios de clientes en insights de negocio accionables usando inteligencia artificial avanzada.
               </p>
               <p className="text-lg">
-                Our system processes customer comments in both Spanish and English, extracting emotions,
-                identifying pain points, calculating churn risk, and determining NPS scores to help businesses
-                understand their customers better.
+                Nuestro sistema procesa comentarios de clientes en español e inglés, extrayendo emociones,
+                identificando puntos de dolor, calculando riesgo de abandono y determinando puntajes NPS para ayudar
+                a las empresas a entender mejor a sus clientes.
               </p>
             </div>
           </GlassCard>
@@ -43,55 +43,55 @@ export const AboutPage: React.FC = () => {
         <section className="py-12">
           <h2 className="text-2xl md:text-3xl font-bold mb-8 text-center">
             <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-              Technical Architecture
+              Arquitectura Técnica
             </span>
           </h2>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             <GlassCard variant="gradient" padding="lg">
               <h3 className="text-xl font-semibold mb-4 text-gray-800 dark:text-gray-100">
-                Frontend Stack
+                Stack Frontend
               </h3>
               <ul className="space-y-2 text-gray-600 dark:text-gray-300">
                 <li className="flex items-center">
                   <span className="w-2 h-2 bg-blue-500 rounded-full mr-3"></span>
-                  React + TypeScript for type-safe development
+                  React + TypeScript para desarrollo seguro
                 </li>
                 <li className="flex items-center">
                   <span className="w-2 h-2 bg-purple-500 rounded-full mr-3"></span>
-                  Tailwind CSS with glassmorphism design
+                  Tailwind CSS con diseño glassmorphism
                 </li>
                 <li className="flex items-center">
                   <span className="w-2 h-2 bg-pink-500 rounded-full mr-3"></span>
-                  Plotly.js for interactive data visualization
+                  Plotly.js para visualización interactiva de datos
                 </li>
                 <li className="flex items-center">
                   <span className="w-2 h-2 bg-green-500 rounded-full mr-3"></span>
-                  Node.js BFF proxy for API communication
+                  Node.js BFF proxy para comunicación con API
                 </li>
               </ul>
             </GlassCard>
 
             <GlassCard variant="gradient" padding="lg">
               <h3 className="text-xl font-semibold mb-4 text-gray-800 dark:text-gray-100">
-                Backend Stack
+                Stack Backend
               </h3>
               <ul className="space-y-2 text-gray-600 dark:text-gray-300">
                 <li className="flex items-center">
                   <span className="w-2 h-2 bg-blue-500 rounded-full mr-3"></span>
-                  FastAPI for high-performance REST APIs
+                  FastAPI para APIs REST de alto rendimiento
                 </li>
                 <li className="flex items-center">
                   <span className="w-2 h-2 bg-purple-500 rounded-full mr-3"></span>
-                  Celery for distributed task processing
+                  Celery para procesamiento distribuido de tareas
                 </li>
                 <li className="flex items-center">
                   <span className="w-2 h-2 bg-pink-500 rounded-full mr-3"></span>
-                  Redis for caching and message brokering
+                  Redis para caché y message brokering
                 </li>
                 <li className="flex items-center">
                   <span className="w-2 h-2 bg-green-500 rounded-full mr-3"></span>
-                  OpenAI GPT-4 for intelligent analysis
+                  OpenAI GPT-4 para análisis inteligente
                 </li>
               </ul>
             </GlassCard>
@@ -102,7 +102,7 @@ export const AboutPage: React.FC = () => {
         <section className="py-12">
           <h2 className="text-2xl md:text-3xl font-bold mb-8 text-center">
             <span className="bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
-              How It Works
+              Cómo Funciona
             </span>
           </h2>
 
@@ -116,11 +116,11 @@ export const AboutPage: React.FC = () => {
                 </div>
                 <div className="ml-4">
                   <h3 className="text-lg font-semibold mb-2 text-gray-800 dark:text-gray-100">
-                    Upload Your Data
+                    Carga tus Datos
                   </h3>
                   <p className="text-gray-600 dark:text-gray-300">
-                    Upload CSV or Excel files containing customer feedback with comments and ratings.
-                    Files must include 'Nota' (0-10) and 'Comentario Final' columns.
+                    Carga archivos CSV o Excel con comentarios de clientes y calificaciones.
+                    Los archivos deben incluir columnas 'Nota' (0-10) y 'Comentario Final'.
                   </p>
                 </div>
               </div>
@@ -135,11 +135,11 @@ export const AboutPage: React.FC = () => {
                 </div>
                 <div className="ml-4">
                   <h3 className="text-lg font-semibold mb-2 text-gray-800 dark:text-gray-100">
-                    AI Processing
+                    Procesamiento con IA
                   </h3>
                   <p className="text-gray-600 dark:text-gray-300">
-                    Our system processes comments in batches using OpenAI's GPT-4, extracting 16 different emotions,
-                    identifying pain points, and calculating churn risk scores.
+                    Nuestro sistema procesa comentarios en lotes usando GPT-4 de OpenAI, extrayendo 16 emociones diferentes,
+                    identificando puntos de dolor y calculando puntajes de riesgo de abandono.
                   </p>
                 </div>
               </div>
@@ -154,11 +154,11 @@ export const AboutPage: React.FC = () => {
                 </div>
                 <div className="ml-4">
                   <h3 className="text-lg font-semibold mb-2 text-gray-800 dark:text-gray-100">
-                    Visualize Insights
+                    Visualizar Insights
                   </h3>
                   <p className="text-gray-600 dark:text-gray-300">
-                    View interactive charts showing emotion distributions, NPS breakdowns, churn risk analysis,
-                    and pain point frequencies.
+                    Ve gráficos interactivos mostrando distribuciones de emociones, desgloses de NPS, análisis de
+                    riesgo de abandono y frecuencias de puntos de dolor.
                   </p>
                 </div>
               </div>
@@ -173,11 +173,11 @@ export const AboutPage: React.FC = () => {
                 </div>
                 <div className="ml-4">
                   <h3 className="text-lg font-semibold mb-2 text-gray-800 dark:text-gray-100">
-                    Export Results
+                    Exportar Resultados
                   </h3>
                   <p className="text-gray-600 dark:text-gray-300">
-                    Download comprehensive analysis results in CSV or Excel format for further processing
-                    or integration with your business intelligence tools.
+                    Descarga resultados completos del análisis en formato CSV o Excel para procesamiento adicional
+                    o integración con tus herramientas de inteligencia de negocio.
                   </p>
                 </div>
               </div>
@@ -189,26 +189,26 @@ export const AboutPage: React.FC = () => {
         <section className="py-12">
           <GlassCard variant="gradient" padding="xl">
             <h2 className="text-2xl md:text-3xl font-bold mb-8 text-center text-gray-800 dark:text-gray-100">
-              Performance Metrics
+              Métricas de Rendimiento
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-center">
               <div className="p-4">
                 <div className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-2">
-                  850-1200 rows
+                  850-1200 filas
                 </div>
-                <p className="text-gray-600 dark:text-gray-300">5-10 seconds processing</p>
+                <p className="text-gray-600 dark:text-gray-300">5-10 segundos de procesamiento</p>
               </div>
               <div className="p-4">
                 <div className="text-3xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent mb-2">
-                  1800 rows
+                  1800 filas
                 </div>
-                <p className="text-gray-600 dark:text-gray-300">~18 seconds processing</p>
+                <p className="text-gray-600 dark:text-gray-300">~18 segundos de procesamiento</p>
               </div>
               <div className="p-4">
                 <div className="text-3xl font-bold bg-gradient-to-r from-pink-600 to-red-600 bg-clip-text text-transparent mb-2">
-                  3000 rows
+                  3000 filas
                 </div>
-                <p className="text-gray-600 dark:text-gray-300">~30 seconds processing</p>
+                <p className="text-gray-600 dark:text-gray-300">~30 segundos de procesamiento</p>
               </div>
             </div>
           </GlassCard>
@@ -223,7 +223,7 @@ export const AboutPage: React.FC = () => {
               onClick={() => window.location.href = '/analyzer'}
               className="text-lg px-8 py-4"
             >
-              Try the Analyzer
+              Probar el Analizador
             </GlassButton>
             <div>
               <GlassButton
@@ -231,7 +231,7 @@ export const AboutPage: React.FC = () => {
                 size="lg"
                 onClick={() => window.location.href = '/'}
               >
-                Back to Home
+                Volver al Inicio
               </GlassButton>
             </div>
           </div>

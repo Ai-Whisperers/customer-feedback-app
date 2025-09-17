@@ -19,7 +19,7 @@ class UploadOptions(BaseModel):
     )
     priority: Optional[str] = Field(
         default="normal",
-        regex="^(normal|high)$",
+        pattern="^(normal|high)$",
         description="Processing priority"
     )
 
