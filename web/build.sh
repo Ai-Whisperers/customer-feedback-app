@@ -18,18 +18,14 @@ npm ci --production=false
 
 # Build client application
 echo "Building client application..."
-cd client
 
 # Install client dependencies
 echo "Installing client dependencies..."
-npm ci --production=false
+npm ci --production=false --prefix client
 
 # Build client
 echo "Running client build..."
-npm run build
-
-# Return to web root
-cd ..
+npm run build --prefix client
 
 # Compile TypeScript server
 echo "Compiling TypeScript server..."
@@ -63,9 +59,7 @@ EOF
 
 # Install production dependencies in dist
 echo "Installing production dependencies..."
-cd dist
-npm ci --production
-cd ..
+npm ci --production --prefix dist
 
 echo "====================================="
 echo "Web/BFF build completed successfully!"

@@ -14,11 +14,10 @@ echo "Environment: ${NODE_ENV:-production}"
 echo "Port: ${PORT:-3000}"
 echo "API Proxy Target: ${API_PROXY_TARGET:-not set}"
 
-# Ensure we're in the correct directory
+# Start from the correct location
 if [ -d "dist" ]; then
     echo "Starting from dist directory..."
-    cd dist
-    node server.js
+    node dist/server.js
 else
     echo "Warning: dist directory not found, starting development server..."
     node server/server.js

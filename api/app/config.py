@@ -1,7 +1,7 @@
 """Application configuration using Pydantic Settings."""
 
 import os
-from typing import Optional
+from typing import Optional, List
 from pydantic import Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
@@ -19,6 +19,8 @@ class Settings(BaseSettings):
     APP_ENV: str = Field(default="development")
     DEBUG: bool = Field(default=True)
     SECRET_KEY: str = Field(min_length=32)
+    ALLOWED_ORIGINS: List[str] = Field(default_factory=list)
+    PORT: int = Field(default=8000)
 
     # OpenAI Configuration
     OPENAI_API_KEY: str = Field(min_length=1)

@@ -2,127 +2,157 @@
 # Customer AI Driven Feedback Analyzer v3.1.0
 
 services:
-  # FastAPI Backend Service
+  # Redis Key-Value Store (MUST BE FIRST for service references)
+  - type: keyvalue
+    name: feedback-analyzer-redis
+    plan: starter
+    region: oregon
+    maxmemoryPolicy: noeviction  # Changed from allkeys-lru for job queue reliability
+    ipAllowList: []
+
+  # FastAPI Backend Service (Private)
   - type: web
     name: feedback-analyzer-api
     runtime: python
     region: oregon
     plan: standard
-    buildCommand: cd api && bash build.sh
-    startCommand: cd api && bash start.sh
+    buildCommand: bash api/build.sh
+    startCommand: bash api/start.sh
     envVars:
       - key: PYTHON_VERSION
-        value: 3.11
+        value: 3.11.0
+      - key: PORT
+        value: 10000
+      - key: APP_ENV
+        value: production
+      - key: SECRET_KEY
+        generateValue: true
+        sync: false
       - key: OPENAI_API_KEY
         sync: false
       - key: AI_MODEL
         value: gpt-4o-mini
       - key: REDIS_URL
         fromService:
-          type: redis
+          type: keyvalue
           name: feedback-analyzer-redis
-          property: connectionString
+          property: REDIS_URL
       - key: CELERY_BROKER_URL
         fromService:
-          type: redis
+          type: keyvalue
           name: feedback-analyzer-redis
-          property: connectionString
+          property: REDIS_URL
       - key: CELERY_RESULT_BACKEND
         fromService:
-          type: redis
+          type: keyvalue
           name: feedback-analyzer-redis
-          property: connectionString
-      - key: MAX_FILE_SIZE_MB
-        value: 10
+          property: REDIS_URL
+      - key: FILE_MAX_MB  # Fixed from MAX_FILE_SIZE_MB
+        value: 20
       - key: ALLOWED_EXTENSIONS
         value: "csv,xlsx,xls"
       - key: MAX_BATCH_SIZE
         value: 50
       - key: MAX_RPS
         value: 8
-      - key: TASK_EXPIRY_SECONDS
-        value: 3600
+      - key: RESULTS_TTL_SECONDS
+        value: 86400
       - key: API_WORKERS
         value: 1
       - key: LOG_LEVEL
-        value: info
-    healthCheckPath: /api/health
+        value: INFO
+      - key: ALLOWED_ORIGINS
+        value: "[]"  # Empty list since API is private
+    healthCheckPath: /health  # Fixed from /api/health
     autoDeploy: true
+    buildFilter:
+      paths:
+        - api/**
+        - requirements.txt
 
-  # Celery Worker Service
-  - type: worker
+  # Celery Worker Service (Private Service)
+  - type: pserv  # Changed from worker to pserv for background workers
     name: feedback-analyzer-worker
     runtime: python
     region: oregon
     plan: standard
-    buildCommand: cd api && bash build-worker.sh
-    startCommand: cd api && bash start-worker.sh
+    buildCommand: bash api/build-worker.sh
+    startCommand: bash api/start-worker.sh
     envVars:
       - key: PYTHON_VERSION
-        value: 3.11
+        value: 3.11.0
+      - key: APP_ENV
+        value: production
+      - key: SECRET_KEY
+        fromService:
+          type: web
+          name: feedback-analyzer-api
+          envVarKey: SECRET_KEY
       - key: OPENAI_API_KEY
         sync: false
       - key: AI_MODEL
         value: gpt-4o-mini
       - key: REDIS_URL
         fromService:
-          type: redis
+          type: keyvalue
           name: feedback-analyzer-redis
-          property: connectionString
+          property: REDIS_URL
       - key: CELERY_BROKER_URL
         fromService:
-          type: redis
+          type: keyvalue
           name: feedback-analyzer-redis
-          property: connectionString
+          property: REDIS_URL
       - key: CELERY_RESULT_BACKEND
         fromService:
-          type: redis
+          type: keyvalue
           name: feedback-analyzer-redis
-          property: connectionString
+          property: REDIS_URL
+      - key: FILE_MAX_MB
+        value: 20
       - key: MAX_BATCH_SIZE
         value: 50
       - key: MAX_RPS
         value: 8
+      - key: RESULTS_TTL_SECONDS
+        value: 86400
       - key: CELERY_WORKER_CONCURRENCY
         value: 2
       - key: CELERY_MAX_TASKS_PER_CHILD
         value: 100
-      - key: CELERY_LOG_LEVEL
-        value: info
+      - key: LOG_LEVEL
+        value: INFO
     autoDeploy: true
+    buildFilter:
+      paths:
+        - api/**
+        - requirements.txt
 
-  # BFF/Frontend Service
+  # BFF/Frontend Service (Public)
   - type: web
     name: feedback-analyzer-web
     runtime: node
     region: oregon
     plan: standard
-    buildCommand: cd web && bash build.sh
-    startCommand: cd web && bash start.sh
+    buildCommand: bash web/build.sh
+    startCommand: bash web/start.sh
     envVars:
       - key: NODE_VERSION
-        value: 20
+        value: 20.11.0  # Fixed: specific version
       - key: NODE_ENV
         value: production
+      - key: PORT
+        value: 3000
       - key: API_PROXY_TARGET
         fromService:
           type: web
           name: feedback-analyzer-api
-          envVarKey: RENDER_INTERNAL_URL
-      - key: PORT
-        value: 3000
-    routes:
-      - type: rewrite
-        source: /api/*
-        destination: /*
+          property: internalURL  # Fixed from envVarKey: RENDER_INTERNAL_URL
     healthCheckPath: /health
     autoDeploy: true
+    buildFilter:
+      paths:
+        - web/**
+        - package.json
+        - package-lock.json
 
-# Redis Database
-databases:
-  - name: feedback-analyzer-redis
-    type: redis
-    region: oregon
-    plan: starter
-    maxmemoryPolicy: allkeys-lru
-    ipAllowList: []
+# Note: Routes section removed from web service as it's handled by Express proxy

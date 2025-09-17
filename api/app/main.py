@@ -6,7 +6,6 @@ Customer AI Driven Feedback Analyzer API.
 import structlog
 from contextlib import asynccontextmanager
 from fastapi import FastAPI, Request
-from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.trustedhost import TrustedHostMiddleware
 from fastapi.responses import JSONResponse
 import time
@@ -45,14 +44,7 @@ if not settings.is_development:
         allowed_hosts=["*.onrender.com", "localhost"]
     )
 
-# CORS middleware
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=settings.ALLOWED_ORIGINS,
-    allow_credentials=True,
-    allow_methods=["GET", "POST"],
-    allow_headers=["*"],
-)
+# Note: CORS is not needed since API is private and accessed only via BFF proxy
 
 
 @app.middleware("http")

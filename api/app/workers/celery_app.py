@@ -77,9 +77,6 @@ celery_app.conf.update(
         "fanout_prefix": True,
         "fanout_patterns": True
     },
-    result_backend_transport_options={
-        "master_name": "mymaster",
-    },
 
     # Beat schedule (for future periodic tasks)
     beat_schedule={

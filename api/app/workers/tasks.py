@@ -179,3 +179,114 @@ def _handle_task_error(task_obj: Any, task_id: str, error: str, start_time: floa
             retry_count=task_obj.request.retries + 1
         )
         raise task_obj.retry(countdown=60 * (task_obj.request.retries + 1))
+
+
+@celery_app.task
+def cleanup_expired_tasks() -> Dict[str, Any]:
+    """
+    Periodic task to clean up expired results from Redis.
+    Runs every hour and removes tasks older than TTL.
+
+    Returns:
+        Statistics about the cleanup operation
+    """
+    import redis
+    from datetime import datetime, timedelta
+    from app.config import settings
+
+    logger.info("Starting cleanup of expired tasks")
+
+    try:
+        # Connect to Redis
+        r = redis.from_url(settings.REDIS_URL)
+
+        # Get current time and expiry threshold
+        now = datetime.utcnow()
+        expiry_time = now - timedelta(seconds=settings.RESULTS_TTL_SECONDS)
+        expiry_timestamp = expiry_time.timestamp()
+
+        # Track statistics
+        stats = {
+            "checked": 0,
+            "deleted": 0,
+            "errors": 0,
+            "start_time": now.isoformat(),
+        }
+
+        # Scan for task keys
+        for key in r.scan_iter(match="celery-task-meta-*"):
+            stats["checked"] += 1
+
+            try:
+                # Get task metadata
+                task_data = r.get(key)
+                if not task_data:
+                    continue
+
+                import json
+                task_meta = json.loads(task_data)
+
+                # Check if task is expired based on date_done
+                if "date_done" in task_meta:
+                    # Parse the date_done timestamp
+                    task_timestamp = datetime.fromisoformat(
+                        task_meta["date_done"].replace("Z", "+00:00")
+                    ).timestamp()
+
+                    # Delete if expired
+                    if task_timestamp < expiry_timestamp:
+                        r.delete(key)
+                        stats["deleted"] += 1
+
+                        # Also try to delete associated result data
+                        result_key = key.replace("celery-task-meta-", "result-")
+                        if r.exists(result_key):
+                            r.delete(result_key)
+
+            except Exception as e:
+                stats["errors"] += 1
+                logger.error(
+                    "Error processing task key",
+                    key=key.decode() if isinstance(key, bytes) else key,
+                    error=str(e)
+                )
+
+        # Clean up orphaned result keys
+        for key in r.scan_iter(match="result-*"):
+            stats["checked"] += 1
+
+            try:
+                # Check TTL
+                ttl = r.ttl(key)
+                if ttl == -1:  # No TTL set
+                    # Set a TTL to ensure cleanup
+                    r.expire(key, settings.RESULTS_TTL_SECONDS)
+                elif ttl == -2:  # Key doesn't exist
+                    continue
+
+            except Exception as e:
+                stats["errors"] += 1
+                logger.error(
+                    "Error processing result key",
+                    key=key.decode() if isinstance(key, bytes) else key,
+                    error=str(e)
+                )
+
+        stats["end_time"] = datetime.utcnow().isoformat()
+        stats["duration_seconds"] = (
+            datetime.utcnow() - now
+        ).total_seconds()
+
+        logger.info(
+            "Cleanup completed",
+            checked=stats["checked"],
+            deleted=stats["deleted"],
+            errors=stats["errors"],
+            duration=stats["duration_seconds"]
+        )
+
+        return stats
+
+    except Exception as e:
+        logger.error("Cleanup task failed", error=str(e))
+        raise
