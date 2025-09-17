@@ -10,9 +10,12 @@ type AppState = 'idle' | 'uploading' | 'processing' | 'completed' | 'error';
 export const AnalyzerPage: React.FC = () => {
   const [appState, setAppState] = useState<AppState>('idle');
   const [taskId, setTaskId] = useState<string>('');
-  const [, setProgress] = useState(0);
+  const [progress, setProgress] = useState(0);
   const [results, setResults] = useState<any>(null);
   const [error, setError] = useState<string>('');
+  const [statusMessage, setStatusMessage] = useState<string>('');
+  const [processedRows, setProcessedRows] = useState(0);
+  const [totalRows, setTotalRows] = useState(0);
 
   const handleFileUpload = async (file: File) => {
     setAppState('uploading');
@@ -34,6 +37,9 @@ export const AnalyzerPage: React.FC = () => {
       try {
         const status = await getStatus(id);
         setProgress(status.progress || 0);
+        setStatusMessage(status.message || 'Procesando...');
+        setProcessedRows(status.processed_rows || 0);
+        setTotalRows(status.total_rows || 0);
 
         if (status.status === 'completed') {
           clearInterval(interval);
@@ -105,11 +111,11 @@ export const AnalyzerPage: React.FC = () => {
             <div className="animate-fadeIn">
               <ProgressTracker
                 taskId={taskId}
-                onComplete={() => {}}
-                onError={(err) => {
-                  setError(err);
-                  setAppState('error');
-                }}
+                progress={progress}
+                status="processing"
+                message={statusMessage}
+                processedRows={processedRows}
+                totalRows={totalRows}
               />
             </div>
           )}
@@ -155,7 +161,7 @@ export const AnalyzerPage: React.FC = () => {
 
         <footer className="text-center mt-16 pb-8">
           <p className="text-sm text-gray-500 dark:text-gray-400">
-            Powered by OpenAI GPT-4 • Análisis en Español e Inglés
+            Powered by OpenAI GPT-4 - Análisis en Español e Inglés
           </p>
         </footer>
       </div>

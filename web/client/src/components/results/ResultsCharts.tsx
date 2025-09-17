@@ -221,24 +221,24 @@ export const ResultsCharts: React.FC<ResultsChartsProps> = ({ results }) => {
           <StatCard
             label="Total Comentarios"
             value={results.summary.n.toString()}
-            icon="📊"
+            icon="Chart"
           />
           <StatCard
             label="NPS Score"
             value={results.summary.nps.score.toString()}
-            icon="⭐"
+            icon="Star"
             color="blue"
           />
           <StatCard
             label="Riesgo Abandono Promedio"
             value={`${(results.summary.churn_risk_avg * 100).toFixed(1)}%`}
-            icon="⚠️"
+            icon="Warning"
             color="yellow"
           />
           <StatCard
             label="Puntos de Dolor"
             value={results.pain_points.length.toString()}
-            icon="🎯"
+            icon="Target"
             color="red"
           />
         </div>

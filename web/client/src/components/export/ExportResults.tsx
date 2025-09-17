@@ -75,23 +75,23 @@ export const ExportResults: React.FC<ExportResultsProps> = ({
           </h3>
           <ul className="space-y-1 text-sm text-blue-700 dark:text-blue-400">
             <li className="flex items-start">
-              <span className="mr-2">✓</span>
+              <span className="mr-2">[OK]</span>
               <span>Análisis completo de emociones para cada comentario</span>
             </li>
             <li className="flex items-start">
-              <span className="mr-2">✓</span>
+              <span className="mr-2">[OK]</span>
               <span>Puntuación NPS y clasificación por cliente</span>
             </li>
             <li className="flex items-start">
-              <span className="mr-2">✓</span>
+              <span className="mr-2">[OK]</span>
               <span>Índice de riesgo de abandono individual</span>
             </li>
             <li className="flex items-start">
-              <span className="mr-2">✓</span>
+              <span className="mr-2">[OK]</span>
               <span>Puntos de dolor identificados y frecuencias</span>
             </li>
             <li className="flex items-start">
-              <span className="mr-2">✓</span>
+              <span className="mr-2">[OK]</span>
               <span>Estadísticas agregadas y métricas generales</span>
             </li>
           </ul>
@@ -126,13 +126,13 @@ export const ExportResults: React.FC<ExportResultsProps> = ({
 
           {exportStatus === 'success' && (
             <GlassBadge variant="success" size="md">
-              ✓ Descarga exitosa
+              [OK] Descarga exitosa
             </GlassBadge>
           )}
 
           {exportStatus === 'error' && (
             <GlassBadge variant="danger" size="md">
-              ✗ Error en la descarga
+              [ERROR] Error en la descarga
             </GlassBadge>
           )}
         </div>
@@ -231,7 +231,7 @@ const FormatOption: React.FC<FormatOptionProps> = ({
       <ul className="space-y-1 text-sm text-gray-600 dark:text-gray-400">
         {features.map((feature, index) => (
           <li key={index} className="flex items-center">
-            <span className="mr-2 text-green-500">•</span>
+            <span className="mr-2 text-green-500">-</span>
             {feature}
           </li>
         ))}

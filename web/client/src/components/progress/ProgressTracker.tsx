@@ -167,7 +167,7 @@ export const ProgressTracker: React.FC<ProgressTrackerProps> = ({
                   key={index}
                   className="text-sm text-red-600 dark:text-red-400 flex items-start"
                 >
-                  <span className="mr-2">•</span>
+                  <span className="mr-2">-</span>
                   <span>{error}</span>
                 </li>
               ))}

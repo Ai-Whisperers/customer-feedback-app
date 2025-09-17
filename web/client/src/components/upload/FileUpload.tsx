@@ -227,19 +227,19 @@ export const FileUpload: React.FC<FileUploadProps> = ({
           </h3>
           <ul className="space-y-1 text-sm text-blue-700 dark:text-blue-400">
             <li className="flex items-start">
-              <span className="mr-2">•</span>
+              <span className="mr-2">-</span>
               <span>
                 <strong>Columna "Nota":</strong> Calificación del 0 al 10
               </span>
             </li>
             <li className="flex items-start">
-              <span className="mr-2">•</span>
+              <span className="mr-2">-</span>
               <span>
                 <strong>Columna "Comentario Final":</strong> Texto del comentario (3-2000 caracteres)
               </span>
             </li>
             <li className="flex items-start">
-              <span className="mr-2">•</span>
+              <span className="mr-2">-</span>
               <span>
                 <strong>Columna "NPS" (opcional):</strong> Si existe, se usará directamente
               </span>
