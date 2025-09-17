@@ -4,6 +4,7 @@ import { ProgressTracker } from '@/components/progress/ProgressTracker';
 import { ResultsVisualization } from '@/components/ResultsVisualization';
 import { GlassCard } from '@/components/ui';
 import { uploadFile, getStatus, getResults } from '@/lib/api';
+import type { AnalysisResults } from '@/lib/api';
 
 type AppState = 'idle' | 'uploading' | 'processing' | 'completed' | 'error';
 
@@ -11,7 +12,7 @@ export const AnalyzerPage: React.FC = () => {
   const [appState, setAppState] = useState<AppState>('idle');
   const [taskId, setTaskId] = useState<string>('');
   const [progress, setProgress] = useState(0);
-  const [results, setResults] = useState<any>(null);
+  const [results, setResults] = useState<AnalysisResults | null>(null);
   const [error, setError] = useState<string>('');
   const [statusMessage, setStatusMessage] = useState<string>('');
   const [processedRows, setProcessedRows] = useState(0);
@@ -26,7 +27,7 @@ export const AnalyzerPage: React.FC = () => {
       setTaskId(response.task_id);
       setAppState('processing');
       pollStatus(response.task_id);
-    } catch (err) {
+    } catch {
       setError('Error al cargar el archivo. Por favor, intente nuevamente.');
       setAppState('error');
     }
@@ -51,7 +52,7 @@ export const AnalyzerPage: React.FC = () => {
           setError('El análisis falló. Por favor, verifique su archivo e intente nuevamente.');
           setAppState('error');
         }
-      } catch (err) {
+      } catch {
         clearInterval(interval);
         setError('Error al obtener el estado del análisis.');
         setAppState('error');

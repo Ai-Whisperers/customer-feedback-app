@@ -1,4 +1,5 @@
 import React from 'react';
+import { cn } from '@/lib/utils';
 
 interface GlassBadgeProps {
   children: React.ReactNode;
@@ -31,17 +32,12 @@ export const GlassBadge: React.FC<GlassBadgeProps> = ({
 
   return (
     <span
-      className={`
-        inline-flex
-        items-center
-        font-medium
-        backdrop-blur-sm
-        border
-        border-white/20
-        ${sizeClasses[size]}
-        ${variantClasses[variant]}
-        ${rounded ? 'rounded-full' : 'rounded-lg'}
-      `}
+      className={cn(
+        'inline-flex items-center font-medium backdrop-blur-sm border border-white/20',
+        sizeClasses[size],
+        variantClasses[variant],
+        rounded ? 'rounded-full' : 'rounded-lg'
+      )}
     >
       {children}
     </span>

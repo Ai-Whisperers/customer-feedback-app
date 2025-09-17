@@ -7,6 +7,35 @@ export default {
   darkMode: 'class',
   theme: {
     extend: {
+      fontFamily: {
+        'sans': ['Roboto', 'system-ui', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'sans-serif'],
+        'display': ['Roboto', 'system-ui', 'sans-serif'],
+        'body': ['Roboto', 'system-ui', 'sans-serif'],
+      },
+      fontSize: {
+        'xs': ['0.75rem', { lineHeight: '1rem', letterSpacing: '0.02em', fontWeight: '400' }],
+        'sm': ['0.875rem', { lineHeight: '1.25rem', letterSpacing: '0.01em', fontWeight: '400' }],
+        'base': ['1rem', { lineHeight: '1.5rem', letterSpacing: '0', fontWeight: '400' }],
+        'lg': ['1.125rem', { lineHeight: '1.75rem', letterSpacing: '-0.01em', fontWeight: '400' }],
+        'xl': ['1.25rem', { lineHeight: '1.75rem', letterSpacing: '-0.01em', fontWeight: '400' }],
+        '2xl': ['1.5rem', { lineHeight: '2rem', letterSpacing: '-0.02em', fontWeight: '500' }],
+        '3xl': ['1.875rem', { lineHeight: '2.25rem', letterSpacing: '-0.02em', fontWeight: '500' }],
+        '4xl': ['2.25rem', { lineHeight: '2.5rem', letterSpacing: '-0.03em', fontWeight: '700' }],
+        '5xl': ['3rem', { lineHeight: '1.16', letterSpacing: '-0.03em', fontWeight: '700' }],
+        '6xl': ['3.75rem', { lineHeight: '1.1', letterSpacing: '-0.04em', fontWeight: '700' }],
+        '7xl': ['4.5rem', { lineHeight: '1.1', letterSpacing: '-0.04em', fontWeight: '700' }],
+      },
+      fontWeight: {
+        'thin': '100',
+        'extralight': '200',
+        'light': '300',
+        'normal': '400',
+        'medium': '500',
+        'semibold': '600',
+        'bold': '700',
+        'extrabold': '800',
+        'black': '900',
+      },
       colors: {
         primary: {
           50: '#eff6ff',
@@ -45,28 +74,7 @@ export default {
     },
   },
   plugins: [
-    function({ addUtilities }) {
-      const newUtilities = {
-        '.glass': {
-          'background': 'rgba(255, 255, 255, 0.1)',
-          'backdrop-filter': 'blur(10px)',
-          '-webkit-backdrop-filter': 'blur(10px)',
-          'border': '1px solid rgba(255, 255, 255, 0.2)',
-        },
-        '.glass-dark': {
-          'background': 'rgba(0, 0, 0, 0.2)',
-          'backdrop-filter': 'blur(10px)',
-          '-webkit-backdrop-filter': 'blur(10px)',
-          'border': '1px solid rgba(255, 255, 255, 0.1)',
-        },
-        '.glass-gradient': {
-          'background': 'linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05))',
-          'backdrop-filter': 'blur(10px)',
-          '-webkit-backdrop-filter': 'blur(10px)',
-          'border': '1px solid rgba(255, 255, 255, 0.2)',
-        },
-      }
-      addUtilities(newUtilities)
-    }
+    require('@tailwindcss/typography'),
+    require('@tailwindcss/forms'),
   ],
 }

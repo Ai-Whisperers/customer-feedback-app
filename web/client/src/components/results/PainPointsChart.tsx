@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react';
-import Plot from 'react-plotly.js';
+import { LazyPlot as Plot } from '@/components/charts/LazyPlot';
 import { defaultLayoutConfig, plotConfig } from './chartConfig';
 import type { AnalysisResults } from './types';
 

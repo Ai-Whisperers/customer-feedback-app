@@ -21,7 +21,7 @@ export const ExportResults: React.FC<ExportResultsProps> = ({
       await onExport(selectedFormat);
       setExportStatus('success');
       setTimeout(() => setExportStatus('idle'), 3000);
-    } catch (error) {
+    } catch {
       setExportStatus('error');
       setTimeout(() => setExportStatus('idle'), 5000);
     }

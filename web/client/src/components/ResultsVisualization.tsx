@@ -4,7 +4,7 @@
  */
 
 import React from 'react';
-import Plot from 'react-plotly.js';
+import { LazyPlot as Plot } from '@/components/charts/LazyPlot';
 import { exportResults } from '@/lib/api';
 import type { AnalysisResults } from '@/lib/api';
 

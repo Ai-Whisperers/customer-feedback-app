@@ -1,4 +1,5 @@
 import React from 'react';
+import { cn } from '@/lib/utils';
 
 interface GlassCardProps {
   children: React.ReactNode;
@@ -41,26 +42,31 @@ export const GlassCard: React.FC<GlassCardProps> = ({
   };
 
   const variantClasses = {
-    light: 'bg-white/80 dark:bg-gray-900/80',
-    dark: 'bg-gray-800/80 dark:bg-gray-950/80',
-    gradient: 'bg-gradient-to-br from-white/90 via-white/80 to-gray-100/70',
+    light: 'bg-white/80 dark:bg-gray-900/80 text-gray-900 dark:text-gray-100',
+    dark: 'bg-gray-800/80 dark:bg-gray-950/80 text-gray-100 dark:text-gray-100',
+    gradient: 'bg-gradient-to-br from-white/90 via-white/80 to-gray-100/70 dark:from-gray-900/90 dark:via-gray-800/80 dark:to-gray-700/70',
   };
 
   const borderClass = border ? 'border border-white/20' : '';
 
   return (
     <div
-      className={`
-        ${paddingClasses[padding]}
-        ${blurClasses[blur]}
-        ${shadowClasses[shadow]}
-        ${variantClasses[variant]}
-        ${borderClass}
-        rounded-2xl
-        transition-all
-        duration-300
-        ${className}
-      `}
+      className={cn(
+        // Base styles
+        'card-base',
+        // Padding
+        paddingClasses[padding],
+        // Blur effect
+        blurClasses[blur],
+        // Shadow
+        shadowClasses[shadow],
+        // Variant
+        variantClasses[variant],
+        // Border
+        borderClass,
+        // Custom className
+        className
+      )}
     >
       {children}
     </div>

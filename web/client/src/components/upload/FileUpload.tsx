@@ -82,10 +82,10 @@ export const FileUpload: React.FC<FileUploadProps> = ({
     <GlassCard variant="gradient" className="w-full">
       <div className="space-y-4">
         <div className="text-center">
-          <h2 className="text-2xl font-bold text-gray-800 dark:text-gray-100 mb-2">
+          <h2 className="h3 mb-2">
             Cargar Archivo de Comentarios
           </h2>
-          <p className="text-gray-600 dark:text-gray-400">
+          <p className="body-lg">
             Sube un archivo CSV o Excel con los comentarios de clientes
           </p>
         </div>
