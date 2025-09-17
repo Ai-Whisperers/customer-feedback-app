@@ -1,14 +1,19 @@
 # 🚀 Customer AI Driven Feedback Analyzer
 
-[![Version](https://img.shields.io/badge/version-3.1.0-blue.svg)](https://github.com/yourusername/customer-feedback-analyzer)
-[![Python](https://img.shields.io/badge/python-3.11%2B-brightgreen.svg)](https://www.python.org/)
-[![Node](https://img.shields.io/badge/node-18%2B-green.svg)](https://nodejs.org/)
-[![FastAPI](https://img.shields.io/badge/FastAPI-0.104-009688.svg)](https://fastapi.tiangolo.com/)
-[![React](https://img.shields.io/badge/React-18-61dafb.svg)](https://reactjs.org/)
-[![TypeScript](https://img.shields.io/badge/TypeScript-5.6-3178c6.svg)](https://www.typescriptlang.org/)
+[![Version](https://img.shields.io/badge/version-3.1.0-blue.svg)](https://github.com/Ai-Whisperers/customer-feedback-app)
+[![Python](https://img.shields.io/badge/python-3.12.6-brightgreen.svg)](https://www.python.org/)
+[![Node](https://img.shields.io/badge/node-20.11.0-green.svg)](https://nodejs.org/)
+[![FastAPI](https://img.shields.io/badge/FastAPI-0.115.0-009688.svg)](https://fastapi.tiangolo.com/)
+[![React](https://img.shields.io/badge/React-18.3.1-61dafb.svg)](https://reactjs.org/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.6.3-3178c6.svg)](https://www.typescriptlang.org/)
+[![Celery](https://img.shields.io/badge/Celery-5.4.0-37814A.svg)](https://docs.celeryq.dev/)
+[![Redis](https://img.shields.io/badge/Redis-Latest-DC382D.svg)](https://redis.io/)
 [![OpenAI](https://img.shields.io/badge/OpenAI-GPT--4o--mini-412991.svg)](https://openai.com/)
+[![Tailwind CSS](https://img.shields.io/badge/Tailwind-3.4.14-38B2AC.svg)](https://tailwindcss.com/)
 [![License](https://img.shields.io/badge/license-MIT-yellow.svg)](LICENSE)
 [![Deploy on Render](https://img.shields.io/badge/deploy-render-5B48EF.svg)](https://render.com/)
+[![Status](https://img.shields.io/badge/status-production-success.svg)](https://customer-feedback-app.onrender.com)
+[![Maintenance](https://img.shields.io/badge/maintained-yes-green.svg)](https://github.com/Ai-Whisperers/customer-feedback-app/commits/main)
 
 > Sistema inteligente de análisis masivo de comentarios de clientes mediante IA, diseñado para extraer insights valiosos, emociones, riesgo de abandono y puntos de dolor de manera automatizada y escalable.
 
