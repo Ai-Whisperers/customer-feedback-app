@@ -5,7 +5,7 @@ python-multipart==0.0.12
 
 # OpenAI
 openai==1.54.0
-tiktoken==0.7.0  # Token counting for accurate batching
+transformers==4.36.0  # Use GPT2TokenizerFast for token counting
 
 # Async Processing
 celery==5.4.0

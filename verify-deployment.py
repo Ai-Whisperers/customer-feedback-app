@@ -128,7 +128,7 @@ class DeploymentVerifier:
 
             critical_packages = [
                 'fastapi', 'uvicorn', 'openai', 'celery',
-                'redis', 'pandas', 'tiktoken', 'structlog'
+                'redis', 'pandas', 'transformers', 'structlog'
             ]
 
             for package in critical_packages:

@@ -2,13 +2,27 @@
 Utility functions for OpenAI adapter with improved token counting.
 """
 
-import tiktoken
 from typing import List, Tuple
 import structlog
 
 from app.config import settings
 
 logger = structlog.get_logger()
+
+# Lazy load transformers to avoid import issues
+_tokenizer = None
+
+def _get_tokenizer():
+    """Get or create the tokenizer instance."""
+    global _tokenizer
+    if _tokenizer is None:
+        try:
+            from transformers import GPT2TokenizerFast
+            _tokenizer = GPT2TokenizerFast.from_pretrained("gpt2")
+        except Exception as e:
+            logger.warning(f"Failed to load transformers tokenizer: {e}")
+            _tokenizer = False  # Mark as failed
+    return _tokenizer
 
 
 def format_comments_for_analysis(comments: List[str]) -> str:
@@ -29,7 +43,7 @@ def format_comments_for_analysis(comments: List[str]) -> str:
 
 def count_tokens(text: str, model: str = None) -> int:
     """
-    Count actual tokens using tiktoken for accurate estimation.
+    Count actual tokens using transformers for accurate estimation.
 
     Args:
         text: Input text
@@ -41,28 +55,26 @@ def count_tokens(text: str, model: str = None) -> int:
     if model is None:
         model = settings.AI_MODEL
 
-    try:
-        # Use the appropriate encoding for the model
-        if "gpt-4" in model:
-            encoding = tiktoken.get_encoding("cl100k_base")
-        else:
-            # Fallback for gpt-3.5 and others
-            encoding = tiktoken.get_encoding("cl100k_base")
+    tokenizer = _get_tokenizer()
 
-        tokens = encoding.encode(text)
-        return len(tokens)
-    except Exception as e:
-        logger.warning(
-            "Failed to count tokens with tiktoken, using estimation",
-            error=str(e)
-        )
-        # Fallback to rough estimation: ~1 token per 4 characters
-        return len(text) // 4
+    if tokenizer and tokenizer is not False:
+        try:
+            # Use the transformers tokenizer
+            tokens = tokenizer.encode(text)
+            return len(tokens)
+        except Exception as e:
+            logger.warning(
+                "Failed to count tokens with transformers, using estimation",
+                error=str(e)
+            )
+
+    # Fallback to rough estimation: ~1 token per 4 characters
+    return len(text) // 4
 
 
 def estimate_tokens(text: str) -> int:
     """
-    Quick token estimation without tiktoken (for backwards compatibility).
+    Quick token estimation without tokenizer (for backwards compatibility).
 
     Args:
         text: Input text
@@ -100,7 +112,7 @@ def optimize_batch_size(
     reserved_tokens = 2000
     available_tokens = max_tokens_per_batch - reserved_tokens
 
-    # Token counting function
+    # Token counting function (use transformers if available)
     count_fn = count_tokens if use_accurate_counting else estimate_tokens
 
     # Pre-calculate token counts for all comments

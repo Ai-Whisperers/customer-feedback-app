@@ -12,6 +12,9 @@ echo "====================================="
 echo "Node version: $(node --version)"
 echo "NPM version: $(npm --version)"
 
+# Navigate to web directory
+cd web
+
 # Install root dependencies
 echo "Installing root dependencies..."
 npm ci --production=false
@@ -19,13 +22,19 @@ npm ci --production=false
 # Build client application
 echo "Building client application..."
 
-# Install client dependencies
+# Navigate to client directory
+cd client
+
+# Install client dependencies with all devDependencies
 echo "Installing client dependencies..."
-npm ci --production=false --prefix client
+npm ci --production=false
 
 # Build client
 echo "Running client build..."
-npm run build --prefix client
+npm run build
+
+# Return to web directory
+cd ..
 
 # Compile TypeScript server
 echo "Compiling TypeScript server..."
