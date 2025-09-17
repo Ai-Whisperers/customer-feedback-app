@@ -51,6 +51,9 @@ export interface TaskStatus {
   total_batches?: number;
   items_processed?: number;
   total_items?: number;
+  message?: string;
+  processed_rows?: number;
+  total_rows?: number;
 }
 
 export interface AnalysisResults {
