@@ -36,7 +36,7 @@ Esta guía explica cómo configurar los servicios ya desplegados en Render para 
 
 ### 2. customer-feedback-api (API - PRIVATE)
 - **Tipo:** Private Service
-- **URL Interna:** http://customer-feedback-api:10000
+- **URL Interna:** http://customer-feedback-api-bmjp:10000
 - **Puerto:** 10000
 - **Build:** `pip install -r api/requirements.txt`
 - **Start:** `cd api && uvicorn app.main:app --host 0.0.0.0 --port 10000`
@@ -58,7 +58,7 @@ Esta guía explica cómo configurar los servicios ya desplegados en Render para 
 NODE_VERSION=20.11.0
 NODE_ENV=production
 PORT=3000
-API_PROXY_TARGET=http://customer-feedback-api:10000
+API_PROXY_TARGET=http://customer-feedback-api-bmjp:10000
 ```
 
 **IMPORTANTE:** El `API_PROXY_TARGET` debe usar el nombre del servicio interno de Render, NO la URL pública.
@@ -114,7 +114,7 @@ En el servicio **customer-feedback-app**:
 
 1. Ve a Environment → Environment Variables
 2. Busca o crea `API_PROXY_TARGET`
-3. Establece el valor: `http://customer-feedback-api:10000`
+3. Establece el valor: `http://customer-feedback-api-bmjp:10000`
 
    **NO uses:**
    - ❌ `https://customer-feedback-api.onrender.com`
@@ -122,7 +122,7 @@ En el servicio **customer-feedback-app**:
    - ❌ URLs externas
 
    **SÍ usa:**
-   - ✅ `http://customer-feedback-api:10000`
+   - ✅ `http://customer-feedback-api-bmjp:10000`
 
 ### Paso 3: Configurar Redis URL
 
@@ -170,7 +170,7 @@ En el dashboard de Render, revisa los logs de cada servicio:
 ```
 BFF Server Started Successfully
 Port: 3000
-API Target: http://customer-feedback-api:10000
+API Target: http://customer-feedback-api-bmjp:10000
 ```
 
 **API Service debe mostrar:**
@@ -199,7 +199,7 @@ curl -X POST https://customer-feedback-app.onrender.com/api/upload \
 **Causa:** El web service no puede conectar con el API.
 
 **Solución:**
-1. Verifica que `API_PROXY_TARGET` = `http://customer-feedback-api:10000`
+1. Verifica que `API_PROXY_TARGET` = `http://customer-feedback-api-bmjp:10000`
 2. Confirma que el API está en puerto 10000
 3. Revisa que el API service esté "Running" en Render
 
@@ -234,7 +234,7 @@ curl -X POST https://customer-feedback-app.onrender.com/api/upload \
 
 - [ ] Servicios creados con nombres correctos
 - [ ] Redis configurado y conectado
-- [ ] `API_PROXY_TARGET` = `http://customer-feedback-api:10000`
+- [ ] `API_PROXY_TARGET` = `http://customer-feedback-api-bmjp:10000`
 - [ ] `OPENAI_API_KEY` configurada en API y Worker
 - [ ] `SECRET_KEY` generada (32+ caracteres)
 - [ ] `REDIS_URL` configurada en API y Worker

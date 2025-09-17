@@ -14,7 +14,7 @@ En Render Dashboard > customer-feedback-app > Environment:
 NODE_VERSION=20.11.0
 NODE_ENV=production
 PORT=3000
-API_PROXY_TARGET=http://customer-feedback-api:10000
+API_PROXY_TARGET=http://customer-feedback-api-bmjp:10000
 ```
 
 **CRÍTICO:** `API_PROXY_TARGET` debe ser exactamente `http://customer-feedback-api:10000`
