@@ -1,23 +1,24 @@
 # Render Blueprint Configuration
 # Customer AI Driven Feedback Analyzer v3.1.0
+# IMPORTANT: Service names must match existing deployments
 
 services:
   # Redis Key-Value Store (MUST BE FIRST for service references)
   - type: keyvalue
     name: feedback-analyzer-redis
-    plan: starter
+    plan: free  # Match existing deployment
     region: oregon
     maxmemoryPolicy: noeviction  # Changed from allkeys-lru for job queue reliability
     ipAllowList: []
 
   # FastAPI Backend Service (Private)
-  - type: web
-    name: feedback-analyzer-api
+  - type: pserv
+    name: customer-feedback-api  # Match existing deployment name
     runtime: python
     region: oregon
-    plan: standard
-    buildCommand: bash api/build.sh
-    startCommand: bash api/start.sh
+    plan: starter  # Match existing deployment
+    buildCommand: pip install -r api/requirements.txt
+    startCommand: cd api && uvicorn app.main:app --host 0.0.0.0 --port 10000
     envVars:
       - key: PYTHON_VERSION
         value: 3.11.0
@@ -70,14 +71,14 @@ services:
         - api/**
         - requirements.txt
 
-  # Celery Worker Service (Private Service)
-  - type: pserv  # Changed from worker to pserv for background workers
-    name: feedback-analyzer-worker
+  # Celery Worker Service (Background Worker)
+  - type: worker
+    name: celery-worker  # Match existing deployment name
     runtime: python
     region: oregon
-    plan: standard
-    buildCommand: bash api/build-worker.sh
-    startCommand: bash api/start-worker.sh
+    plan: starter  # Match existing deployment
+    buildCommand: pip install -r api/requirements.txt --no-binary tiktoken
+    startCommand: cd api && celery -A app.workers.celery_app worker --loglevel=INFO
     envVars:
       - key: PYTHON_VERSION
         value: 3.11.0
@@ -85,8 +86,8 @@ services:
         value: production
       - key: SECRET_KEY
         fromService:
-          type: web
-          name: feedback-analyzer-api
+          type: pserv
+          name: customer-feedback-api
           envVarKey: SECRET_KEY
       - key: OPENAI_API_KEY
         sync: false
@@ -129,12 +130,12 @@ services:
 
   # BFF/Frontend Service (Public)
   - type: web
-    name: feedback-analyzer-web
+    name: customer-feedback-app  # Match existing deployment name
     runtime: node
     region: oregon
-    plan: standard
-    buildCommand: bash web/build.sh
-    startCommand: bash web/start.sh
+    plan: starter  # Match existing deployment
+    buildCommand: cd web && npm install && npm run build:render
+    startCommand: cd web && npm run start:prod
     envVars:
       - key: NODE_VERSION
         value: 20.11.0  # Fixed: specific version
@@ -144,9 +145,9 @@ services:
         value: 3000
       - key: API_PROXY_TARGET
         fromService:
-          type: web
-          name: feedback-analyzer-api
-          property: internalURL  # Fixed from envVarKey: RENDER_INTERNAL_URL
+          type: pserv
+          name: customer-feedback-api
+          property: hostport  # Use hostport for private service connection
     healthCheckPath: /health
     autoDeploy: true
     buildFilter:

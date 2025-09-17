@@ -17,7 +17,15 @@ pip install --upgrade pip
 
 # Install Python dependencies
 echo "Installing Python dependencies..."
-pip install -r requirements.txt
+# Check if we're in the api directory or root
+if [ -f "requirements.txt" ]; then
+    pip install -r requirements.txt
+elif [ -f "api/requirements.txt" ]; then
+    pip install -r api/requirements.txt
+else
+    echo "ERROR: requirements.txt not found!"
+    exit 1
+fi
 
 # Verify critical dependencies
 echo "Verifying critical dependencies..."

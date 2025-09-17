@@ -15,9 +15,17 @@ python --version
 echo "Upgrading pip..."
 pip install --upgrade pip
 
-# Install Python dependencies
+# Install Python dependencies with --no-binary tiktoken to avoid Rust compilation
 echo "Installing Python dependencies..."
-pip install -r requirements.txt
+# Check if we're in the api directory or root
+if [ -f "requirements.txt" ]; then
+    pip install -r requirements.txt --no-binary tiktoken
+elif [ -f "api/requirements.txt" ]; then
+    pip install -r api/requirements.txt --no-binary tiktoken
+else
+    echo "ERROR: requirements.txt not found!"
+    exit 1
+fi
 
 # Verify critical dependencies
 echo "Verifying critical dependencies..."
