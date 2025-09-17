@@ -143,10 +143,7 @@ services:
       - key: PORT
         value: 3000
       - key: API_PROXY_TARGET
-        fromService:
-          type: pserv
-          name: customer-feedback-api
-          property: hostport  # Use hostport for private service connection
+        value: http://customer-feedback-api:10000  # Internal Render service URL
     healthCheckPath: /health
     autoDeploy: true
     buildFilter:

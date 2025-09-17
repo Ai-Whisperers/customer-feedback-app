@@ -7,7 +7,7 @@
     "dev": "tsx server/server.ts",
     "dev:client": "cd client && npm run dev",
     "build": "cd client && npm install && npm run build && cd .. && tsc server/server.ts --outDir dist --esModuleInterop --module commonjs --target es2020 && cp -r client/dist dist/client-build",
-    "build:render": "npm ci --production=false && cd client && npm ci --production=false && npm run build && cd .. && npx tsc server/server.ts --outDir dist --esModuleInterop --module commonjs --target es2020 && cp -r client/dist dist/client-build",
+    "build:render": "npm ci --production=false && cd client && npm ci --production=false && npm run build && cd .. && npx tsc server/server.ts --outDir dist --esModuleInterop --module commonjs --target es2020 && (cp -r client/dist dist/client-build 2>/dev/null || xcopy /E /I /Y client\\dist dist\\client-build)",
     "start:prod": "node dist/server.js",
     "server": "tsx server/server.ts",
     "lint": "cd client && npm run lint",

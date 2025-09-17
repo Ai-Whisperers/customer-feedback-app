@@ -41,7 +41,7 @@ app = FastAPI(
 if not settings.is_development:
     app.add_middleware(
         TrustedHostMiddleware,
-        allowed_hosts=["*.onrender.com", "localhost"]
+        allowed_hosts=["*.onrender.com", "localhost", "customer-feedback-api"]
     )
 
 # Note: CORS is not needed since API is private and accessed only via BFF proxy
