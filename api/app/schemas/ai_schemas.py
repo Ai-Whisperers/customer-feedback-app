@@ -3,7 +3,7 @@ Pydantic schemas for OpenAI Responses API with structured outputs.
 Defines the exact JSON structure for AI analysis results.
 """
 
-from typing import Dict, List, Optional, Any
+from typing import Dict, List, Optional, Any, Union
 from pydantic import BaseModel, Field, field_validator
 
 
@@ -130,7 +130,7 @@ class BatchAnalysisResponse(BaseModel):
         description="Analysis results for each comment"
     )
 
-    batch_metadata: Dict[str, Any] = Field(
+    batch_metadata: Dict[str, Union[str, int, float, bool, List, Dict]] = Field(
         default_factory=dict,
         description="Metadata about the batch processing"
     )
@@ -182,7 +182,7 @@ class AggregatedMetrics(BaseModel):
         description="Average churn risk across all customers"
     )
 
-    top_pain_points: List[Dict[str, Any]] = Field(
+    top_pain_points: List[Dict[str, Union[str, int, float]]] = Field(
         description="Top pain points with frequency counts"
     )
 
@@ -204,7 +204,7 @@ class AggregatedMetrics(BaseModel):
         description="Distribution of sentiment scores (positive, neutral, negative percentages)"
     )
 
-    processing_metadata: Dict[str, Any] = Field(
+    processing_metadata: Dict[str, Union[str, int, float, bool]] = Field(
         default_factory=dict,
         description="Metadata about processing (time, batches, etc.)"
     )
