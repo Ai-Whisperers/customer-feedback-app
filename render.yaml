@@ -21,7 +21,7 @@ services:
     startCommand: cd api && uvicorn app.main:app --host 0.0.0.0 --port 10000
     envVars:
       - key: PYTHON_VERSION
-        value: 3.11.0
+        value: 3.12.6
       - key: PORT
         value: 10000
       - key: APP_ENV
@@ -79,7 +79,7 @@ services:
     startCommand: cd api && celery -A app.workers.celery_app worker --loglevel=INFO
     envVars:
       - key: PYTHON_VERSION
-        value: 3.11.0
+        value: 3.12.6
       - key: APP_ENV
         value: production
       - key: SECRET_KEY

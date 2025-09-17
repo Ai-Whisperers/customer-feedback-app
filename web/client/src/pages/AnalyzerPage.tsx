@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { FileUpload } from '@/components/FileUpload';
-import { ProgressTracker } from '@/components/ProgressTracker';
+import { FileUpload } from '@/components/upload/FileUpload';
+import { ProgressTracker } from '@/components/progress/ProgressTracker';
 import { ResultsVisualization } from '@/components/ResultsVisualization';
 import { GlassCard } from '@/components/ui';
 import { uploadFile, getStatus, getResults } from '@/lib/api';

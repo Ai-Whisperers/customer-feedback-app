@@ -1,5 +1,5 @@
 import React from 'react';
-import { GlassCard, GlassProgress, GlassBadge } from '../../components/ui';
+import { GlassCard, GlassProgress, GlassBadge } from '@/components/ui';
 
 interface ProgressTrackerProps {
   taskId: string;

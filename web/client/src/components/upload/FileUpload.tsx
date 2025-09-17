@@ -1,5 +1,5 @@
 import React, { useState, useRef } from 'react';
-import { GlassCard, GlassButton, GlassBadge } from '../../components/ui';
+import { GlassCard, GlassButton, GlassBadge } from '@/components/ui';
 
 interface FileUploadProps {
   onFileSelect: (file: File) => void;

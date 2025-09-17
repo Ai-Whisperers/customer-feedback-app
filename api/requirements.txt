@@ -4,7 +4,7 @@ uvicorn[standard]==0.32.0
 python-multipart==0.0.12
 
 # OpenAI
-openai==1.54.0
+openai==1.51.0  # Downgrade to fix httpx proxies compatibility issue
 transformers==4.45.0  # Updated for compatibility, use GPT2TokenizerFast for token counting
 
 # Async Processing

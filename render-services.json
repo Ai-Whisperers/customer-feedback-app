@@ -1,0 +1,926 @@
+[
+  {
+    "service": {
+      "autoDeploy": "yes",
+      "branch": "main",
+      "createdAt": "2025-08-12T19:13:55.150482Z",
+      "dashboardUrl": "https://dashboard.render.com/web/srv-d2dp4sh5pdvs73accti0",
+      "environmentId": "evm-cv90b33tq21c7394jnr0",
+      "id": "srv-d2dp4sh5pdvs73accti0",
+      "name": "waardhaven-api-backend",
+      "notifyOnFail": "default",
+      "ownerId": "tea-cv8vjpdumphs73fja5d0",
+      "repo": "https://github.com/Ai-Whisperers/AI-Investment",
+      "rootDir": "./apps/api/",
+      "serviceDetails": {
+        "buildPlan": "starter",
+        "cache": {
+          "profile": "no-cache"
+        },
+        "env": "docker",
+        "envSpecificDetails": {
+          "dockerCommand": "",
+          "dockerContext": ".",
+          "dockerfilePath": "./Dockerfile"
+        },
+        "healthCheckPath": "",
+        "maintenanceMode": {
+          "enabled": false,
+          "uri": ""
+        },
+        "numInstances": 1,
+        "openPorts": null,
+        "plan": "free",
+        "previews": {
+          "generation": "off"
+        },
+        "pullRequestPreviewsEnabled": "no",
+        "region": "oregon",
+        "runtime": "docker",
+        "sshAddress": "srv-d2dp4sh5pdvs73accti0@ssh.oregon.render.com",
+        "url": "https://waardhaven-api-backend.onrender.com"
+      },
+      "slug": "waardhaven-api-backend",
+      "suspended": "not_suspended",
+      "suspenders": [],
+      "type": "web_service",
+      "updatedAt": "2025-09-04T03:21:26.85861Z"
+    },
+    "project": {
+      "createdAt": "2025-03-12T22:07:08.417586Z",
+      "environmentIds": [
+        "evm-cv90b33tq21c7394jnr0",
+        "evm-d24k0jje5dus73dcbfcg"
+      ],
+      "id": "prj-cv90b33tq21c7394jnqg",
+      "name": "Jonathan Verdun's  Projects",
+      "owner": {
+        "email": "jonathan.verdun707@gmail.com",
+        "id": "tea-cv8vjpdumphs73fja5d0",
+        "name": "AI-WHISPERERS",
+        "type": "team"
+      },
+      "updatedAt": "2025-07-29T21:13:03.345586Z"
+    },
+    "environment": {
+      "databasesIds": null,
+      "envGroupIds": [
+        "evg-d2htbf63jp1c738om1u0"
+      ],
+      "id": "evm-cv90b33tq21c7394jnr0",
+      "name": "Formal Production",
+      "networkIsolationEnabled": false,
+      "projectId": "prj-cv90b33tq21c7394jnqg",
+      "protectedStatus": "unprotected",
+      "redisIds": null,
+      "serviceIds": [
+        "srv-d2dp66jipnbc73asfr7g",
+        "srv-d2dp4sh5pdvs73accti0"
+      ]
+    }
+  },
+  {
+    "service": {
+      "autoDeploy": "yes",
+      "branch": "main",
+      "createdAt": "2025-08-12T19:16:44.045109Z",
+      "dashboardUrl": "https://dashboard.render.com/web/srv-d2dp66jipnbc73asfr7g",
+      "environmentId": "evm-cv90b33tq21c7394jnr0",
+      "id": "srv-d2dp66jipnbc73asfr7g",
+      "name": "waardhaven-web-frontend",
+      "notifyOnFail": "default",
+      "ownerId": "tea-cv8vjpdumphs73fja5d0",
+      "repo": "https://github.com/Ai-Whisperers/AI-Investment",
+      "rootDir": "./apps/web/",
+      "serviceDetails": {
+        "buildPlan": "starter",
+        "cache": {
+          "profile": "no-cache"
+        },
+        "env": "docker",
+        "envSpecificDetails": {
+          "dockerCommand": "",
+          "dockerContext": ".",
+          "dockerfilePath": "./Dockerfile"
+        },
+        "healthCheckPath": "",
+        "maintenanceMode": {
+          "enabled": false,
+          "uri": ""
+        },
+        "numInstances": 1,
+        "openPorts": null,
+        "plan": "free",
+        "previews": {
+          "generation": "off"
+        },
+        "pullRequestPreviewsEnabled": "no",
+        "region": "oregon",
+        "runtime": "docker",
+        "sshAddress": "srv-d2dp66jipnbc73asfr7g@ssh.oregon.render.com",
+        "url": "https://waardhaven-web-frontend.onrender.com"
+      },
+      "slug": "waardhaven-web-frontend",
+      "suspended": "not_suspended",
+      "suspenders": [],
+      "type": "web_service",
+      "updatedAt": "2025-09-04T03:24:09.251181Z"
+    },
+    "project": {
+      "createdAt": "2025-03-12T22:07:08.417586Z",
+      "environmentIds": [
+        "evm-cv90b33tq21c7394jnr0",
+        "evm-d24k0jje5dus73dcbfcg"
+      ],
+      "id": "prj-cv90b33tq21c7394jnqg",
+      "name": "Jonathan Verdun's  Projects",
+      "owner": {
+        "email": "jonathan.verdun707@gmail.com",
+        "id": "tea-cv8vjpdumphs73fja5d0",
+        "name": "AI-WHISPERERS",
+        "type": "team"
+      },
+      "updatedAt": "2025-07-29T21:13:03.345586Z"
+    },
+    "environment": {
+      "databasesIds": null,
+      "envGroupIds": [
+        "evg-d2htbf63jp1c738om1u0"
+      ],
+      "id": "evm-cv90b33tq21c7394jnr0",
+      "name": "Formal Production",
+      "networkIsolationEnabled": false,
+      "projectId": "prj-cv90b33tq21c7394jnqg",
+      "protectedStatus": "unprotected",
+      "redisIds": null,
+      "serviceIds": [
+        "srv-d2dp66jipnbc73asfr7g",
+        "srv-d2dp4sh5pdvs73accti0"
+      ]
+    }
+  },
+  {
+    "service": {
+      "autoDeploy": "yes",
+      "branch": "main",
+      "createdAt": "2025-09-17T03:05:23.946409Z",
+      "dashboardUrl": "https://dashboard.render.com/worker/srv-d352asqli9vc739eklf0",
+      "environmentId": "evm-d24k0jje5dus73dcbfcg",
+      "id": "srv-d352asqli9vc739eklf0",
+      "name": "celery-worker",
+      "notifyOnFail": "default",
+      "ownerId": "tea-cv8vjpdumphs73fja5d0",
+      "repo": "https://github.com/Ai-Whisperers/customer-feedback-app",
+      "rootDir": "",
+      "serviceDetails": {
+        "buildPlan": "starter",
+        "env": "python",
+        "envSpecificDetails": {
+          "buildCommand": "pip install -r api/requirements.txt",
+          "startCommand": "cd api \u0026\u0026 celery -A app.workers.celery_app worker"
+        },
+        "numInstances": 1,
+        "plan": "starter",
+        "previews": {
+          "generation": "off"
+        },
+        "pullRequestPreviewsEnabled": "no",
+        "region": "oregon",
+        "runtime": "python",
+        "sshAddress": "srv-d352asqli9vc739eklf0@ssh.oregon.render.com"
+      },
+      "slug": "celery-worker-e682",
+      "suspended": "not_suspended",
+      "suspenders": [],
+      "type": "background_worker",
+      "updatedAt": "2025-09-17T16:14:35.018586Z"
+    },
+    "project": {
+      "createdAt": "2025-03-12T22:07:08.417586Z",
+      "environmentIds": [
+        "evm-cv90b33tq21c7394jnr0",
+        "evm-d24k0jje5dus73dcbfcg"
+      ],
+      "id": "prj-cv90b33tq21c7394jnqg",
+      "name": "Jonathan Verdun's  Projects",
+      "owner": {
+        "email": "jonathan.verdun707@gmail.com",
+        "id": "tea-cv8vjpdumphs73fja5d0",
+        "name": "AI-WHISPERERS",
+        "type": "team"
+      },
+      "updatedAt": "2025-07-29T21:13:03.345586Z"
+    },
+    "environment": {
+      "databasesIds": [
+        "dpg-d2sfso7diees738r970g-a"
+      ],
+      "envGroupIds": [
+        "evg-d2sedqje5dus73ejc68g",
+        "evg-d34svc63jp1c73ej60ng"
+      ],
+      "id": "evm-d24k0jje5dus73dcbfcg",
+      "name": "Gestaltt",
+      "networkIsolationEnabled": false,
+      "projectId": "prj-cv90b33tq21c7394jnqg",
+      "protectedStatus": "unprotected",
+      "redisIds": [
+        "red-d3597km3jp1c73es8tcg"
+      ],
+      "serviceIds": [
+        "srv-d2sepmh5pdvs739cbl70",
+        "srv-cv90c7dsvqrc738b7e8g",
+        "srv-d24ldiqli9vc73edvqk0",
+        "srv-d358oa0dl3ps738fgdrg",
+        "srv-d352asqli9vc739eklf0",
+        "srv-d358pridbo4c73f6bkmg",
+        "srv-d22b092dbo4c73f15br0"
+      ]
+    }
+  },
+  {
+    "keyValue": {
+      "createdAt": "2025-09-17T10:56:18.087901Z",
+      "dashboardUrl": "https://dashboard.render.com/r/red-d3597km3jp1c73es8tcg",
+      "environmentId": "evm-d24k0jje5dus73dcbfcg",
+      "id": "red-d3597km3jp1c73es8tcg",
+      "ipAllowList": null,
+      "name": "feedback-analyzer-redis",
+      "options": {
+        "maxmemoryPolicy": "noeviction"
+      },
+      "owner": {
+        "email": "jonathan.verdun707@gmail.com",
+        "id": "tea-cv8vjpdumphs73fja5d0",
+        "name": "AI-WHISPERERS",
+        "type": "team"
+      },
+      "plan": "free",
+      "region": "oregon",
+      "status": "available",
+      "updatedAt": "2025-09-17T10:56:18.087901Z",
+      "version": "8.1.0"
+    },
+    "project": {
+      "createdAt": "2025-03-12T22:07:08.417586Z",
+      "environmentIds": [
+        "evm-cv90b33tq21c7394jnr0",
+        "evm-d24k0jje5dus73dcbfcg"
+      ],
+      "id": "prj-cv90b33tq21c7394jnqg",
+      "name": "Jonathan Verdun's  Projects",
+      "owner": {
+        "email": "jonathan.verdun707@gmail.com",
+        "id": "tea-cv8vjpdumphs73fja5d0",
+        "name": "AI-WHISPERERS",
+        "type": "team"
+      },
+      "updatedAt": "2025-07-29T21:13:03.345586Z"
+    },
+    "environment": {
+      "databasesIds": [
+        "dpg-d2sfso7diees738r970g-a"
+      ],
+      "envGroupIds": [
+        "evg-d2sedqje5dus73ejc68g",
+        "evg-d34svc63jp1c73ej60ng"
+      ],
+      "id": "evm-d24k0jje5dus73dcbfcg",
+      "name": "Gestaltt",
+      "networkIsolationEnabled": false,
+      "projectId": "prj-cv90b33tq21c7394jnqg",
+      "protectedStatus": "unprotected",
+      "redisIds": [
+        "red-d3597km3jp1c73es8tcg"
+      ],
+      "serviceIds": [
+        "srv-d2sepmh5pdvs739cbl70",
+        "srv-cv90c7dsvqrc738b7e8g",
+        "srv-d24ldiqli9vc73edvqk0",
+        "srv-d358oa0dl3ps738fgdrg",
+        "srv-d352asqli9vc739eklf0",
+        "srv-d358pridbo4c73f6bkmg",
+        "srv-d22b092dbo4c73f15br0"
+      ]
+    }
+  },
+  {
+    "postgres": {
+      "createdAt": "2025-09-04T02:50:08.766253Z",
+      "dashboardUrl": "https://dashboard.render.com/d/dpg-d2sfso7diees738r970g-a",
+      "databaseName": "aiwhisperers_production",
+      "databaseUser": "aiwhisperers_admin",
+      "diskSizeGB": 15,
+      "environmentId": "evm-d24k0jje5dus73dcbfcg",
+      "highAvailabilityEnabled": false,
+      "id": "dpg-d2sfso7diees738r970g-a",
+      "ipAllowList": [
+        {
+          "cidrBlock": "0.0.0.0/0",
+          "description": "everywhere"
+        }
+      ],
+      "name": "aiwhisperers-database",
+      "owner": {
+        "email": "jonathan.verdun707@gmail.com",
+        "id": "tea-cv8vjpdumphs73fja5d0",
+        "name": "AI-WHISPERERS",
+        "type": "team"
+      },
+      "plan": "basic_256mb",
+      "readReplicas": [],
+      "region": "oregon",
+      "role": "primary",
+      "status": "available",
+      "suspended": "not_suspended",
+      "suspenders": [],
+      "updatedAt": "2025-09-04T02:50:08.766253Z",
+      "version": "15"
+    },
+    "project": {
+      "createdAt": "2025-03-12T22:07:08.417586Z",
+      "environmentIds": [
+        "evm-cv90b33tq21c7394jnr0",
+        "evm-d24k0jje5dus73dcbfcg"
+      ],
+      "id": "prj-cv90b33tq21c7394jnqg",
+      "name": "Jonathan Verdun's  Projects",
+      "owner": {
+        "email": "jonathan.verdun707@gmail.com",
+        "id": "tea-cv8vjpdumphs73fja5d0",
+        "name": "AI-WHISPERERS",
+        "type": "team"
+      },
+      "updatedAt": "2025-07-29T21:13:03.345586Z"
+    },
+    "environment": {
+      "databasesIds": [
+        "dpg-d2sfso7diees738r970g-a"
+      ],
+      "envGroupIds": [
+        "evg-d2sedqje5dus73ejc68g",
+        "evg-d34svc63jp1c73ej60ng"
+      ],
+      "id": "evm-d24k0jje5dus73dcbfcg",
+      "name": "Gestaltt",
+      "networkIsolationEnabled": false,
+      "projectId": "prj-cv90b33tq21c7394jnqg",
+      "protectedStatus": "unprotected",
+      "redisIds": [
+        "red-d3597km3jp1c73es8tcg"
+      ],
+      "serviceIds": [
+        "srv-d2sepmh5pdvs739cbl70",
+        "srv-cv90c7dsvqrc738b7e8g",
+        "srv-d24ldiqli9vc73edvqk0",
+        "srv-d358oa0dl3ps738fgdrg",
+        "srv-d352asqli9vc739eklf0",
+        "srv-d358pridbo4c73f6bkmg",
+        "srv-d22b092dbo4c73f15br0"
+      ]
+    }
+  },
+  {
+    "service": {
+      "autoDeploy": "yes",
+      "branch": "main",
+      "createdAt": "2025-09-17T10:23:37.087288Z",
+      "dashboardUrl": "https://dashboard.render.com/pserv/srv-d358oa0dl3ps738fgdrg",
+      "environmentId": "evm-d24k0jje5dus73dcbfcg",
+      "id": "srv-d358oa0dl3ps738fgdrg",
+      "name": "customer-feedback-api",
+      "notifyOnFail": "default",
+      "ownerId": "tea-cv8vjpdumphs73fja5d0",
+      "repo": "https://github.com/Ai-Whisperers/customer-feedback-app",
+      "rootDir": "",
+      "serviceDetails": {
+        "buildPlan": "starter",
+        "env": "python",
+        "envSpecificDetails": {
+          "buildCommand": "pip install -r api/requirements.txt",
+          "startCommand": "cd api \u0026\u0026 uvicorn app.main:app --host 0.0.0.0 --port 10000"
+        },
+        "numInstances": 1,
+        "openPorts": [
+          {
+            "port": 10000,
+            "protocol": "TCP"
+          }
+        ],
+        "plan": "starter",
+        "previews": {
+          "generation": "off"
+        },
+        "pullRequestPreviewsEnabled": "no",
+        "region": "oregon",
+        "runtime": "python",
+        "sshAddress": "srv-d358oa0dl3ps738fgdrg@ssh.oregon.render.com",
+        "url": "customer-feedback-api-bmjp:10000"
+      },
+      "slug": "customer-feedback-api-bmjp",
+      "suspended": "not_suspended",
+      "suspenders": [],
+      "type": "private_service",
+      "updatedAt": "2025-09-17T16:12:08.99906Z"
+    },
+    "project": {
+      "createdAt": "2025-03-12T22:07:08.417586Z",
+      "environmentIds": [
+        "evm-cv90b33tq21c7394jnr0",
+        "evm-d24k0jje5dus73dcbfcg"
+      ],
+      "id": "prj-cv90b33tq21c7394jnqg",
+      "name": "Jonathan Verdun's  Projects",
+      "owner": {
+        "email": "jonathan.verdun707@gmail.com",
+        "id": "tea-cv8vjpdumphs73fja5d0",
+        "name": "AI-WHISPERERS",
+        "type": "team"
+      },
+      "updatedAt": "2025-07-29T21:13:03.345586Z"
+    },
+    "environment": {
+      "databasesIds": [
+        "dpg-d2sfso7diees738r970g-a"
+      ],
+      "envGroupIds": [
+        "evg-d2sedqje5dus73ejc68g",
+        "evg-d34svc63jp1c73ej60ng"
+      ],
+      "id": "evm-d24k0jje5dus73dcbfcg",
+      "name": "Gestaltt",
+      "networkIsolationEnabled": false,
+      "projectId": "prj-cv90b33tq21c7394jnqg",
+      "protectedStatus": "unprotected",
+      "redisIds": [
+        "red-d3597km3jp1c73es8tcg"
+      ],
+      "serviceIds": [
+        "srv-d2sepmh5pdvs739cbl70",
+        "srv-cv90c7dsvqrc738b7e8g",
+        "srv-d24ldiqli9vc73edvqk0",
+        "srv-d358oa0dl3ps738fgdrg",
+        "srv-d352asqli9vc739eklf0",
+        "srv-d358pridbo4c73f6bkmg",
+        "srv-d22b092dbo4c73f15br0"
+      ]
+    }
+  },
+  {
+    "service": {
+      "autoDeploy": "yes",
+      "branch": "main",
+      "createdAt": "2025-09-04T01:35:23.454158Z",
+      "dashboardUrl": "https://dashboard.render.com/web/srv-d2sepmh5pdvs739cbl70",
+      "environmentId": "evm-d24k0jje5dus73dcbfcg",
+      "id": "srv-d2sepmh5pdvs739cbl70",
+      "name": "AI-Whisperers-website-and-courses",
+      "notifyOnFail": "default",
+      "ownerId": "tea-cv8vjpdumphs73fja5d0",
+      "repo": "https://github.com/Ai-Whisperers/AI-Whisperers-website-and-courses",
+      "rootDir": "",
+      "serviceDetails": {
+        "buildPlan": "starter",
+        "cache": {
+          "profile": "no-cache"
+        },
+        "env": "node",
+        "envSpecificDetails": {
+          "buildCommand": "npm run build",
+          "startCommand": "npm start"
+        },
+        "healthCheckPath": "",
+        "maintenanceMode": {
+          "enabled": false,
+          "uri": ""
+        },
+        "numInstances": 1,
+        "openPorts": [
+          {
+            "port": 10000,
+            "protocol": "TCP"
+          }
+        ],
+        "plan": "starter",
+        "previews": {
+          "generation": "off"
+        },
+        "pullRequestPreviewsEnabled": "no",
+        "region": "oregon",
+        "runtime": "node",
+        "sshAddress": "srv-d2sepmh5pdvs739cbl70@ssh.oregon.render.com",
+        "url": "https://ai-whisperers-website-and-courses.onrender.com"
+      },
+      "slug": "ai-whisperers-website-and-courses",
+      "suspended": "not_suspended",
+      "suspenders": [],
+      "type": "web_service",
+      "updatedAt": "2025-09-10T01:15:16.404631Z"
+    },
+    "project": {
+      "createdAt": "2025-03-12T22:07:08.417586Z",
+      "environmentIds": [
+        "evm-cv90b33tq21c7394jnr0",
+        "evm-d24k0jje5dus73dcbfcg"
+      ],
+      "id": "prj-cv90b33tq21c7394jnqg",
+      "name": "Jonathan Verdun's  Projects",
+      "owner": {
+        "email": "jonathan.verdun707@gmail.com",
+        "id": "tea-cv8vjpdumphs73fja5d0",
+        "name": "AI-WHISPERERS",
+        "type": "team"
+      },
+      "updatedAt": "2025-07-29T21:13:03.345586Z"
+    },
+    "environment": {
+      "databasesIds": [
+        "dpg-d2sfso7diees738r970g-a"
+      ],
+      "envGroupIds": [
+        "evg-d2sedqje5dus73ejc68g",
+        "evg-d34svc63jp1c73ej60ng"
+      ],
+      "id": "evm-d24k0jje5dus73dcbfcg",
+      "name": "Gestaltt",
+      "networkIsolationEnabled": false,
+      "projectId": "prj-cv90b33tq21c7394jnqg",
+      "protectedStatus": "unprotected",
+      "redisIds": [
+        "red-d3597km3jp1c73es8tcg"
+      ],
+      "serviceIds": [
+        "srv-d2sepmh5pdvs739cbl70",
+        "srv-cv90c7dsvqrc738b7e8g",
+        "srv-d24ldiqli9vc73edvqk0",
+        "srv-d358oa0dl3ps738fgdrg",
+        "srv-d352asqli9vc739eklf0",
+        "srv-d358pridbo4c73f6bkmg",
+        "srv-d22b092dbo4c73f15br0"
+      ]
+    }
+  },
+  {
+    "service": {
+      "autoDeploy": "yes",
+      "branch": "main",
+      "createdAt": "2025-09-17T10:26:55.505772Z",
+      "dashboardUrl": "https://dashboard.render.com/web/srv-d358pridbo4c73f6bkmg",
+      "environmentId": "evm-d24k0jje5dus73dcbfcg",
+      "id": "srv-d358pridbo4c73f6bkmg",
+      "name": "customer-feedback-app",
+      "notifyOnFail": "default",
+      "ownerId": "tea-cv8vjpdumphs73fja5d0",
+      "repo": "https://github.com/Ai-Whisperers/customer-feedback-app",
+      "rootDir": "",
+      "serviceDetails": {
+        "buildPlan": "starter",
+        "cache": {
+          "profile": "origin-controlled"
+        },
+        "env": "node",
+        "envSpecificDetails": {
+          "buildCommand": "cd web \u0026\u0026 npm install \u0026\u0026 npm run build:render",
+          "startCommand": "cd web \u0026\u0026 npm run start:prod"
+        },
+        "healthCheckPath": "",
+        "maintenanceMode": {
+          "enabled": false,
+          "uri": ""
+        },
+        "numInstances": 1,
+        "openPorts": [
+          {
+            "port": 8000,
+            "protocol": "TCP"
+          }
+        ],
+        "plan": "starter",
+        "previews": {
+          "generation": "off"
+        },
+        "pullRequestPreviewsEnabled": "no",
+        "region": "oregon",
+        "runtime": "node",
+        "sshAddress": "srv-d358pridbo4c73f6bkmg@ssh.oregon.render.com",
+        "url": "https://customer-feedback-app.onrender.com"
+      },
+      "slug": "customer-feedback-app",
+      "suspended": "not_suspended",
+      "suspenders": [],
+      "type": "web_service",
+      "updatedAt": "2025-09-17T16:14:39.816377Z"
+    },
+    "project": {
+      "createdAt": "2025-03-12T22:07:08.417586Z",
+      "environmentIds": [
+        "evm-cv90b33tq21c7394jnr0",
+        "evm-d24k0jje5dus73dcbfcg"
+      ],
+      "id": "prj-cv90b33tq21c7394jnqg",
+      "name": "Jonathan Verdun's  Projects",
+      "owner": {
+        "email": "jonathan.verdun707@gmail.com",
+        "id": "tea-cv8vjpdumphs73fja5d0",
+        "name": "AI-WHISPERERS",
+        "type": "team"
+      },
+      "updatedAt": "2025-07-29T21:13:03.345586Z"
+    },
+    "environment": {
+      "databasesIds": [
+        "dpg-d2sfso7diees738r970g-a"
+      ],
+      "envGroupIds": [
+        "evg-d2sedqje5dus73ejc68g",
+        "evg-d34svc63jp1c73ej60ng"
+      ],
+      "id": "evm-d24k0jje5dus73dcbfcg",
+      "name": "Gestaltt",
+      "networkIsolationEnabled": false,
+      "projectId": "prj-cv90b33tq21c7394jnqg",
+      "protectedStatus": "unprotected",
+      "redisIds": [
+        "red-d3597km3jp1c73es8tcg"
+      ],
+      "serviceIds": [
+        "srv-d2sepmh5pdvs739cbl70",
+        "srv-cv90c7dsvqrc738b7e8g",
+        "srv-d24ldiqli9vc73edvqk0",
+        "srv-d358oa0dl3ps738fgdrg",
+        "srv-d352asqli9vc739eklf0",
+        "srv-d358pridbo4c73f6bkmg",
+        "srv-d22b092dbo4c73f15br0"
+      ]
+    }
+  },
+  {
+    "service": {
+      "autoDeploy": "yes",
+      "branch": "main",
+      "createdAt": "2025-03-12T22:09:33.926965Z",
+      "dashboardUrl": "https://dashboard.render.com/web/srv-cv90c7dsvqrc738b7e8g",
+      "environmentId": "evm-d24k0jje5dus73dcbfcg",
+      "id": "srv-cv90c7dsvqrc738b7e8g",
+      "name": "gestock-backend",
+      "notifyOnFail": "default",
+      "ownerId": "tea-cv8vjpdumphs73fja5d0",
+      "repo": "https://github.com/gesttaltt/gestock",
+      "rootDir": "backend",
+      "serviceDetails": {
+        "buildPlan": "starter",
+        "cache": {
+          "profile": "no-cache"
+        },
+        "env": "node",
+        "envSpecificDetails": {
+          "buildCommand": "npm install",
+          "startCommand": "npm run start"
+        },
+        "healthCheckPath": "",
+        "maintenanceMode": {
+          "enabled": false,
+          "uri": ""
+        },
+        "numInstances": 1,
+        "openPorts": null,
+        "plan": "free",
+        "previews": {
+          "generation": "off"
+        },
+        "pullRequestPreviewsEnabled": "no",
+        "region": "oregon",
+        "runtime": "node",
+        "sshAddress": "srv-cv90c7dsvqrc738b7e8g@ssh.oregon.render.com",
+        "url": "https://gestock-backend.onrender.com"
+      },
+      "slug": "gestock-backend",
+      "suspended": "not_suspended",
+      "suspenders": [],
+      "type": "web_service",
+      "updatedAt": "2025-08-13T12:42:53.615606Z"
+    },
+    "project": {
+      "createdAt": "2025-03-12T22:07:08.417586Z",
+      "environmentIds": [
+        "evm-cv90b33tq21c7394jnr0",
+        "evm-d24k0jje5dus73dcbfcg"
+      ],
+      "id": "prj-cv90b33tq21c7394jnqg",
+      "name": "Jonathan Verdun's  Projects",
+      "owner": {
+        "email": "jonathan.verdun707@gmail.com",
+        "id": "tea-cv8vjpdumphs73fja5d0",
+        "name": "AI-WHISPERERS",
+        "type": "team"
+      },
+      "updatedAt": "2025-07-29T21:13:03.345586Z"
+    },
+    "environment": {
+      "databasesIds": [
+        "dpg-d2sfso7diees738r970g-a"
+      ],
+      "envGroupIds": [
+        "evg-d2sedqje5dus73ejc68g",
+        "evg-d34svc63jp1c73ej60ng"
+      ],
+      "id": "evm-d24k0jje5dus73dcbfcg",
+      "name": "Gestaltt",
+      "networkIsolationEnabled": false,
+      "projectId": "prj-cv90b33tq21c7394jnqg",
+      "protectedStatus": "unprotected",
+      "redisIds": [
+        "red-d3597km3jp1c73es8tcg"
+      ],
+      "serviceIds": [
+        "srv-d2sepmh5pdvs739cbl70",
+        "srv-cv90c7dsvqrc738b7e8g",
+        "srv-d24ldiqli9vc73edvqk0",
+        "srv-d358oa0dl3ps738fgdrg",
+        "srv-d352asqli9vc739eklf0",
+        "srv-d358pridbo4c73f6bkmg",
+        "srv-d22b092dbo4c73f15br0"
+      ]
+    }
+  },
+  {
+    "service": {
+      "autoDeploy": "yes",
+      "branch": "main",
+      "createdAt": "2025-07-29T23:18:35.648894Z",
+      "dashboardUrl": "https://dashboard.render.com/web/srv-d24ldiqli9vc73edvqk0",
+      "environmentId": "evm-d24k0jje5dus73dcbfcg",
+      "id": "srv-d24ldiqli9vc73edvqk0",
+      "name": "gnews-fetcher",
+      "notifyOnFail": "default",
+      "ownerId": "tea-cv8vjpdumphs73fja5d0",
+      "repo": "https://github.com/gesttaltt/gnews-fetcher",
+      "rootDir": "./app/",
+      "serviceDetails": {
+        "buildPlan": "starter",
+        "cache": {
+          "profile": "no-cache"
+        },
+        "env": "docker",
+        "envSpecificDetails": {
+          "dockerCommand": "",
+          "dockerContext": ".",
+          "dockerfilePath": "./Dockerfile"
+        },
+        "healthCheckPath": "",
+        "maintenanceMode": {
+          "enabled": false,
+          "uri": ""
+        },
+        "numInstances": 1,
+        "openPorts": null,
+        "plan": "free",
+        "previews": {
+          "generation": "off"
+        },
+        "pullRequestPreviewsEnabled": "no",
+        "region": "oregon",
+        "runtime": "docker",
+        "sshAddress": "srv-d24ldiqli9vc73edvqk0@ssh.oregon.render.com",
+        "url": "https://gnews-fetcher.onrender.com"
+      },
+      "slug": "gnews-fetcher",
+      "suspended": "not_suspended",
+      "suspenders": [],
+      "type": "web_service",
+      "updatedAt": "2025-07-29T23:19:24.359477Z"
+    },
+    "project": {
+      "createdAt": "2025-03-12T22:07:08.417586Z",
+      "environmentIds": [
+        "evm-cv90b33tq21c7394jnr0",
+        "evm-d24k0jje5dus73dcbfcg"
+      ],
+      "id": "prj-cv90b33tq21c7394jnqg",
+      "name": "Jonathan Verdun's  Projects",
+      "owner": {
+        "email": "jonathan.verdun707@gmail.com",
+        "id": "tea-cv8vjpdumphs73fja5d0",
+        "name": "AI-WHISPERERS",
+        "type": "team"
+      },
+      "updatedAt": "2025-07-29T21:13:03.345586Z"
+    },
+    "environment": {
+      "databasesIds": [
+        "dpg-d2sfso7diees738r970g-a"
+      ],
+      "envGroupIds": [
+        "evg-d2sedqje5dus73ejc68g",
+        "evg-d34svc63jp1c73ej60ng"
+      ],
+      "id": "evm-d24k0jje5dus73dcbfcg",
+      "name": "Gestaltt",
+      "networkIsolationEnabled": false,
+      "projectId": "prj-cv90b33tq21c7394jnqg",
+      "protectedStatus": "unprotected",
+      "redisIds": [
+        "red-d3597km3jp1c73es8tcg"
+      ],
+      "serviceIds": [
+        "srv-d2sepmh5pdvs739cbl70",
+        "srv-cv90c7dsvqrc738b7e8g",
+        "srv-d24ldiqli9vc73edvqk0",
+        "srv-d358oa0dl3ps738fgdrg",
+        "srv-d352asqli9vc739eklf0",
+        "srv-d358pridbo4c73f6bkmg",
+        "srv-d22b092dbo4c73f15br0"
+      ]
+    }
+  },
+  {
+    "service": {
+      "autoDeploy": "yes",
+      "branch": "main",
+      "createdAt": "2025-07-26T10:38:28.844472Z",
+      "dashboardUrl": "https://dashboard.render.com/web/srv-d22b092dbo4c73f15br0",
+      "environmentId": "evm-d24k0jje5dus73dcbfcg",
+      "id": "srv-d22b092dbo4c73f15br0",
+      "name": "news-fetcher",
+      "notifyOnFail": "default",
+      "ownerId": "tea-cv8vjpdumphs73fja5d0",
+      "repo": "https://github.com/gesttaltt/news-fetcher",
+      "rootDir": "app",
+      "serviceDetails": {
+        "buildPlan": "starter",
+        "cache": {
+          "profile": "no-cache"
+        },
+        "env": "docker",
+        "envSpecificDetails": {
+          "dockerCommand": "",
+          "dockerContext": ".",
+          "dockerfilePath": "/Dockerfile"
+        },
+        "healthCheckPath": "",
+        "maintenanceMode": {
+          "enabled": false,
+          "uri": ""
+        },
+        "numInstances": 1,
+        "openPorts": null,
+        "plan": "free",
+        "previews": {
+          "generation": "off"
+        },
+        "pullRequestPreviewsEnabled": "no",
+        "region": "oregon",
+        "runtime": "docker",
+        "sshAddress": "srv-d22b092dbo4c73f15br0@ssh.oregon.render.com",
+        "url": "https://news-fetcher-ui4q.onrender.com"
+      },
+      "slug": "news-fetcher-ui4q",
+      "suspended": "not_suspended",
+      "suspenders": [],
+      "type": "web_service",
+      "updatedAt": "2025-08-13T12:42:42.423794Z"
+    },
+    "project": {
+      "createdAt": "2025-03-12T22:07:08.417586Z",
+      "environmentIds": [
+        "evm-cv90b33tq21c7394jnr0",
+        "evm-d24k0jje5dus73dcbfcg"
+      ],
+      "id": "prj-cv90b33tq21c7394jnqg",
+      "name": "Jonathan Verdun's  Projects",
+      "owner": {
+        "email": "jonathan.verdun707@gmail.com",
+        "id": "tea-cv8vjpdumphs73fja5d0",
+        "name": "AI-WHISPERERS",
+        "type": "team"
+      },
+      "updatedAt": "2025-07-29T21:13:03.345586Z"
+    },
+    "environment": {
+      "databasesIds": [
+        "dpg-d2sfso7diees738r970g-a"
+      ],
+      "envGroupIds": [
+        "evg-d2sedqje5dus73ejc68g",
+        "evg-d34svc63jp1c73ej60ng"
+      ],
+      "id": "evm-d24k0jje5dus73dcbfcg",
+      "name": "Gestaltt",
+      "networkIsolationEnabled": false,
+      "projectId": "prj-cv90b33tq21c7394jnqg",
+      "protectedStatus": "unprotected",
+      "redisIds": [
+        "red-d3597km3jp1c73es8tcg"
+      ],
+      "serviceIds": [
+        "srv-d2sepmh5pdvs739cbl70",
+        "srv-cv90c7dsvqrc738b7e8g",
+        "srv-d24ldiqli9vc73edvqk0",
+        "srv-d358oa0dl3ps738fgdrg",
+        "srv-d352asqli9vc739eklf0",
+        "srv-d358pridbo4c73f6bkmg",
+        "srv-d22b092dbo4c73f15br0"
+      ]
+    }
+  }
+]
