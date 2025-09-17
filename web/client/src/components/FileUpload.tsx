@@ -5,7 +5,8 @@
 
 import React, { useCallback, useState } from 'react';
 import { useDropzone } from 'react-dropzone';
-import { uploadFile, UploadResponse } from '@/lib/api';
+import { uploadFile } from '@/lib/api';
+import type { UploadResponse } from '@/lib/api';
 
 interface FileUploadProps {
   onUploadSuccess: (response: UploadResponse) => void;

@@ -4,7 +4,8 @@
  */
 
 import React, { useEffect, useState } from 'react';
-import { getStatus, TaskStatus } from '@/lib/api';
+import { getStatus } from '@/lib/api';
+import type { TaskStatus } from '@/lib/api';
 
 interface ProgressTrackerProps {
   taskId: string;

@@ -3,11 +3,12 @@
  * Customer AI Driven Feedback Analyzer v3.1.0
  */
 
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { FileUpload } from '@/components/FileUpload';
 import { ProgressTracker } from '@/components/ProgressTracker';
 import { ResultsVisualization } from '@/components/ResultsVisualization';
-import { getResults, UploadResponse, AnalysisResults, checkHealth } from '@/lib/api';
+import { getResults, checkHealth } from '@/lib/api';
+import type { UploadResponse, AnalysisResults } from '@/lib/api';
 
 type AppState = 'idle' | 'uploading' | 'processing' | 'completed' | 'error';
 

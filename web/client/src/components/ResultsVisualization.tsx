@@ -5,7 +5,8 @@
 
 import React from 'react';
 import Plot from 'react-plotly.js';
-import { AnalysisResults, exportResults } from '@/lib/api';
+import { exportResults } from '@/lib/api';
+import type { AnalysisResults } from '@/lib/api';
 
 interface ResultsVisualizationProps {
   results: AnalysisResults;
@@ -148,8 +149,8 @@ export const ResultsVisualization: React.FC<ResultsVisualizationProps> = ({
             layout={{
               height: 300,
               margin: { t: 20, b: 40, l: 40, r: 20 },
-              xaxis: { title: '' },
-              yaxis: { title: 'Count' },
+              xaxis: { title: { text: '' } },
+              yaxis: { title: { text: 'Count' } },
             }}
             config={{ displayModeBar: false }}
           />
@@ -172,8 +173,8 @@ export const ResultsVisualization: React.FC<ResultsVisualizationProps> = ({
             layout={{
               height: 400,
               margin: { t: 20, b: 40, l: 80, r: 20 },
-              xaxis: { title: 'Emotions', side: 'bottom' },
-              yaxis: { title: '', autorange: 'reversed' },
+              xaxis: { title: { text: 'Emotions' }, side: 'bottom' },
+              yaxis: { title: { text: '' }, autorange: 'reversed' },
             }}
             config={{ displayModeBar: false }}
           />

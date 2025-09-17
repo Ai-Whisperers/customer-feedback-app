@@ -68,21 +68,23 @@ const apiProxy = createProxyMiddleware({
   pathRewrite: {
     '^/api': '', // Remove /api prefix when forwarding
   },
-  onProxyReq: (proxyReq, req, res) => {
-    // Add custom headers if needed
-    proxyReq.setHeader('X-Forwarded-Host', req.headers.host || '');
-    proxyReq.setHeader('X-Real-IP', req.ip || '');
+  on: {
+    proxyReq: (proxyReq, req, res) => {
+      // Add custom headers if needed
+      proxyReq.setHeader('X-Forwarded-Host', req.headers.host || '');
+      proxyReq.setHeader('X-Real-IP', (req as any).ip || req.socket.remoteAddress || '');
+    },
+    error: (err, req, res) => {
+      console.error('Proxy error:', err);
+      (res as any).status(502).json({
+        error: 'Bad Gateway',
+        message: 'Unable to connect to API service',
+        details: IS_PRODUCTION ? undefined : err.message,
+      });
+    },
   },
-  onError: (err, req, res) => {
-    console.error('Proxy error:', err);
-    res.status(502).json({
-      error: 'Bad Gateway',
-      message: 'Unable to connect to API service',
-      details: IS_PRODUCTION ? undefined : err.message,
-    });
-  },
-  logLevel: IS_PRODUCTION ? 'error' : 'debug',
-});
+  logger: IS_PRODUCTION ? console : undefined,
+} as any);
 
 // Proxy API requests
 app.use('/api', apiProxy);
