@@ -134,6 +134,7 @@ services:
     plan: starter  # Match existing deployment
     buildCommand: cd web && npm install && npm run build:render
     startCommand: cd web && npm run start:prod
+    # No preDeployCommand needed - build handles everything
     envVars:
       - key: NODE_VERSION
         value: 20.11.0  # Fixed: specific version
