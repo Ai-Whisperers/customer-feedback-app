@@ -98,7 +98,7 @@ def optimize_batch_size(
     Args:
         comments: List of comments to batch
         max_tokens_per_batch: Maximum tokens per batch (input)
-        use_accurate_counting: Use tiktoken for accurate counting
+        use_accurate_counting: Use transformers for accurate counting
 
     Returns:
         List of comment batches optimized for token usage

@@ -77,7 +77,7 @@ services:
     runtime: python
     region: oregon
     plan: starter  # Match existing deployment
-    buildCommand: pip install -r api/requirements.txt --no-binary tiktoken
+    buildCommand: pip install -r api/requirements.txt
     startCommand: cd api && celery -A app.workers.celery_app worker --loglevel=INFO
     envVars:
       - key: PYTHON_VERSION
