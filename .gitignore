@@ -21,8 +21,13 @@ pip-delete-this-directory.txt
 
 # Environment variables
 .env
+.env.*
 .env.local
 .env.*.local
+**/.env
+**/.env.*
+web/.env
+web/.env.*
 
 # IDE and editor files
 .vscode/
