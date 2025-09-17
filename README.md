@@ -1,6 +1,6 @@
 # 🚀 Customer AI Driven Feedback Analyzer
 
-[![Version](https://img.shields.io/badge/version-3.1.0-blue.svg)](https://github.com/Ai-Whisperers/customer-feedback-app)
+[![Version](https://img.shields.io/badge/version-3.2.0-blue.svg)](https://github.com/Ai-Whisperers/customer-feedback-app)
 [![Python](https://img.shields.io/badge/python-3.12.6-brightgreen.svg)](https://www.python.org/)
 [![Node](https://img.shields.io/badge/node-20.11.0-green.svg)](https://nodejs.org/)
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.115.0-009688.svg)](https://fastapi.tiangolo.com/)
@@ -22,6 +22,7 @@
 - [Características](#-características)
 - [Demo](#-demo)
 - [Arquitectura](#-arquitectura)
+- [Arquitectura Frontend](#-arquitectura-frontend)
 - [Tecnologías](#-tecnologías)
 - [Instalación](#-instalación)
 - [Uso](#-uso)
@@ -99,6 +100,54 @@ graph LR
 | **Workers** | Celery | Procesamiento asíncrono |
 | **Queue/Cache** | Redis | Mensajería y almacenamiento temporal |
 | **AI Engine** | OpenAI GPT-4o-mini | Análisis de texto |
+
+## 🎨 Arquitectura Frontend
+
+### Nueva Estructura Modular (v3.2.0)
+El frontend ha sido completamente refactorizado siguiendo principios de Clean Architecture y SOLID:
+
+#### 📊 Componentes de Resultados
+La visualización de resultados se ha modularizado completamente:
+- **ResultsCharts.tsx**: Orquestador principal (65 líneas, antes 380)
+  - `EmotionsChart`: Gráfico de barras para emociones (56 líneas)
+  - `NPSChart`: Gráfico circular para NPS (48 líneas)
+  - `PainPointsChart`: Gráfico horizontal de puntos de dolor (56 líneas)
+  - `ChurnRiskChart`: Distribución de riesgo de abandono (65 líneas)
+  - `SampleCommentsTable`: Tabla de comentarios de muestra (72 líneas)
+  - `StatCard`: Tarjetas de estadísticas resumidas (26 líneas)
+
+#### 📤 Componentes de Carga
+El sistema de carga de archivos ahora está dividido en componentes especializados:
+- **FileUpload.tsx**: Componente principal (100 líneas, antes 251)
+  - `DragDropZone`: Zona interactiva drag & drop (99 líneas)
+  - `FileInfo`: Display de información del archivo (49 líneas)
+  - `FormatRequirements`: Documentación de requisitos (30 líneas)
+  - `ErrorMessage`: Mensajes de error reutilizables (13 líneas)
+
+#### 🚀 Optimizaciones de Rendimiento
+- **Code Splitting**: Lazy loading implementado en todas las rutas
+- **Bundle Size**: Reducción del 65% en el bundle principal
+- **Chunks Optimizados**:
+  - Main: 176 KB
+  - LandingPage: 6.25 KB
+  - AboutPage: 8.62 KB
+  - AnalyzerPage: 4.8 MB (incluye Plotly, carga bajo demanda)
+
+#### 📁 Estructura de Directorios
+```
+web/client/src/
+├── components/
+│   ├── ui/          # Glass Design System
+│   ├── results/     # Componentes de visualización (7 archivos)
+│   ├── upload/      # Componentes de carga (4 archivos)
+│   ├── progress/    # Seguimiento de progreso
+│   └── export/      # Exportación de resultados
+├── pages/           # Páginas con lazy loading
+├── lib/             # API client y utilidades
+└── App.tsx          # Router principal con Suspense
+```
+
+Para más detalles sobre la arquitectura frontend, consulta [📚 Frontend Architecture Documentation](./docs/FRONTEND_ARCHITECTURE.md)
 
 ## 🛠 Tecnologías
 
