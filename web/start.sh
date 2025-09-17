@@ -14,8 +14,11 @@ echo "Environment: ${NODE_ENV:-production}"
 echo "Port: ${PORT:-3000}"
 echo "API Proxy Target: ${API_PROXY_TARGET:-not set}"
 
-# Navigate to web directory
-cd web
+# Navigate to web directory if not already there
+if [ -d "web" ]; then
+    echo "Navigating to web directory..."
+    cd web
+fi
 
 # Start from the correct location
 if [ -d "dist" ]; then

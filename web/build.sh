@@ -12,11 +12,19 @@ echo "====================================="
 echo "Node version: $(node --version)"
 echo "NPM version: $(npm --version)"
 
-# Navigate to web directory
-cd web
+# Check current directory
+echo "Current directory: $(pwd)"
+echo "Directory contents:"
+ls -la
+
+# Navigate to web directory if not already there
+if [ -d "web" ]; then
+    echo "Navigating to web directory..."
+    cd web
+fi
 
 # Install root dependencies
-echo "Installing root dependencies..."
+echo "Installing root dependencies in: $(pwd)"
 npm ci --production=false
 
 # Build client application
@@ -26,7 +34,7 @@ echo "Building client application..."
 cd client
 
 # Install client dependencies with all devDependencies
-echo "Installing client dependencies..."
+echo "Installing client dependencies in: $(pwd)"
 npm ci --production=false
 
 # Build client
