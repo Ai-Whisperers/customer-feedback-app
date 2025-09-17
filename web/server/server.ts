@@ -15,7 +15,7 @@ import { createProxyMiddleware } from 'http-proxy-middleware';
 dotenv.config();
 
 const app = express();
-const PORT = process.env.PORT || 3000;
+const PORT = parseInt(process.env.PORT || '3000', 10);
 const API_TARGET = process.env.API_PROXY_TARGET || 'http://localhost:8000';
 const IS_PRODUCTION = process.env.NODE_ENV === 'production';
 
@@ -136,12 +136,14 @@ app.use((err: Error, req: express.Request, res: express.Response, next: express.
   });
 });
 
-// Start server
-app.listen(PORT, () => {
+// Start server - IMPORTANT: Bind to 0.0.0.0 for Render
+const HOST = '0.0.0.0';
+app.listen(PORT, HOST, () => {
   console.log(`
     ========================================
     BFF Server Started Successfully
     ========================================
+    Host: ${HOST}
     Port: ${PORT}
     Environment: ${IS_PRODUCTION ? 'PRODUCTION' : 'DEVELOPMENT'}
     API Target: ${API_TARGET}
