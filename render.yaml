@@ -62,8 +62,6 @@ services:
         value: 1
       - key: LOG_LEVEL
         value: INFO
-      - key: ALLOWED_ORIGINS
-        value: "[]"  # Empty list since API is private
     healthCheckPath: /health  # Fixed from /api/health
     autoDeploy: true
     buildFilter:

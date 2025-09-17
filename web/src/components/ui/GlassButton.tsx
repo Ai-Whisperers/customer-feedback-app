@@ -2,7 +2,7 @@ import React from 'react';
 
 interface GlassButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: 'primary' | 'secondary' | 'success' | 'danger' | 'ghost';
-  size?: 'sm' | 'md' | 'lg';
+  size?: 'sm' | 'md' | 'lg' | 'xl';
   fullWidth?: boolean;
   loading?: boolean;
   icon?: React.ReactNode;
@@ -23,6 +23,7 @@ export const GlassButton: React.FC<GlassButtonProps> = ({
     sm: 'px-3 py-1.5 text-sm',
     md: 'px-5 py-2.5 text-base',
     lg: 'px-7 py-3.5 text-lg',
+    xl: 'px-9 py-4 text-xl',
   };
 
   const variantClasses = {

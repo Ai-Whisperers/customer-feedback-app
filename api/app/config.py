@@ -19,7 +19,7 @@ class Settings(BaseSettings):
     APP_ENV: str = Field(default="development")
     DEBUG: bool = Field(default=True)
     SECRET_KEY: str = Field(min_length=32)
-    ALLOWED_ORIGINS: List[str] = Field(default_factory=list)
+    ALLOWED_ORIGINS: Optional[str] = Field(default=None)  # Not needed for private API
     PORT: int = Field(default=8000)
 
     # OpenAI Configuration
