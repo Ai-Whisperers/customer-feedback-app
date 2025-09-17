@@ -18,7 +18,7 @@ class Settings(BaseSettings):
     # Application
     APP_ENV: str = Field(default="development")
     DEBUG: bool = Field(default=True)
-    SECRET_KEY: str = Field(min_length=32)
+    SECRET_KEY: str = Field(default="NtJIvemZxXOP5EBMMMagLf4VZglFrXlSoF5Bvz1Ub80", min_length=32)
     ALLOWED_ORIGINS: Optional[str] = Field(default=None)  # Not needed for private API
     PORT: int = Field(default=8000)
 
