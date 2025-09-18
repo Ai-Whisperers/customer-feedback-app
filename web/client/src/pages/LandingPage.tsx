@@ -2,6 +2,16 @@ import React from 'react';
 import { GlassCard, GlassButton } from '@/components/ui';
 
 export const LandingPage: React.FC = () => {
+  console.log('[LandingPage] Component rendering');
+
+  React.useEffect(() => {
+    console.log('[LandingPage] Component mounted');
+    console.log('[LandingPage] Window dimensions:', window.innerWidth, 'x', window.innerHeight);
+    return () => {
+      console.log('[LandingPage] Component unmounting');
+    };
+  }, []);
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 via-blue-50 to-indigo-100 dark:from-gray-900 dark:via-blue-900 dark:to-indigo-900">
       <div className="absolute inset-0 bg-grid-pattern opacity-5"></div>
