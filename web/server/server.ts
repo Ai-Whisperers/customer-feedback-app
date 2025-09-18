@@ -29,7 +29,7 @@ console.log(`[CONFIG] IS_PRODUCTION: ${IS_PRODUCTION}`);
 // Security middleware with environment-aware CSP
 const cspDirectives: any = IS_PRODUCTION ? {
   defaultSrc: ["'self'"],
-  scriptSrc: ["'self'", "'unsafe-inline'"], // Remove unsafe-eval in production
+  scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'"], // Temporarily allow unsafe-eval for debugging
   styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
   imgSrc: ["'self'", "data:", "https:"],
   connectSrc: ["'self'"],
