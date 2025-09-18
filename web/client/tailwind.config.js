@@ -114,8 +114,10 @@ export default {
   plugins: [
     require('@tailwindcss/typography'),
     require('@tailwindcss/forms'),
-    function({ addUtilities }) {
-      const newUtilities = {
+    // Glass Design System Plugin
+    function({ addUtilities, addComponents, theme }) {
+      // Glass effect utilities
+      const glassUtilities = {
         '.glass': {
           'background': 'rgba(255, 255, 255, 0.1)',
           'backdrop-filter': 'blur(10px)',
@@ -134,8 +136,50 @@ export default {
           '-webkit-backdrop-filter': 'blur(10px)',
           'border': '1px solid rgba(255, 255, 255, 0.2)',
         },
-      }
-      addUtilities(newUtilities)
+        // Additional glass variants
+        '.glass-light': {
+          'background': 'rgba(255, 255, 255, 0.8)',
+          'backdrop-filter': 'blur(8px)',
+          '-webkit-backdrop-filter': 'blur(8px)',
+          'border': '1px solid rgba(255, 255, 255, 0.3)',
+        },
+        '.glass-heavy': {
+          'background': 'rgba(255, 255, 255, 0.15)',
+          'backdrop-filter': 'blur(20px)',
+          '-webkit-backdrop-filter': 'blur(20px)',
+          'border': '1px solid rgba(255, 255, 255, 0.25)',
+        },
+      };
+
+      // Glass component presets
+      const glassComponents = {
+        '.glass-card': {
+          '@apply glass rounded-2xl p-6 shadow-xl transition-all duration-300': {},
+          '&:hover': {
+            'box-shadow': '0 20px 40px rgba(0, 0, 0, 0.1)',
+            'transform': 'translateY(-2px)',
+          },
+        },
+        '.glass-button': {
+          '@apply glass rounded-lg px-4 py-2 font-medium transition-all duration-200': {},
+          '&:hover': {
+            'background': 'rgba(255, 255, 255, 0.2)',
+          },
+          '&:active': {
+            'transform': 'scale(0.98)',
+          },
+        },
+        '.glass-input': {
+          '@apply glass rounded-lg px-4 py-2 focus:outline-none focus:ring-2': {},
+          'background': 'rgba(255, 255, 255, 0.05)',
+          '&:focus': {
+            'background': 'rgba(255, 255, 255, 0.1)',
+          },
+        },
+      };
+
+      addUtilities(glassUtilities);
+      addComponents(glassComponents);
     }
   ],
 }

@@ -4,7 +4,13 @@ import { ProgressTracker } from '@/components/progress/ProgressTracker';
 import { ResultsCharts } from '@/components/results/ResultsCharts';
 import { ExportResults } from '@/components/export/ExportResults';
 import { GlassCard } from '@/components/ui';
-import { uploadFile, getStatus, getResults, exportResults } from '@/lib/api';
+import {
+  uploadFile,
+  getStatus,
+  getResults,
+  exportResults,
+  cancelAllRequests
+} from '@/lib/api';
 import type { AnalysisResults } from '@/lib/api';
 
 type AppState = 'idle' | 'uploading' | 'processing' | 'completed' | 'error';
@@ -84,6 +90,8 @@ export const AnalyzerPage: React.FC = () => {
         clearInterval(intervalRef.current);
         intervalRef.current = null;
       }
+      // Cancel any pending API requests
+      cancelAllRequests();
     };
   }, [taskId, appState]);
 
@@ -110,6 +118,8 @@ export const AnalyzerPage: React.FC = () => {
       clearInterval(intervalRef.current);
       intervalRef.current = null;
     }
+    // Cancel any pending API requests
+    cancelAllRequests();
     setAppState('idle');
     setTaskId('');
     setProgress(0);

@@ -7,6 +7,8 @@ interface GlassButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement>
   fullWidth?: boolean;
   loading?: boolean;
   icon?: React.ReactNode;
+  ariaLabel?: string;
+  pressed?: boolean;
 }
 
 export const GlassButton: React.FC<GlassButtonProps> = ({
@@ -18,6 +20,8 @@ export const GlassButton: React.FC<GlassButtonProps> = ({
   icon,
   className = '',
   disabled,
+  ariaLabel,
+  pressed,
   ...props
 }) => {
   const sizeClasses = {
@@ -53,13 +57,20 @@ export const GlassButton: React.FC<GlassButtonProps> = ({
         className
       )}
       disabled={isDisabled}
+      aria-label={ariaLabel || (typeof children === 'string' ? children : undefined)}
+      aria-busy={loading}
+      aria-pressed={pressed}
+      role="button"
       {...props}
     >
       {loading ? (
-        <div className="animate-spin h-5 w-5 border-2 border-white/30 border-t-white rounded-full" />
+        <>
+          <div className="animate-spin h-5 w-5 border-2 border-white/30 border-t-white rounded-full" aria-hidden="true" />
+          <span className="sr-only">Cargando...</span>
+        </>
       ) : icon ? (
         <>
-          {icon}
+          <span aria-hidden="true">{icon}</span>
           {children}
         </>
       ) : (
