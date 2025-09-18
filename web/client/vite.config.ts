@@ -23,9 +23,7 @@ export default defineConfig({
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src'),
-      // Redirect plotly.js imports to plotly.js-dist-min
-      'plotly.js/dist/plotly': path.resolve(__dirname, 'node_modules/plotly.js-dist-min/plotly.min.js'),
-      'plotly.js': path.resolve(__dirname, 'node_modules/plotly.js-dist-min/plotly.min.js'),
+      // Plotly is loaded from CDN, no alias needed
       // Add polyfills for Node.js modules
       buffer: 'buffer',
       process: 'process/browser',
@@ -91,14 +89,7 @@ export default defineConfig({
       output: {
         manualChunks: (id) => {
           // Advanced chunking strategy for better isolation
-
-          // Plotly chunks - completely isolated
-          if (id.includes('plotly.js-dist-min')) {
-            return 'plotly-vendor';  // Pre-minified plotly
-          }
-          if (id.includes('react-plotly.js')) {
-            return 'plotly-react';   // React wrapper
-          }
+          // Plotly is loaded from CDN, not bundled
 
           // React ecosystem - core libraries
           if (id.includes('node_modules/react-dom')) {

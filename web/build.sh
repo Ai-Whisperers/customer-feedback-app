@@ -17,6 +17,13 @@ echo "Current directory: $(pwd)"
 echo "Directory contents:"
 ls -la
 
+# Clean all previous builds to prevent cache issues
+echo "====================================="
+echo "Cleaning previous builds..."
+echo "====================================="
+rm -rf dist client/dist node_modules/.vite 2>/dev/null || true
+echo "Previous builds cleaned successfully"
+
 # Install server dependencies
 echo "====================================="
 echo "Installing server dependencies..."
