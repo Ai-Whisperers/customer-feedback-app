@@ -45,6 +45,7 @@ export const NPSChart: React.FC<NPSChartProps> = ({ nps }) => {
       layout={chartData.layout}
       config={plotConfig}
       className="w-full"
+      chartName="NPS Distribution"
     />
   );
 };

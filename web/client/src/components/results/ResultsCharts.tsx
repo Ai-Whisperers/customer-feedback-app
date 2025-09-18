@@ -1,12 +1,45 @@
-import React from 'react';
+import React, { lazy, Suspense } from 'react';
 import { GlassCard } from '../../components/ui';
-import { EmotionsChart } from './EmotionsChart';
-import { NPSChart } from './NPSChart';
-import { PainPointsChart } from './PainPointsChart';
-import { ChurnRiskChart } from './ChurnRiskChart';
 import { SampleCommentsTable } from './SampleCommentsTable';
 import { StatCard } from './StatCard';
 import type { AnalysisResults } from '@/lib/api';
+
+// Dynamic imports for chart components to isolate Plotly loading
+const EmotionsChart = lazy(() =>
+  import('./EmotionsChart').then(module => ({
+    default: module.EmotionsChart
+  }))
+);
+
+const NPSChart = lazy(() =>
+  import('./NPSChart').then(module => ({
+    default: module.NPSChart
+  }))
+);
+
+const PainPointsChart = lazy(() =>
+  import('./PainPointsChart').then(module => ({
+    default: module.PainPointsChart
+  }))
+);
+
+const ChurnRiskChart = lazy(() =>
+  import('./ChurnRiskChart').then(module => ({
+    default: module.ChurnRiskChart
+  }))
+);
+
+// Chart loading skeleton
+const ChartSkeleton = ({ height = '400px' }: { height?: string }) => (
+  <div className="animate-pulse" style={{ minHeight: height }}>
+    <div className="flex items-center justify-center h-full">
+      <div className="text-center">
+        <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600 mb-4"></div>
+        <p className="text-gray-500 dark:text-gray-400">Loading chart...</p>
+      </div>
+    </div>
+  </div>
+);
 
 interface ResultsChartsProps {
   results: AnalysisResults;
@@ -51,21 +84,29 @@ export const ResultsCharts: React.FC<ResultsChartsProps> = ({ results }) => {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {results.rows && results.rows.length > 0 && (
           <GlassCard>
-            <EmotionsChart rows={results.rows} />
+            <Suspense fallback={<ChartSkeleton />}>
+              <EmotionsChart rows={results.rows} />
+            </Suspense>
           </GlassCard>
         )}
 
         <GlassCard>
-          <NPSChart nps={results.summary.nps} />
+          <Suspense fallback={<ChartSkeleton />}>
+            <NPSChart nps={results.summary.nps} />
+          </Suspense>
         </GlassCard>
 
         <GlassCard>
-          <PainPointsChart painPoints={results.summary.pain_points} />
+          <Suspense fallback={<ChartSkeleton />}>
+            <PainPointsChart painPoints={results.summary.pain_points} />
+          </Suspense>
         </GlassCard>
 
         {results.rows && (
           <GlassCard>
-            <ChurnRiskChart rows={results.rows} averageRisk={results.summary.churn_risk.average} />
+            <Suspense fallback={<ChartSkeleton />}>
+              <ChurnRiskChart rows={results.rows} averageRisk={results.summary.churn_risk.average} />
+            </Suspense>
           </GlassCard>
         )}
       </div>

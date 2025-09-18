@@ -54,6 +54,7 @@ export const PainPointsChart: React.FC<PainPointsChartProps> = ({ painPoints }) 
       layout={chartData.layout}
       config={plotConfig}
       className="w-full"
+      chartName="Pain Points"
     />
   );
 };

@@ -75,6 +75,7 @@ export const EmotionsChart: React.FC<EmotionsChartProps> = ({ rows }) => {
       layout={chartData.layout}
       config={plotConfig}
       className="w-full"
+      chartName="Emotions Analysis"
     />
   );
 };

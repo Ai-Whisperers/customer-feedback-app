@@ -69,6 +69,7 @@ export const ChurnRiskChart: React.FC<ChurnRiskChartProps> = ({ rows, averageRis
       layout={chartData.layout}
       config={plotConfig}
       className="w-full"
+      chartName="Churn Risk Distribution"
     />
   );
 };

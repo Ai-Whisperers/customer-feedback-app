@@ -23,6 +23,9 @@ export default defineConfig({
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src'),
+      // Redirect plotly.js imports to plotly.js-dist-min
+      'plotly.js/dist/plotly': path.resolve(__dirname, 'node_modules/plotly.js-dist-min/plotly.min.js'),
+      'plotly.js': path.resolve(__dirname, 'node_modules/plotly.js-dist-min/plotly.min.js'),
       // Add polyfills for Node.js modules
       buffer: 'buffer',
       process: 'process/browser',
@@ -83,18 +86,52 @@ export default defineConfig({
       },
       output: {
         manualChunks: (id) => {
-          // Better chunking strategy
-          if (id.includes('plotly.js')) {
-            return 'plotly-core';
+          // Advanced chunking strategy for better isolation
+
+          // Plotly chunks - completely isolated
+          if (id.includes('plotly.js-dist-min')) {
+            return 'plotly-vendor';  // Pre-minified plotly
           }
-          if (id.includes('react-plotly')) {
-            return 'react-plotly';
+          if (id.includes('react-plotly.js')) {
+            return 'plotly-react';   // React wrapper
           }
-          if (id.includes('node_modules/react') || id.includes('node_modules/react-dom')) {
-            return 'vendor-react';
+
+          // React ecosystem - core libraries
+          if (id.includes('node_modules/react-dom')) {
+            return 'react-dom';
           }
-          if (id.includes('node_modules') && (id.includes('axios') || id.includes('date-fns') || id.includes('clsx'))) {
-            return 'vendor-utils';
+          if (id.includes('node_modules/react')) {
+            return 'react-vendor';
+          }
+          if (id.includes('react-router')) {
+            return 'react-router';
+          }
+
+          // Utility libraries - grouped by function
+          if (id.includes('date-fns')) {
+            return 'date-utils';
+          }
+          if (id.includes('axios')) {
+            return 'http-utils';
+          }
+          if (id.includes('clsx') || id.includes('tailwind-merge')) {
+            return 'ui-utils';
+          }
+
+          // File handling
+          if (id.includes('react-dropzone') || id.includes('xlsx')) {
+            return 'file-utils';
+          }
+
+          // Form/validation
+          if (id.includes('zod')) {
+            return 'validation';
+          }
+
+          // Chart components (will be dynamically imported)
+          if (id.includes('components/results') &&
+              (id.includes('Chart') || id.includes('chart'))) {
+            return 'charts-components';
           }
         },
         // Ensure proper chunk naming
