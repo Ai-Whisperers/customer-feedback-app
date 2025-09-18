@@ -31,7 +31,7 @@ const REQUIRED_PATTERNS = [
   { pattern: /assets\/about-.*\.js/, description: 'About page bundle' },
   { pattern: /assets\/analyzer-.*\.js/, description: 'Analyzer page bundle' },
   { pattern: /assets\/(vendor-react|react-vendor|react-dom)-.*\.js/, description: 'React vendor bundle' },
-  { pattern: /assets\/ErrorBoundary-.*\.css/, description: 'ErrorBoundary styles' }
+  { pattern: /assets\/(ErrorBoundary|bootstrap)-.*\.css/, description: 'Application styles' }
 ];
 
 const MAX_FILE_SIZES = {
