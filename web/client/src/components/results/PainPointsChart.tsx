@@ -1,10 +1,10 @@
 import React, { useMemo } from 'react';
 import { LazyPlot as Plot } from '@/components/charts/LazyPlot';
 import { defaultLayoutConfig, plotConfig } from './chartConfig';
-import type { AnalysisResults } from './types';
+import type { AnalysisResults } from '@/lib/api';
 
 interface PainPointsChartProps {
-  painPoints: AnalysisResults['pain_points'];
+  painPoints: AnalysisResults['summary']['pain_points'];
 }
 
 export const PainPointsChart: React.FC<PainPointsChartProps> = ({ painPoints }) => {
@@ -14,8 +14,8 @@ export const PainPointsChart: React.FC<PainPointsChartProps> = ({ painPoints }) 
     return {
       data: [
         {
-          y: topPainPoints.map(pp => pp.key).reverse(),
-          x: topPainPoints.map(pp => pp.freq).reverse(),
+          y: topPainPoints.map(pp => pp.category).reverse(),
+          x: topPainPoints.map(pp => pp.count).reverse(),
           type: 'bar' as const,
           orientation: 'h' as const,
           marker: {
@@ -25,7 +25,7 @@ export const PainPointsChart: React.FC<PainPointsChartProps> = ({ painPoints }) 
               width: 1,
             },
           },
-          text: topPainPoints.map(pp => pp.freq.toString()).reverse(),
+          text: topPainPoints.map(pp => pp.count.toString()).reverse(),
           textposition: 'outside' as const,
           hovertemplate: '%{y}<br>Frecuencia: %{x}<extra></extra>',
         },

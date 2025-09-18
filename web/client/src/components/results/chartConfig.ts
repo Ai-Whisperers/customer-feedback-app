@@ -1,6 +1,4 @@
-import type { ChartLayoutConfig } from './types';
-
-export const defaultLayoutConfig: ChartLayoutConfig = {
+export const defaultLayoutConfig = {
   paper_bgcolor: 'rgba(0,0,0,0)',
   plot_bgcolor: 'rgba(0,0,0,0)',
   font: {

@@ -1,7 +1,7 @@
 import React, { useMemo } from 'react';
 import { LazyPlot as Plot } from '@/components/charts/LazyPlot';
 import { defaultLayoutConfig, plotConfig } from './chartConfig';
-import type { AnalysisResults } from './types';
+import type { AnalysisResults } from '@/lib/api';
 
 interface ChurnRiskChartProps {
   rows: AnalysisResults['rows'];
@@ -17,10 +17,13 @@ export const ChurnRiskChart: React.FC<ChurnRiskChartProps> = ({ rows, averageRis
       'Crítico (0.8-1.0)': 0,
     };
 
+    if (!rows) return { data: [], layout: defaultLayoutConfig };
+
     rows.forEach(row => {
-      if (row.churn <= 0.3) riskRanges['Bajo (0-0.3)']++;
-      else if (row.churn <= 0.6) riskRanges['Medio (0.3-0.6)']++;
-      else if (row.churn <= 0.8) riskRanges['Alto (0.6-0.8)']++;
+      const risk = row.churn_risk || 0;
+      if (risk <= 0.3) riskRanges['Bajo (0-0.3)']++;
+      else if (risk <= 0.6) riskRanges['Medio (0.3-0.6)']++;
+      else if (risk <= 0.8) riskRanges['Alto (0.6-0.8)']++;
       else riskRanges['Crítico (0.8-1.0)']++;
     });
 

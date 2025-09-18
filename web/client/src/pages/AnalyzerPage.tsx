@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
 import { FileUpload } from '@/components/upload/FileUpload';
 import { ProgressTracker } from '@/components/progress/ProgressTracker';
-import { ResultsVisualization } from '@/components/ResultsVisualization';
+import { ResultsCharts } from '@/components/results/ResultsCharts';
+import { ExportResults } from '@/components/export/ExportResults';
 import { GlassCard } from '@/components/ui';
-import { uploadFile, getStatus, getResults } from '@/lib/api';
+import { uploadFile, getStatus, getResults, exportResults } from '@/lib/api';
 import type { AnalysisResults } from '@/lib/api';
 
 type AppState = 'idle' | 'uploading' | 'processing' | 'completed' | 'error';
@@ -60,7 +61,22 @@ export const AnalyzerPage: React.FC = () => {
     }, 2000);
   };
 
-  // Export function is handled directly by ResultsVisualization component
+  const handleExport = async (format: 'csv' | 'xlsx') => {
+    if (!taskId) return;
+    try {
+      const blob = await exportResults(taskId, format, 'all');
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `analysis_${taskId}.${format}`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error('Export failed:', error);
+    }
+  };
 
   const handleReset = () => {
     setAppState('idle');
@@ -123,7 +139,8 @@ export const AnalyzerPage: React.FC = () => {
 
           {appState === 'completed' && results && (
             <div className="space-y-8 animate-fadeIn">
-              <ResultsVisualization results={results} taskId={taskId} />
+              <ResultsCharts results={results} />
+              <ExportResults taskId={taskId} onExport={handleExport} />
               <div className="text-center">
                 <button
                   onClick={handleReset}

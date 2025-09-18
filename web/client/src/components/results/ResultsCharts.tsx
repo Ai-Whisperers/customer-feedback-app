@@ -6,7 +6,7 @@ import { PainPointsChart } from './PainPointsChart';
 import { ChurnRiskChart } from './ChurnRiskChart';
 import { SampleCommentsTable } from './SampleCommentsTable';
 import { StatCard } from './StatCard';
-import type { AnalysisResults } from './types';
+import type { AnalysisResults } from '@/lib/api';
 
 interface ResultsChartsProps {
   results: AnalysisResults;
@@ -24,7 +24,7 @@ export const ResultsCharts: React.FC<ResultsChartsProps> = ({ results }) => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
           <StatCard
             label="Total Comentarios"
-            value={results.summary.n.toString()}
+            value={results.metadata.total_comments.toString()}
             icon="Chart"
           />
           <StatCard
@@ -35,13 +35,13 @@ export const ResultsCharts: React.FC<ResultsChartsProps> = ({ results }) => {
           />
           <StatCard
             label="Riesgo Abandono Promedio"
-            value={`${(results.summary.churn_risk_avg * 100).toFixed(1)}%`}
+            value={`${(results.summary.churn_risk.average * 100).toFixed(1)}%`}
             icon="Warning"
             color="yellow"
           />
           <StatCard
             label="Puntos de Dolor"
-            value={results.pain_points.length.toString()}
+            value={results.summary.pain_points.length.toString()}
             icon="Target"
             color="red"
           />
@@ -49,29 +49,35 @@ export const ResultsCharts: React.FC<ResultsChartsProps> = ({ results }) => {
       </GlassCard>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <GlassCard>
-          <EmotionsChart emotions={results.emotions} />
-        </GlassCard>
+        {results.rows && results.rows.length > 0 && (
+          <GlassCard>
+            <EmotionsChart rows={results.rows} />
+          </GlassCard>
+        )}
 
         <GlassCard>
           <NPSChart nps={results.summary.nps} />
         </GlassCard>
 
         <GlassCard>
-          <PainPointsChart painPoints={results.pain_points} />
+          <PainPointsChart painPoints={results.summary.pain_points} />
         </GlassCard>
 
-        <GlassCard>
-          <ChurnRiskChart rows={results.rows} averageRisk={results.summary.churn_risk_avg} />
-        </GlassCard>
+        {results.rows && (
+          <GlassCard>
+            <ChurnRiskChart rows={results.rows} averageRisk={results.summary.churn_risk.average} />
+          </GlassCard>
+        )}
       </div>
 
-      <GlassCard>
-        <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-4">
-          Muestra de Comentarios Analizados
-        </h3>
-        <SampleCommentsTable rows={results.rows} limit={5} />
-      </GlassCard>
+      {results.rows && results.rows.length > 0 && (
+        <GlassCard>
+          <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-4">
+            Muestra de Comentarios Analizados
+          </h3>
+          <SampleCommentsTable rows={results.rows} limit={5} />
+        </GlassCard>
+      )}
     </div>
   );
 };

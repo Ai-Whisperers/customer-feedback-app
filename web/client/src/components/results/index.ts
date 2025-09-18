@@ -5,4 +5,3 @@ export * from './PainPointsChart';
 export * from './ChurnRiskChart';
 export * from './SampleCommentsTable';
 export * from './StatCard';
-export * from './types';

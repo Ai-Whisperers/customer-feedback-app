@@ -1,5 +1,5 @@
 import React from 'react';
-import type { AnalysisResults } from './types';
+import type { AnalysisResults } from '@/lib/api';
 
 interface SampleCommentsTableProps {
   rows: AnalysisResults['rows'];
@@ -7,10 +7,14 @@ interface SampleCommentsTableProps {
 }
 
 export const SampleCommentsTable: React.FC<SampleCommentsTableProps> = ({ rows, limit = 5 }) => {
+  if (!rows || rows.length === 0) {
+    return <div className="text-center text-gray-500">No hay comentarios para mostrar</div>;
+  }
+
   return (
-    <div className="overflow-x-auto">
-      <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-        <thead className="bg-gray-50/50 dark:bg-gray-800/50">
+    <div className="overflow-x-auto rounded-lg bg-white/5 backdrop-blur-sm border border-white/20">
+      <table className="min-w-full divide-y divide-gray-200/20 dark:divide-gray-700/20">
+        <thead className="bg-gradient-to-r from-blue-500/10 to-purple-600/10 backdrop-blur-sm">
           <tr>
             <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
               #
@@ -29,37 +33,37 @@ export const SampleCommentsTable: React.FC<SampleCommentsTableProps> = ({ rows, 
             </th>
           </tr>
         </thead>
-        <tbody className="bg-white/50 dark:bg-gray-900/50 divide-y divide-gray-200 dark:divide-gray-700">
+        <tbody className="bg-white/10 dark:bg-gray-900/30 divide-y divide-gray-200/10 dark:divide-gray-700/10">
           {rows.slice(0, limit).map((row) => (
-            <tr key={row.i}>
+            <tr key={row.index}>
               <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">
-                {row.i + 1}
+                {row.index + 1}
               </td>
               <td className="px-4 py-4 text-sm text-gray-900 dark:text-gray-100">
-                <p className="truncate max-w-xs">{row.text}</p>
+                <p className="truncate max-w-xs">{row.original_text}</p>
               </td>
               <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">
-                {row.nps}
+                {row.nota}
               </td>
               <td className="px-4 py-4 whitespace-nowrap text-sm">
                 <span
-                  className={`px-2 py-1 rounded-full text-xs font-medium ${
-                    row.churn < 0.3
-                      ? 'bg-green-100 text-green-800'
-                      : row.churn < 0.6
-                      ? 'bg-yellow-100 text-yellow-800'
-                      : 'bg-red-100 text-red-800'
+                  className={`px-2 py-1 rounded-full text-xs font-medium backdrop-blur-sm ${
+                    row.churn_risk < 0.3
+                      ? 'bg-green-500/20 text-green-300 border border-green-500/30'
+                      : row.churn_risk < 0.6
+                      ? 'bg-yellow-500/20 text-yellow-300 border border-yellow-500/30'
+                      : 'bg-red-500/20 text-red-300 border border-red-500/30'
                   }`}
                 >
-                  {(row.churn * 100).toFixed(0)}%
+                  {(row.churn_risk * 100).toFixed(0)}%
                 </span>
               </td>
               <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">
                 <div className="flex flex-wrap gap-1">
-                  {row.tags.slice(0, 2).map((tag, idx) => (
+                  {row.pain_points && row.pain_points.slice(0, 2).map((tag, idx) => (
                     <span
                       key={idx}
-                      className="px-2 py-1 bg-blue-100 text-blue-800 rounded text-xs"
+                      className="px-2 py-1 bg-blue-500/20 text-blue-300 border border-blue-500/30 rounded-md text-xs backdrop-blur-sm"
                     >
                       {tag}
                     </span>

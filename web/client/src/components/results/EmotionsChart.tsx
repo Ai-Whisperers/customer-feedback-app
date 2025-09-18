@@ -2,13 +2,33 @@ import React, { useMemo } from 'react';
 import { LazyPlot as Plot } from '@/components/charts/LazyPlot';
 import { defaultLayoutConfig, plotConfig } from './chartConfig';
 
+import type { AnalysisResults } from '@/lib/api';
+
 interface EmotionsChartProps {
-  emotions: Record<string, number>;
+  rows: AnalysisResults['rows'];
 }
 
-export const EmotionsChart: React.FC<EmotionsChartProps> = ({ emotions }) => {
+export const EmotionsChart: React.FC<EmotionsChartProps> = ({ rows }) => {
   const chartData = useMemo(() => {
-    const sortedEmotions = Object.entries(emotions)
+    if (!rows || rows.length === 0) return { data: [], layout: defaultLayoutConfig };
+
+    // Aggregate emotions from all rows
+    const emotionTotals: Record<string, number> = {};
+    rows.forEach(row => {
+      if (row.emotions) {
+        Object.entries(row.emotions).forEach(([emotion, value]) => {
+          emotionTotals[emotion] = (emotionTotals[emotion] || 0) + value;
+        });
+      }
+    });
+
+    // Calculate averages
+    const emotionAverages = Object.entries(emotionTotals).map(([emotion, total]) => [
+      emotion,
+      total / rows.length
+    ] as [string, number]);
+
+    const sortedEmotions = emotionAverages
       .sort(([, a], [, b]) => b - a)
       .slice(0, 10);
 
@@ -47,7 +67,7 @@ export const EmotionsChart: React.FC<EmotionsChartProps> = ({ emotions }) => {
         },
       },
     };
-  }, [emotions]);
+  }, [rows]);
 
   return (
     <Plot

@@ -1,7 +1,7 @@
 import React, { useMemo } from 'react';
 import { LazyPlot as Plot } from '@/components/charts/LazyPlot';
 import { defaultLayoutConfig, plotConfig } from './chartConfig';
-import type { AnalysisResults } from './types';
+import type { AnalysisResults } from '@/lib/api';
 
 interface NPSChartProps {
   nps: AnalysisResults['summary']['nps'];
