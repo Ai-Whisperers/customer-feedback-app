@@ -146,32 +146,52 @@ if (IS_PRODUCTION) {
     },
   }));
 
-  // MPA Routing - serve specific HTML files
+  // MPA Routing - serve specific HTML files with proper cache headers
   app.get('/', (req, res) => {
     const htmlPath = path.join(buildPath, 'index.html');
     console.log('[DEBUG] Serving index.html from:', htmlPath);
     console.log('[DEBUG] File exists:', require('fs').existsSync(htmlPath));
+
+    // Set no-cache headers for HTML to ensure fresh content
+    res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+    res.setHeader('Pragma', 'no-cache');
+    res.setHeader('Expires', '0');
     res.sendFile(htmlPath);
   });
 
   app.get('/about', (req, res) => {
+    res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+    res.setHeader('Pragma', 'no-cache');
+    res.setHeader('Expires', '0');
     res.sendFile(path.join(buildPath, 'about.html'));
   });
 
   app.get('/about.html', (req, res) => {
+    res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+    res.setHeader('Pragma', 'no-cache');
+    res.setHeader('Expires', '0');
     res.sendFile(path.join(buildPath, 'about.html'));
   });
 
   app.get('/analyzer', (req, res) => {
+    res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+    res.setHeader('Pragma', 'no-cache');
+    res.setHeader('Expires', '0');
     res.sendFile(path.join(buildPath, 'analyzer.html'));
   });
 
   app.get('/analyzer.html', (req, res) => {
+    res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+    res.setHeader('Pragma', 'no-cache');
+    res.setHeader('Expires', '0');
     res.sendFile(path.join(buildPath, 'analyzer.html'));
   });
 
   // 404 fallback
   app.get('*', (req, res) => {
+    res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+    res.setHeader('Pragma', 'no-cache');
+    res.setHeader('Expires', '0');
     res.status(404).sendFile(path.join(buildPath, 'index.html'));
   });
 } else {
