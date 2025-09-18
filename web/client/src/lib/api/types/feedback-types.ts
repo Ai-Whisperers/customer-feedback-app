@@ -1,34 +1,56 @@
 /**
  * Feedback Domain Types
  * Following Clean Architecture - Domain Layer
+ * Aligned with backend schemas
  */
 
-export interface UploadResponse {
-  task_id: string;
-  message: string;
-  estimated_time_seconds: number;
-  file_info: {
-    total_comments: number;
-    preview: Array<{
-      nota: number;
-      comentario_final: string;
-    }>;
-  };
+// Upload types matching backend schemas
+export interface FileInfo {
+  name: string;
+  rows: number;
+  size_mb: number;
+  columns_found: string[];
+  has_nps_column: boolean;
 }
 
+export interface UploadResponse {
+  success: boolean;
+  message?: string;
+  task_id: string;
+  estimated_time_seconds: number;
+  file_info: FileInfo;
+}
+
+// Status types matching backend schemas
+export type BackendTaskStatus = 'queued' | 'processing' | 'completed' | 'failed' | 'expired';
+export type FrontendTaskStatus = 'pending' | 'processing' | 'completed' | 'failed';
+
+export interface StatusResponse {
+  task_id: string;
+  status: BackendTaskStatus;
+  progress: number;
+  current_step?: string;
+  estimated_remaining_seconds?: number;
+  started_at?: string;
+  completed_at?: string;
+  duration_seconds?: number;
+  messages: string[];
+  results_available: boolean;
+  error?: string;
+  details?: string;
+  failed_at?: string;
+  retry_available: boolean;
+}
+
+// Simplified interface for backward compatibility
 export interface TaskStatus {
   task_id: string;
-  status: 'pending' | 'processing' | 'completed' | 'failed';
+  status: FrontendTaskStatus;
   progress?: number;
-  result?: string;
-  error?: string;
-  current_batch?: number;
-  total_batches?: number;
-  items_processed?: number;
-  total_items?: number;
   message?: string;
   processed_rows?: number;
   total_rows?: number;
+  error?: string;
 }
 
 export interface AnalysisResults {

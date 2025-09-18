@@ -9,10 +9,13 @@ export {
   // Types
   type UploadResponse,
   type TaskStatus,
+  type StatusResponse,
   type AnalysisResults,
+  type FileInfo,
   // Methods
   uploadFile,
   getStatus,
+  getRawStatus,
   getResults,
   exportResults,
   checkHealth,

@@ -31,9 +31,24 @@ export const AnalyzerPage: React.FC = () => {
     setError('');
 
     try {
-      const response = await uploadFile(file);
-      setTaskId(response.task_id);
-      setAppState('processing');
+      const response = await uploadFile(file, {
+        language_hint: 'es', // Default to Spanish, could be made configurable
+        priority: 'normal'
+      });
+
+      // Check if upload was successful
+      if (response.success && response.task_id) {
+        setTaskId(response.task_id);
+        setAppState('processing');
+
+        // Show file info if available
+        if (response.file_info) {
+          console.log(`Processing ${response.file_info.rows} rows from ${response.file_info.name}`);
+        }
+      } else {
+        setError(response.message || 'Error al cargar el archivo');
+        setAppState('error');
+      }
     } catch {
       setError('Error al cargar el archivo. Por favor, intente nuevamente.');
       setAppState('error');
@@ -47,10 +62,19 @@ export const AnalyzerPage: React.FC = () => {
     const pollStatus = async () => {
       try {
         const status = await getStatus(taskId);
+
+        // Update UI with mapped status fields
         setProgress(status.progress || 0);
         setStatusMessage(status.message || 'Procesando...');
-        setProcessedRows(status.processed_rows || 0);
-        setTotalRows(status.total_rows || 0);
+
+        // Use processed_rows and total_rows if available
+        // These are now properly mapped from backend response
+        if (status.processed_rows !== undefined) {
+          setProcessedRows(status.processed_rows);
+        }
+        if (status.total_rows !== undefined) {
+          setTotalRows(status.total_rows);
+        }
 
         if (status.status === 'completed') {
           const analysisResults = await getResults(taskId, 'json', true);

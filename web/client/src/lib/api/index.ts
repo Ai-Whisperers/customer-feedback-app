@@ -23,6 +23,7 @@ const feedbackRepository = new FeedbackRepository(httpClient);
 // Export API methods (maintaining backward compatibility)
 export const uploadFile = feedbackRepository.uploadFile.bind(feedbackRepository);
 export const getStatus = feedbackRepository.getStatus.bind(feedbackRepository);
+export const getRawStatus = feedbackRepository.getRawStatus.bind(feedbackRepository);
 export const getResults = feedbackRepository.getResults.bind(feedbackRepository);
 export const exportResults = feedbackRepository.exportResults.bind(feedbackRepository);
 export const checkHealth = feedbackRepository.checkHealth.bind(feedbackRepository);

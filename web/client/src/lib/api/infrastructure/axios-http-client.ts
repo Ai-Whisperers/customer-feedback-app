@@ -5,9 +5,11 @@
 
 import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios';
 import type { IHttpClient, HttpRequestConfig, HttpResponse, HttpError } from '../core/http-client';
+import { ZodSchema } from 'zod';
 
 export class AxiosHttpClient implements IHttpClient {
   private axiosInstance: AxiosInstance;
+  private validationSchemas: Map<string, ZodSchema> = new Map();
 
   constructor(baseURL: string, defaultHeaders?: Record<string, string>) {
     this.axiosInstance = axios.create({
@@ -63,6 +65,32 @@ export class AxiosHttpClient implements IHttpClient {
       status: response.status,
       headers: response.headers as Record<string, string>,
     };
+  }
+
+  /**
+   * Register a validation schema for a specific endpoint
+   */
+  registerSchema(endpoint: string, schema: ZodSchema): void {
+    this.validationSchemas.set(endpoint, schema);
+  }
+
+  /**
+   * Validate response data if schema is registered
+   */
+  private validateResponse<T>(endpoint: string, data: unknown): T {
+    const schema = this.validationSchemas.get(endpoint);
+    if (schema) {
+      try {
+        return schema.parse(data) as T;
+      } catch (error) {
+        console.error(`Validation failed for ${endpoint}:`, error);
+        // In development, throw the error; in production, log and continue
+        if (process.env.NODE_ENV === 'development') {
+          throw error;
+        }
+      }
+    }
+    return data as T;
   }
 
   async get<T = unknown>(url: string, config?: HttpRequestConfig): Promise<HttpResponse<T>> {

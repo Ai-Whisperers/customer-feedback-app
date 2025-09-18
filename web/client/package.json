@@ -22,7 +22,8 @@
     "react-dom": "^18.3.1",
     "react-dropzone": "^14.2.9",
     "react-plotly.js": "^2.6.0",
-    "react-router-dom": "^6.27.0"
+    "react-router-dom": "^6.27.0",
+    "zod": "^4.1.9"
   },
   "overrides": {
     "postcss": "^8.4.47"

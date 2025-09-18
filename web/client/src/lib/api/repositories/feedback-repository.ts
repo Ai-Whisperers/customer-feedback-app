@@ -8,8 +8,10 @@ import { requestManager } from '../core/request-manager';
 import type {
   UploadResponse,
   TaskStatus,
+  StatusResponse,
   AnalysisResults
 } from '../types/feedback-types';
+import { mapStatusResponseToTaskStatus } from '../mappers/status-mapper';
 
 export class FeedbackRepository {
   constructor(private httpClient: IHttpClient) {}
@@ -17,9 +19,27 @@ export class FeedbackRepository {
   /**
    * Uploads a file for analysis
    */
-  async uploadFile(file: File): Promise<UploadResponse> {
+  async uploadFile(
+    file: File,
+    options?: {
+      language_hint?: 'es' | 'en';
+      segment?: string;
+      priority?: 'normal' | 'high';
+    }
+  ): Promise<UploadResponse> {
     const formData = new FormData();
     formData.append('file', file);
+
+    // Add optional form parameters
+    if (options?.language_hint) {
+      formData.append('language_hint', options.language_hint);
+    }
+    if (options?.segment) {
+      formData.append('segment', options.segment);
+    }
+    if (options?.priority) {
+      formData.append('priority', options.priority);
+    }
 
     const controller = requestManager.createController('upload');
 
@@ -42,14 +62,36 @@ export class FeedbackRepository {
   }
 
   /**
-   * Gets the status of a task
+   * Gets the status of a task (returns simplified TaskStatus)
    */
   async getStatus(taskId: string): Promise<TaskStatus> {
     const key = `status-${taskId}`;
     const controller = requestManager.createController(key);
 
     try {
-      const response = await this.httpClient.get<TaskStatus>(
+      const response = await this.httpClient.get<StatusResponse>(
+        `/status/${taskId}`,
+        { signal: controller.signal }
+      );
+
+      requestManager.complete(key);
+      // Map backend StatusResponse to frontend TaskStatus
+      return mapStatusResponseToTaskStatus(response.data);
+    } catch (error) {
+      requestManager.complete(key);
+      throw error;
+    }
+  }
+
+  /**
+   * Gets the raw status response from backend
+   */
+  async getRawStatus(taskId: string): Promise<StatusResponse> {
+    const key = `status-raw-${taskId}`;
+    const controller = requestManager.createController(key);
+
+    try {
+      const response = await this.httpClient.get<StatusResponse>(
         `/status/${taskId}`,
         { signal: controller.signal }
       );
