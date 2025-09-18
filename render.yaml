@@ -150,7 +150,5 @@ services:
     buildFilter:
       paths:
         - web/**
-        - package.json
-        - package-lock.json
 
 # Note: Routes section removed from web service as it's handled by Express proxy
