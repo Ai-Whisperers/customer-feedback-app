@@ -27,7 +27,7 @@ console.log(`[CONFIG] NODE_ENV: ${process.env.NODE_ENV}`);
 console.log(`[CONFIG] IS_PRODUCTION: ${IS_PRODUCTION}`);
 
 // Security middleware with environment-aware CSP
-const cspDirectives = IS_PRODUCTION ? {
+const cspDirectives: any = IS_PRODUCTION ? {
   defaultSrc: ["'self'"],
   scriptSrc: ["'self'", "'unsafe-inline'"], // Remove unsafe-eval in production
   styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
@@ -99,12 +99,12 @@ const apiProxy = createProxyMiddleware({
     '^/api': '', // Remove /api prefix when forwarding
   },
   on: {
-    proxyReq: (proxyReq, req, res) => {
+    proxyReq: (proxyReq: any, req: any, res: any) => {
       // Add custom headers if needed
       proxyReq.setHeader('X-Forwarded-Host', req.headers.host || '');
       proxyReq.setHeader('X-Real-IP', (req as any).ip || req.socket.remoteAddress || '');
     },
-    error: (err, req, res) => {
+    error: (err: any, req: any, res: any) => {
       console.error('Proxy error:', err);
       (res as any).status(502).json({
         error: 'Bad Gateway',
