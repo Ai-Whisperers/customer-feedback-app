@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
-# Build script for Web/BFF MPA service on Render
+# Build script for Web/BFF SPA service on Render
 # Customer AI Driven Feedback Analyzer - Web Build v3.2.0
 
 set -e
 
 echo "====================================="
-echo "Starting MPA Web/BFF build process..."
+echo "Starting SPA Web/BFF build process..."
 echo "====================================="
 
 # Display Node version
@@ -30,9 +30,9 @@ echo "Installing server dependencies..."
 echo "====================================="
 npm ci --production=false
 
-# Build client application (MPA)
+# Build client application (SPA)
 echo "====================================="
-echo "Building client MPA application..."
+echo "Building client SPA application..."
 echo "====================================="
 
 cd client
@@ -41,27 +41,25 @@ cd client
 echo "Installing client dependencies..."
 npm ci --production=false
 
-# Build client with Vite (generates index.html, about.html, analyzer.html)
+# Build client with Vite (generates single index.html + assets)
 echo "Building client with Vite..."
 npm run build
 
-# Verify MPA build output
-echo "Verifying MPA build output..."
+# Verify SPA build output
+echo "Verifying SPA build output..."
 if [ ! -f "dist/index.html" ]; then
     echo "ERROR: index.html not found in dist/"
     exit 1
 fi
-if [ ! -f "dist/about.html" ]; then
-    echo "ERROR: about.html not found in dist/"
-    exit 1
-fi
-if [ ! -f "dist/analyzer.html" ]; then
-    echo "ERROR: analyzer.html not found in dist/"
+if [ ! -d "dist/assets" ]; then
+    echo "ERROR: assets directory not found in dist/"
     exit 1
 fi
 
-echo "MPA HTML files verified:"
-ls -la dist/*.html
+echo "SPA build files verified:"
+echo "  - index.html (main entry point)"
+echo "  - assets/ directory with JS/CSS bundles"
+ls -la dist/assets/ | head -5
 
 # Return to web directory
 cd ..
@@ -117,9 +115,10 @@ echo "Asset files:"
 ls -la dist/client-build/assets/ | head -10
 
 echo "====================================="
-echo "MPA Web/BFF build completed successfully!"
+echo "SPA Web/BFF build completed successfully!"
 echo "Ready to serve:"
-echo "  - / (Landing page)"
-echo "  - /about (About page)"
-echo "  - /analyzer (Analyzer page)"
+echo "  - /* → index.html (SPA with React Router)"
+echo "    - / (Landing page)"
+echo "    - /about (About page)"
+echo "    - /analyzer (Analyzer page)"
 echo "====================================="

@@ -33,32 +33,42 @@ cat runtime.txt
 echo -e "\n${YELLOW}4. Verificando OpenAI version...${NC}"
 grep "openai==" api/requirements.txt
 
-echo -e "\n${YELLOW}5. Verificando archivos duplicados eliminados...${NC}"
-if [ -f "web/client/src/components/FileUpload.tsx" ]; then
-    echo -e "${RED}ERROR: FileUpload.tsx duplicado aún existe${NC}"
+echo -e "\n${YELLOW}5. Verificando arquitectura SPA...${NC}"
+if [ -f "web/client/about.html" ]; then
+    echo -e "${RED}ERROR: about.html MPA file still exists${NC}"
 else
-    echo -e "${GREEN}OK: FileUpload.tsx duplicado eliminado${NC}"
+    echo -e "${GREEN}OK: about.html MPA file removed${NC}"
 fi
 
-if [ -f "web/client/src/components/ProgressTracker.tsx" ]; then
-    echo -e "${RED}ERROR: ProgressTracker.tsx duplicado aún existe${NC}"
+if [ -f "web/client/analyzer.html" ]; then
+    echo -e "${RED}ERROR: analyzer.html MPA file still exists${NC}"
 else
-    echo -e "${GREEN}OK: ProgressTracker.tsx duplicado eliminado${NC}"
+    echo -e "${GREEN}OK: analyzer.html MPA file removed${NC}"
 fi
 
-echo -e "\n${YELLOW}6. Verificando imports corregidos...${NC}"
-grep "@/components/upload/FileUpload" web/client/src/pages/AnalyzerPage.tsx > /dev/null
-if [ $? -eq 0 ]; then
-    echo -e "${GREEN}OK: Import de FileUpload actualizado${NC}"
+if [ -f "web/client/src/main.tsx" ]; then
+    echo -e "${GREEN}OK: main.tsx SPA entrypoint exists${NC}"
 else
-    echo -e "${RED}ERROR: Import de FileUpload no actualizado${NC}"
+    echo -e "${RED}ERROR: main.tsx SPA entrypoint missing${NC}"
 fi
 
-grep "@/components/progress/ProgressTracker" web/client/src/pages/AnalyzerPage.tsx > /dev/null
-if [ $? -eq 0 ]; then
-    echo -e "${GREEN}OK: Import de ProgressTracker actualizado${NC}"
+if [ -f "web/client/src/App.tsx" ]; then
+    echo -e "${GREEN}OK: App.tsx with React Router exists${NC}"
 else
-    echo -e "${RED}ERROR: Import de ProgressTracker no actualizado${NC}"
+    echo -e "${RED}ERROR: App.tsx with React Router missing${NC}"
+fi
+
+echo -e "\n${YELLOW}6. Verificando estructuras consolidadas...${NC}"
+if [ -d "web/client/src/lib" ]; then
+    echo -e "${RED}ERROR: lib/ directory still exists (should be consolidated into utils/)${NC}"
+else
+    echo -e "${GREEN}OK: lib/ directory removed and consolidated into utils/${NC}"
+fi
+
+if [ -d "web/client/src/utils/api" ]; then
+    echo -e "${GREEN}OK: API utilities consolidated in utils/api/${NC}"
+else
+    echo -e "${RED}ERROR: API utilities not found in utils/api/${NC}"
 fi
 
 echo -e "\n======================================"
@@ -75,3 +85,7 @@ echo "2. Monitorear deploys en Render dashboard"
 echo "3. Verificar logs de servicios:"
 echo "   ./tools/render_cli_v2.1.4.exe logs customer-feedback-api --tail"
 echo "   ./tools/render_cli_v2.1.4.exe logs celery-worker --tail"
+echo "4. Verificar SPA functionality:"
+echo "   https://customer-feedback-app.onrender.com/ (Landing)"
+echo "   https://customer-feedback-app.onrender.com/about (About - React Router)"
+echo "   https://customer-feedback-app.onrender.com/analyzer (Analyzer - React Router)"

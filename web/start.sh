@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
-# Start script for Web/BFF MPA service on Render
+# Start script for Web/BFF SPA service on Render
 # Customer AI Driven Feedback Analyzer - Web Start v3.2.0
 
 set -e
 
 echo "====================================="
-echo "Starting MPA Web/BFF server..."
+echo "Starting SPA Web/BFF server..."
 echo "====================================="
 
 # Display environment info
@@ -29,9 +29,9 @@ if [ ! -d "dist/client-build" ]; then
     exit 1
 fi
 
-# Verify MPA HTML files exist
+# Verify SPA build files exist
 echo "====================================="
-echo "Verifying MPA files..."
+echo "Verifying SPA files..."
 echo "====================================="
 
 if [ ! -f "dist/client-build/index.html" ]; then
@@ -39,30 +39,26 @@ if [ ! -f "dist/client-build/index.html" ]; then
     exit 1
 fi
 
-if [ ! -f "dist/client-build/about.html" ]; then
-    echo "ERROR: about.html not found in dist/client-build/"
+# Check for main assets directory
+if [ ! -d "dist/client-build/assets" ]; then
+    echo "ERROR: assets directory not found in dist/client-build/"
     exit 1
 fi
 
-if [ ! -f "dist/client-build/analyzer.html" ]; then
-    echo "ERROR: analyzer.html not found in dist/client-build/"
-    exit 1
-fi
-
-echo "✓ All MPA HTML files verified"
-echo "  - index.html (Landing)"
-echo "  - about.html (About)"
-echo "  - analyzer.html (Analyzer)"
+echo "✓ SPA build files verified"
+echo "  - index.html (Single entry point)"
+echo "  - assets/ (JS/CSS bundles)"
 
 # Display what we're serving
 echo "====================================="
 echo "Server configuration:"
 echo "====================================="
 echo "Static files from: dist/client-build/"
-echo "MPA Routes:"
-echo "  GET / → index.html"
-echo "  GET /about → about.html"
-echo "  GET /analyzer → analyzer.html"
+echo "SPA Routes (React Router):"
+echo "  GET /* → index.html (SPA)"
+echo "  - / → Landing Page"
+echo "  - /about → About Page"
+echo "  - /analyzer → Analyzer Page"
 echo "  GET /api/* → Proxy to ${API_PROXY_TARGET}"
 echo "====================================="
 
