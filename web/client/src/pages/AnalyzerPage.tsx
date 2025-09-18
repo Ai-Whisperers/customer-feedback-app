@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { FileUpload } from '@/components/upload/FileUpload';
 import { ProgressTracker } from '@/components/progress/ProgressTracker';
 import { ResultsCharts } from '@/components/results/ResultsCharts';
@@ -18,6 +18,7 @@ export const AnalyzerPage: React.FC = () => {
   const [statusMessage, setStatusMessage] = useState<string>('');
   const [processedRows, setProcessedRows] = useState(0);
   const [totalRows, setTotalRows] = useState(0);
+  const intervalRef = useRef<NodeJS.Timeout | null>(null);
 
   const handleFileUpload = async (file: File) => {
     setAppState('uploading');
@@ -27,39 +28,64 @@ export const AnalyzerPage: React.FC = () => {
       const response = await uploadFile(file);
       setTaskId(response.task_id);
       setAppState('processing');
-      pollStatus(response.task_id);
     } catch {
       setError('Error al cargar el archivo. Por favor, intente nuevamente.');
       setAppState('error');
     }
   };
 
-  const pollStatus = async (id: string) => {
-    const interval = setInterval(async () => {
+  // Cleanup interval on unmount or when taskId changes
+  useEffect(() => {
+    if (!taskId || appState !== 'processing') return;
+
+    const pollStatus = async () => {
       try {
-        const status = await getStatus(id);
+        const status = await getStatus(taskId);
         setProgress(status.progress || 0);
         setStatusMessage(status.message || 'Procesando...');
         setProcessedRows(status.processed_rows || 0);
         setTotalRows(status.total_rows || 0);
 
         if (status.status === 'completed') {
-          clearInterval(interval);
-          const analysisResults = await getResults(id, 'json', true);
+          const analysisResults = await getResults(taskId, 'json', true);
           setResults(analysisResults);
           setAppState('completed');
+          if (intervalRef.current) {
+            clearInterval(intervalRef.current);
+            intervalRef.current = null;
+          }
         } else if (status.status === 'failed') {
-          clearInterval(interval);
           setError('El análisis falló. Por favor, verifique su archivo e intente nuevamente.');
           setAppState('error');
+          if (intervalRef.current) {
+            clearInterval(intervalRef.current);
+            intervalRef.current = null;
+          }
         }
       } catch {
-        clearInterval(interval);
         setError('Error al obtener el estado del análisis.');
         setAppState('error');
+        if (intervalRef.current) {
+          clearInterval(intervalRef.current);
+          intervalRef.current = null;
+        }
       }
-    }, 2000);
-  };
+    };
+
+    // Start polling immediately
+    pollStatus();
+
+    // Set up interval
+    intervalRef.current = setInterval(pollStatus, 2000);
+
+    // Cleanup function
+    return () => {
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+        intervalRef.current = null;
+      }
+    };
+  }, [taskId, appState]);
 
   const handleExport = async (format: 'csv' | 'xlsx') => {
     if (!taskId) return;
@@ -79,11 +105,19 @@ export const AnalyzerPage: React.FC = () => {
   };
 
   const handleReset = () => {
+    // Clear any running interval
+    if (intervalRef.current) {
+      clearInterval(intervalRef.current);
+      intervalRef.current = null;
+    }
     setAppState('idle');
     setTaskId('');
     setProgress(0);
     setResults(null);
     setError('');
+    setStatusMessage('');
+    setProcessedRows(0);
+    setTotalRows(0);
   };
 
   return (

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { GlassCard, GlassButton, GlassBadge } from '../../components/ui';
 
 interface ExportResultsProps {
@@ -14,18 +14,40 @@ export const ExportResults: React.FC<ExportResultsProps> = ({
 }) => {
   const [selectedFormat, setSelectedFormat] = useState<'csv' | 'xlsx'>('xlsx');
   const [exportStatus, setExportStatus] = useState<'idle' | 'success' | 'error'>('idle');
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   const handleExport = async () => {
     try {
+      // Clear any existing timeout
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+        timeoutRef.current = null;
+      }
       setExportStatus('idle');
       await onExport(selectedFormat);
       setExportStatus('success');
-      setTimeout(() => setExportStatus('idle'), 3000);
+      timeoutRef.current = setTimeout(() => {
+        setExportStatus('idle');
+        timeoutRef.current = null;
+      }, 3000);
     } catch {
       setExportStatus('error');
-      setTimeout(() => setExportStatus('idle'), 5000);
+      timeoutRef.current = setTimeout(() => {
+        setExportStatus('idle');
+        timeoutRef.current = null;
+      }, 5000);
     }
   };
+
+  // Cleanup timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+        timeoutRef.current = null;
+      }
+    };
+  }, []);
 
   return (
     <GlassCard variant="gradient" className="w-full">
