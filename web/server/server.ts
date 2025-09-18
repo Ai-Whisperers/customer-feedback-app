@@ -38,8 +38,7 @@ const cspDirectives: any = IS_PRODUCTION ? {
   styleSrc: [
     "'self'",
     "'unsafe-inline'",
-    "https://fonts.googleapis.com",
-    "https://unpkg.com" // MapLibre CSS
+    "https://fonts.googleapis.com"
   ],
   imgSrc: ["'self'", "data:", "https:"],
   connectSrc: ["'self'", "https://cdn.plot.ly"],
@@ -61,8 +60,7 @@ const cspDirectives: any = IS_PRODUCTION ? {
   styleSrc: [
     "'self'",
     "'unsafe-inline'",
-    "https://fonts.googleapis.com",
-    "https://unpkg.com"
+    "https://fonts.googleapis.com"
   ],
   imgSrc: ["'self'", "data:", "https:"],
   connectSrc: ["'self'", "ws:", "wss:", "https://cdn.plot.ly"], // Allow WebSocket for HMR
