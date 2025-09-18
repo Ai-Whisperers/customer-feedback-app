@@ -142,8 +142,7 @@ services:
         value: 20.11.0  # Fixed: specific version
       - key: NODE_ENV
         value: production
-      - key: PORT
-        value: 8000  # Explicit port to match existing service configuration
+      # PORT is automatically assigned by Render, do not hardcode
       - key: API_PROXY_TARGET
         value: http://customer-feedback-api-bmjp:10000  # Internal Render service URL with suffix
     healthCheckPath: /health
