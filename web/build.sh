@@ -15,13 +15,22 @@ echo "NPM version: $(npm --version)"
 # Display current location
 echo "Current directory: $(pwd)"
 
-# Navigate to project root for workspace installation
-echo "====================================="
-echo "Installing dependencies with workspaces..."
-echo "====================================="
-cd ..
-npm ci --production=false
-cd web
+# Check if we have package-lock.json
+if [ ! -f "../package-lock.json" ]; then
+    echo "====================================="
+    echo "No package-lock.json found, running npm install..."
+    echo "====================================="
+    cd ..
+    npm install --production=false
+    cd web
+else
+    echo "====================================="
+    echo "Installing dependencies with workspaces..."
+    echo "====================================="
+    cd ..
+    npm ci --production=false
+    cd web
+fi
 
 # Build client application (SPA)
 echo "====================================="
