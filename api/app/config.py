@@ -1,6 +1,7 @@
 """Application configuration using Pydantic Settings."""
 
 import os
+from pathlib import Path
 from typing import Optional, List
 from pydantic import Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
@@ -9,10 +10,16 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 class Settings(BaseSettings):
     """Application configuration."""
 
+    # Try to find .env file, but don't fail if it doesn't exist
+    # Environment variables always take precedence over .env file
+    _env_file_path = Path(__file__).parent.parent.parent / ".env"
+
     model_config = SettingsConfigDict(
-        env_file=".env",
+        env_file=str(_env_file_path) if _env_file_path.exists() else None,
         env_file_encoding="utf-8",
-        case_sensitive=True
+        case_sensitive=True,
+        # This ensures environment variables override .env file values
+        env_ignore_empty=False
     )
 
     # Application

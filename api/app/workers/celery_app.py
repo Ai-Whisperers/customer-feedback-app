@@ -24,6 +24,19 @@ structlog.configure(
     cache_logger_on_first_use=True,
 )
 
+# Get logger for configuration debugging
+logger = structlog.get_logger()
+
+# Log configuration values for debugging
+logger.info(
+    "Celery configuration loaded",
+    broker_url=settings.CELERY_BROKER_URL,
+    result_backend=settings.CELERY_RESULT_BACKEND,
+    redis_url=settings.REDIS_URL,
+    app_env=settings.APP_ENV,
+    celery_worker_concurrency=settings.CELERY_WORKER_CONCURRENCY
+)
+
 # Create Celery app
 celery_app = Celery(
     "feedback_analyzer",
