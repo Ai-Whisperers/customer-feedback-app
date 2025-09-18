@@ -3,15 +3,15 @@
  * Following Repository Pattern and Dependency Inversion Principle (DIP)
  */
 
-import type { IHttpClient } from '../core/http-client';
-import { requestManager } from '../core/request-manager';
+import type { IHttpClient } from './http-client';
+import { requestManager } from './request-manager';
 import type {
   UploadResponse,
   TaskStatus,
   StatusResponse,
   AnalysisResults
-} from '../types/feedback-types';
-import { mapStatusResponseToTaskStatus } from '../mappers/status-mapper';
+} from './types';
+import { mapStatusResponseToTaskStatus } from './status-mapper';
 
 export class FeedbackRepository {
   private httpClient: IHttpClient;

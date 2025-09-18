@@ -8,7 +8,7 @@ import type {
   TaskStatus,
   BackendTaskStatus,
   FrontendTaskStatus
-} from '../types/feedback-types';
+} from './types';
 
 /**
  * Maps backend status enum to frontend status enum

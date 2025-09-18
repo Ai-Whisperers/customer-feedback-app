@@ -5,7 +5,7 @@
 
 import axios from 'axios';
 import type { AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios';
-import type { IHttpClient, HttpRequestConfig, HttpResponse, HttpError } from '../core/http-client';
+import type { IHttpClient, HttpRequestConfig, HttpResponse, HttpError } from './http-client';
 import type { ZodSchema } from 'zod';
 
 export class AxiosHttpClient implements IHttpClient {

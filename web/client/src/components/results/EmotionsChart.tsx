@@ -2,7 +2,7 @@ import React, { useMemo } from 'react';
 import { PlotlySafe as Plot } from '@/components/charts/PlotlySafe';
 import { defaultLayoutConfig, plotConfig } from './chartConfig';
 
-import type { AnalysisResults } from '@/lib/api';
+import type { AnalysisResults } from '@/utils/api';
 
 interface EmotionsChartProps {
   rows: AnalysisResults['rows'];

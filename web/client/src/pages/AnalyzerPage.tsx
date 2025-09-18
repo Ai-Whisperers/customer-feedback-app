@@ -10,8 +10,8 @@ import {
   getResults,
   exportResults,
   cancelAllRequests
-} from '@/lib/api';
-import type { AnalysisResults } from '@/lib/api';
+} from '@/utils/api';
+import type { AnalysisResults } from '@/utils/api';
 
 type AppState = 'idle' | 'uploading' | 'processing' | 'completed' | 'error';
 

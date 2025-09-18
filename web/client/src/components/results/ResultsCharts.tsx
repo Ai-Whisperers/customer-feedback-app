@@ -2,7 +2,7 @@ import React, { lazy, Suspense } from 'react';
 import { GlassCard } from '../../components/ui';
 import { SampleCommentsTable } from './SampleCommentsTable';
 import { StatCard } from './StatCard';
-import type { AnalysisResults } from '@/lib/api';
+import type { AnalysisResults } from '@/utils/api';
 
 // Dynamic imports for chart components to isolate Plotly loading
 const EmotionsChart = lazy(() =>

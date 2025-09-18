@@ -1,5 +1,5 @@
 import React from 'react';
-import type { AnalysisResults } from '@/lib/api';
+import type { AnalysisResults } from '@/utils/api';
 
 interface SampleCommentsTableProps {
   rows: AnalysisResults['rows'];

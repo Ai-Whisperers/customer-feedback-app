@@ -83,8 +83,6 @@ export default defineConfig({
       ],
       input: {
         main: resolve(__dirname, 'index.html'),
-        about: resolve(__dirname, 'about.html'),
-        analyzer: resolve(__dirname, 'analyzer.html'),
       },
       output: {
         manualChunks: (id) => {

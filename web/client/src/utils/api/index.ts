@@ -3,9 +3,9 @@
  * Exports the configured API client with cancellation support
  */
 
-import { AxiosHttpClient } from './infrastructure/axios-http-client';
-import { FeedbackRepository } from './repositories/feedback-repository';
-import { requestManager } from './core/request-manager';
+import { AxiosHttpClient } from './axios-http-client';
+import { FeedbackRepository } from './feedback-repository';
+import { requestManager } from './request-manager';
 
 // Re-export types
 export type {
@@ -14,7 +14,7 @@ export type {
   StatusResponse,
   AnalysisResults,
   FileInfo
-} from './types/feedback-types';
+} from './types';
 
 // Create HTTP client instance
 const httpClient = new AxiosHttpClient('/api');

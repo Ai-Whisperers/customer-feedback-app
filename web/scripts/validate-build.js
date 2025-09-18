@@ -21,23 +21,17 @@ const colors = {
 const BUILD_DIR = path.join(__dirname, '../dist/client-build');
 const REQUIRED_FILES = [
   'index.html',
-  'about.html',
-  'analyzer.html',
   'vite.svg'
 ];
 
 const REQUIRED_PATTERNS = [
   { pattern: /assets\/main-.*\.js/, description: 'Main entry bundle' },
-  { pattern: /assets\/about-.*\.js/, description: 'About page bundle' },
-  { pattern: /assets\/analyzer-.*\.js/, description: 'Analyzer page bundle' },
   { pattern: /assets\/(vendor-react|react-vendor|react-dom)-.*\.js/, description: 'React vendor bundle' },
-  { pattern: /assets\/(ErrorBoundary|bootstrap)-.*\.css/, description: 'Application styles' }
+  { pattern: /assets\/main-.*\.css/, description: 'Application styles' }
 ];
 
 const MAX_FILE_SIZES = {
   'index.html': 5 * 1024, // 5KB max for HTML files
-  'about.html': 5 * 1024,
-  'analyzer.html': 5 * 1024,
   'plotly-core': 5 * 1024 * 1024 // 5MB max for plotly
 };
 
