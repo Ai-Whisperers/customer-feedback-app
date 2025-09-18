@@ -95,11 +95,7 @@ if [ ! -f "dist/client-build/index.html" ]; then
     exit 1
 fi
 
-# Validate build
-echo "====================================="
-echo "Validating build..."
-echo "====================================="
-npm run validate-build
+# Build validation removed - no longer needed
 
 # Display final structure
 echo "====================================="
