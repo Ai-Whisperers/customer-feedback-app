@@ -47,6 +47,8 @@ export default defineConfig({
   },
   build: {
     chunkSizeWarningLimit: 1500, // Increase warning limit to 1500 kB
+    // Disable modulePreload to prevent plotly from loading on all pages
+    modulePreload: false,
     rollupOptions: {
       plugins: [
         nodeResolve({
