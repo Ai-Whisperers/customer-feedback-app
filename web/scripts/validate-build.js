@@ -30,7 +30,7 @@ const REQUIRED_PATTERNS = [
   { pattern: /assets\/main-.*\.js/, description: 'Main entry bundle' },
   { pattern: /assets\/about-.*\.js/, description: 'About page bundle' },
   { pattern: /assets\/analyzer-.*\.js/, description: 'Analyzer page bundle' },
-  { pattern: /assets\/vendor-react-.*\.js/, description: 'React vendor bundle' },
+  { pattern: /assets\/(vendor-react|react-vendor|react-dom)-.*\.js/, description: 'React vendor bundle' },
   { pattern: /assets\/ErrorBoundary-.*\.css/, description: 'ErrorBoundary styles' }
 ];
 
