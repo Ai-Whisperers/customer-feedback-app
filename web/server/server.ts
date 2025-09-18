@@ -124,6 +124,17 @@ if (IS_PRODUCTION) {
   // Client build is copied to client-build during build process
   const buildPath = path.join(__dirname, 'client-build');
 
+  // Debug logging
+  console.log('[DEBUG] Production mode activated');
+  console.log('[DEBUG] __dirname:', __dirname);
+  console.log('[DEBUG] buildPath:', buildPath);
+  console.log('[DEBUG] buildPath exists:', require('fs').existsSync(buildPath));
+
+  if (require('fs').existsSync(buildPath)) {
+    const files = require('fs').readdirSync(buildPath);
+    console.log('[DEBUG] Files in buildPath:', files.slice(0, 10));
+  }
+
   // Serve static assets
   app.use(express.static(buildPath, {
     maxAge: '1d',
@@ -137,7 +148,10 @@ if (IS_PRODUCTION) {
 
   // MPA Routing - serve specific HTML files
   app.get('/', (req, res) => {
-    res.sendFile(path.join(buildPath, 'index.html'));
+    const htmlPath = path.join(buildPath, 'index.html');
+    console.log('[DEBUG] Serving index.html from:', htmlPath);
+    console.log('[DEBUG] File exists:', require('fs').existsSync(htmlPath));
+    res.sendFile(htmlPath);
   });
 
   app.get('/about', (req, res) => {
