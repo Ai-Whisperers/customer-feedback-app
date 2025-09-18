@@ -139,8 +139,8 @@ app.use('/api', apiProxy);
 
 // Serve static files in production
 if (IS_PRODUCTION) {
-  // Client build is copied to client-build during build process
-  const buildPath = path.join(__dirname, 'client-build');
+  // Client build is in dist/client from Vite build
+  const buildPath = path.join(__dirname, '..', 'client');
 
   // Debug logging
   console.log('[DEBUG] Production mode activated');

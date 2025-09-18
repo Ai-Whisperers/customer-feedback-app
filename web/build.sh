@@ -14,101 +14,59 @@ echo "NPM version: $(npm --version)"
 
 # Display current location
 echo "Current directory: $(pwd)"
-echo "Directory contents:"
-ls -la
 
-# Clean all previous builds to prevent cache issues
+# Navigate to project root for workspace installation
 echo "====================================="
-echo "Cleaning previous builds..."
+echo "Installing dependencies with workspaces..."
 echo "====================================="
-rm -rf dist client/dist node_modules/.vite 2>/dev/null || true
-echo "Previous builds cleaned successfully"
-
-# Install server dependencies
-echo "====================================="
-echo "Installing server dependencies..."
-echo "====================================="
+cd ..
 npm ci --production=false
+cd web
 
 # Build client application (SPA)
 echo "====================================="
 echo "Building client SPA application..."
 echo "====================================="
+npm run build:client
 
-cd client
-
-# Install client dependencies
-echo "Installing client dependencies..."
-npm ci --production=false
-
-# Build client with Vite (generates single index.html + assets)
-echo "Building client with Vite..."
-npm run build
+# Build BFF server
+echo "====================================="
+echo "Building BFF server..."
+echo "====================================="
+npm run build:bff
 
 # Verify SPA build output
 echo "Verifying SPA build output..."
-if [ ! -f "dist/index.html" ]; then
-    echo "ERROR: index.html not found in dist/"
+if [ ! -f "dist/client/index.html" ]; then
+    echo "ERROR: index.html not found in dist/client/"
     exit 1
 fi
-if [ ! -d "dist/assets" ]; then
-    echo "ERROR: assets directory not found in dist/"
+if [ ! -d "dist/client/assets" ]; then
+    echo "ERROR: assets directory not found in dist/client/"
+    exit 1
+fi
+
+# Verify BFF build output
+echo "Verifying BFF build output..."
+if [ ! -f "dist/bff/server.js" ]; then
+    echo "ERROR: server.js not found in dist/bff/"
     exit 1
 fi
 
 echo "SPA build files verified:"
 echo "  - index.html (main entry point)"
 echo "  - assets/ directory with JS/CSS bundles"
-ls -la dist/assets/ | head -5
-
-# Return to web directory
-cd ..
-
-# Compile TypeScript server
-echo "====================================="
-echo "Compiling TypeScript server..."
-echo "====================================="
-npx tsc -p tsconfig.server.json
-
-# Verify server compilation
-if [ ! -f "dist/server.js" ]; then
-    echo "ERROR: server.js not compiled"
-    exit 1
-fi
-
-# Copy client build to server dist
-echo "====================================="
-echo "Copying client build to server dist..."
-echo "====================================="
-
-# Use cross-platform copy command
-if command -v cp &> /dev/null; then
-    cp -r client/dist dist/client-build
-else
-    # Fallback for Windows
-    xcopy /E /I /Y client\dist dist\client-build
-fi
-
-# Verify client files are copied
-if [ ! -f "dist/client-build/index.html" ]; then
-    echo "ERROR: Client files not copied correctly"
-    exit 1
-fi
-
-# Build validation removed - no longer needed
+echo "  - BFF server compiled"
 
 # Display final structure
 echo "====================================="
 echo "Final build structure:"
 echo "====================================="
-echo "Server files:"
-ls -la dist/ | head -10
+echo "BFF files:"
+ls -la dist/bff/ | head -10
 echo ""
 echo "Client files:"
-ls -la dist/client-build/ | head -10
-echo ""
-echo "Asset files:"
-ls -la dist/client-build/assets/ | head -10
+ls -la dist/client/ | head -10
 
 echo "====================================="
 echo "SPA Web/BFF build completed successfully!"

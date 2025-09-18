@@ -16,15 +16,15 @@ echo "API Proxy Target: ${API_PROXY_TARGET:-not set}"
 echo "Current directory: $(pwd)"
 
 # Verify we have the built files
-if [ ! -f "dist/server.js" ]; then
-    echo "ERROR: dist/server.js not found!"
+if [ ! -f "dist/bff/server.js" ]; then
+    echo "ERROR: dist/bff/server.js not found!"
     echo "Build may have failed. Contents of dist:"
     ls -la dist/ 2>/dev/null || echo "dist directory not found"
     exit 1
 fi
 
-if [ ! -d "dist/client-build" ]; then
-    echo "ERROR: dist/client-build directory not found!"
+if [ ! -d "dist/client" ]; then
+    echo "ERROR: dist/client directory not found!"
     echo "Client build may have failed."
     exit 1
 fi
@@ -34,14 +34,14 @@ echo "====================================="
 echo "Verifying SPA files..."
 echo "====================================="
 
-if [ ! -f "dist/client-build/index.html" ]; then
-    echo "ERROR: index.html not found in dist/client-build/"
+if [ ! -f "dist/client/index.html" ]; then
+    echo "ERROR: index.html not found in dist/client/"
     exit 1
 fi
 
 # Check for main assets directory
-if [ ! -d "dist/client-build/assets" ]; then
-    echo "ERROR: assets directory not found in dist/client-build/"
+if [ ! -d "dist/client/assets" ]; then
+    echo "ERROR: assets directory not found in dist/client/"
     exit 1
 fi
 
@@ -53,7 +53,7 @@ echo "  - assets/ (JS/CSS bundles)"
 echo "====================================="
 echo "Server configuration:"
 echo "====================================="
-echo "Static files from: dist/client-build/"
+echo "Static files from: dist/client/"
 echo "SPA Routes (React Router):"
 echo "  GET /* → index.html (SPA)"
 echo "  - / → Landing Page"
@@ -64,4 +64,4 @@ echo "====================================="
 
 # Start the Express server
 echo "Starting Express server..."
-exec node dist/server.js
+exec node dist/bff/server.js
