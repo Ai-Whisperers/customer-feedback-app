@@ -132,8 +132,8 @@ services:
     runtime: node
     region: oregon
     plan: starter  # Match existing deployment
-    buildCommand: cd web && npm install && npm run build:render
-    startCommand: cd web && npm run start:prod
+    buildCommand: cd web && ./build.sh
+    startCommand: cd web && ./start.sh
     # Disable cache to ensure fresh builds with our Tailwind fixes
     cache:
       profile: no-cache

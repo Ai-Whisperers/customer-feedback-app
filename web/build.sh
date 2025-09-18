@@ -1,84 +1,118 @@
 #!/usr/bin/env bash
-# Build script for Web/BFF service on Render
-# Customer AI Driven Feedback Analyzer - Web Build
+# Build script for Web/BFF MPA service on Render
+# Customer AI Driven Feedback Analyzer - Web Build v3.2.0
 
 set -e
 
 echo "====================================="
-echo "Starting Web/BFF build process..."
+echo "Starting MPA Web/BFF build process..."
 echo "====================================="
 
 # Display Node version
 echo "Node version: $(node --version)"
 echo "NPM version: $(npm --version)"
 
-# Check current directory
+# Display current location
 echo "Current directory: $(pwd)"
 echo "Directory contents:"
 ls -la
 
-# Navigate to web directory if not already there
-if [ -d "web" ]; then
-    echo "Navigating to web directory..."
-    cd web
-fi
-
-# Install root dependencies
-echo "Installing root dependencies in: $(pwd)"
+# Install server dependencies
+echo "====================================="
+echo "Installing server dependencies..."
+echo "====================================="
 npm ci --production=false
 
-# Build client application
-echo "Building client application..."
+# Build client application (MPA)
+echo "====================================="
+echo "Building client MPA application..."
+echo "====================================="
 
-# Navigate to client directory
 cd client
 
-# Install client dependencies with all devDependencies
-echo "Installing client dependencies in: $(pwd)"
+# Install client dependencies
+echo "Installing client dependencies..."
 npm ci --production=false
 
-# Build client
-echo "Running client build..."
+# Build client with Vite (generates index.html, about.html, analyzer.html)
+echo "Building client with Vite..."
 npm run build
+
+# Verify MPA build output
+echo "Verifying MPA build output..."
+if [ ! -f "dist/index.html" ]; then
+    echo "ERROR: index.html not found in dist/"
+    exit 1
+fi
+if [ ! -f "dist/about.html" ]; then
+    echo "ERROR: about.html not found in dist/"
+    exit 1
+fi
+if [ ! -f "dist/analyzer.html" ]; then
+    echo "ERROR: analyzer.html not found in dist/"
+    exit 1
+fi
+
+echo "MPA HTML files verified:"
+ls -la dist/*.html
 
 # Return to web directory
 cd ..
 
 # Compile TypeScript server
+echo "====================================="
 echo "Compiling TypeScript server..."
-npx tsc server/server.ts \
-    --outDir dist \
-    --esModuleInterop \
-    --module commonjs \
-    --target es2020 \
-    --resolveJsonModule \
-    --skipLibCheck
+echo "====================================="
+npx tsc -p tsconfig.server.json
 
-# Copy client build to dist
-echo "Copying client build to dist..."
-cp -r client/dist dist/client-build
+# Verify server compilation
+if [ ! -f "dist/server.js" ]; then
+    echo "ERROR: server.js not compiled"
+    exit 1
+fi
 
-# Create production package.json for server
-cat > dist/package.json << 'EOF'
-{
-  "name": "feedback-analyzer-server",
-  "version": "3.1.0",
-  "main": "server.js",
-  "dependencies": {
-    "express": "^4.21.1",
-    "http-proxy-middleware": "^3.0.3",
-    "compression": "^1.7.4",
-    "helmet": "^8.0.0",
-    "dotenv": "^16.4.5"
-  }
-}
-EOF
+# Copy client build to server dist
+echo "====================================="
+echo "Copying client build to server dist..."
+echo "====================================="
 
-# Install production dependencies in dist
-echo "Installing production dependencies..."
-npm ci --production --prefix dist
+# Use cross-platform copy command
+if command -v cp &> /dev/null; then
+    cp -r client/dist dist/client-build
+else
+    # Fallback for Windows
+    xcopy /E /I /Y client\dist dist\client-build
+fi
+
+# Verify client files are copied
+if [ ! -f "dist/client-build/index.html" ]; then
+    echo "ERROR: Client files not copied correctly"
+    exit 1
+fi
+
+# Validate build
+echo "====================================="
+echo "Validating build..."
+echo "====================================="
+npm run validate-build
+
+# Display final structure
+echo "====================================="
+echo "Final build structure:"
+echo "====================================="
+echo "Server files:"
+ls -la dist/ | head -10
+echo ""
+echo "Client files:"
+ls -la dist/client-build/ | head -10
+echo ""
+echo "Asset files:"
+ls -la dist/client-build/assets/ | head -10
 
 echo "====================================="
-echo "Web/BFF build completed successfully!"
-echo "Build output in: dist/"
+echo "MPA Web/BFF build completed successfully!"
+echo "Ready to serve:"
+echo "  - / (Landing page)"
+echo "  - /about (About page)"
+echo "  - /analyzer (Analyzer page)"
 echo "====================================="
