@@ -5,6 +5,9 @@ import path from 'path'
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [react()],
+  css: {
+    postcss: './postcss.config.js',
+  },
   server: {
     port: 3001,
     proxy: {
@@ -33,17 +36,13 @@ export default defineConfig({
         },
         // Ensure proper chunk naming
         chunkFileNames: (chunkInfo) => {
-          const facadeModuleId = chunkInfo.facadeModuleId ? chunkInfo.facadeModuleId.split('/').pop() : '';
-          if (facadeModuleId.includes('plotly')) {
+          const facadeModuleId = chunkInfo.facadeModuleId;
+          if (facadeModuleId && facadeModuleId.includes('plotly')) {
             return 'assets/charts-[hash].js';
           }
           return 'assets/[name]-[hash].js';
         },
       },
-    },
-    // Optimize dependencies
-    optimizeDeps: {
-      include: ['react-plotly.js', 'plotly.js'],
     },
   },
 })

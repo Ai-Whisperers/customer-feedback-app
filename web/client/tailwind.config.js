@@ -3,6 +3,39 @@ export default {
   content: [
     "./index.html",
     "./src/**/*.{js,ts,jsx,tsx}",
+    "./src/**/*.{css,scss}",
+  ],
+  safelist: [
+    // Glass morphism effects
+    'backdrop-blur-md',
+    'backdrop-blur-sm',
+    'backdrop-blur-lg',
+    // Gradient backgrounds
+    'bg-gradient-to-r',
+    'bg-gradient-to-br',
+    'from-blue-500',
+    'to-purple-600',
+    'from-white',
+    'to-gray-100',
+    // Critical responsive classes
+    'md:text-4xl',
+    'lg:text-5xl',
+    'md:text-3xl',
+    // Dark mode variants
+    'dark:text-gray-100',
+    'dark:text-gray-200',
+    'dark:bg-gray-900',
+    'dark:from-gray-900',
+    // Animation classes
+    'transform',
+    'transition-all',
+    'duration-300',
+    'hover:scale-105',
+    'active:scale-95',
+    // Glass card variants
+    'bg-white/80',
+    'dark:bg-gray-800/80',
+    'border-white/20',
   ],
   darkMode: 'class',
   theme: {
