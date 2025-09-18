@@ -1,52 +1,72 @@
 import React, { Component, Suspense } from 'react';
 import type { ReactNode } from 'react';
+import createPlotlyComponent from 'react-plotly.js/factory';
 import type { PlotParams } from 'react-plotly.js';
+
+// Declare window.Plotly for TypeScript
+declare global {
+  interface Window {
+    Plotly?: any;
+  }
+}
 
 // Cache for the Plot component
 let PlotComponent: React.ComponentType<PlotParams> | null = null;
 
 /**
- * Factory pattern to load Plotly with plotly.js-dist-min
- * This avoids build-time transformations that can cause TDZ errors
+ * Get or create the Plotly component using the global Plotly object
+ * This approach uses the CDN-loaded Plotly to avoid bundling issues
  */
-const loadPlotly = async (): Promise<React.ComponentType<PlotParams>> => {
+const getPlotlyComponent = (): React.ComponentType<PlotParams> | null => {
   if (PlotComponent) {
     return PlotComponent;
   }
 
-  try {
-    console.log('[PlotlySafe] Loading Plotly with factory pattern...');
-
-    // Import plotly.js-dist-min (pre-minified, avoids transformations)
-    const Plotly = await import('plotly.js-dist-min');
-
-    // Import the factory function from react-plotly.js
-    const createPlotlyComponent = (await import('react-plotly.js/factory')).default;
-
-    // Create the Plot component using the factory
-    PlotComponent = createPlotlyComponent(Plotly);
-
-    console.log('[PlotlySafe] Plotly loaded successfully via factory');
+  // Check if Plotly is available from CDN
+  if (typeof window !== 'undefined' && window.Plotly) {
+    console.log('[PlotlySafe] Using Plotly from CDN');
+    PlotComponent = createPlotlyComponent(window.Plotly);
     return PlotComponent;
-  } catch (factoryError) {
-    console.warn('[PlotlySafe] Factory loading failed, trying direct import:', factoryError);
-
-    // Fallback: try direct import of react-plotly.js
-    try {
-      const module = await import('react-plotly.js');
-      PlotComponent = module.default;
-      console.log('[PlotlySafe] Plotly loaded via direct import');
-      return PlotComponent;
-    } catch (directError) {
-      console.error('[PlotlySafe] All loading methods failed:', directError);
-      throw new Error('Failed to load Plotly chart library');
-    }
   }
+
+  // Plotly not yet loaded from CDN
+  console.warn('[PlotlySafe] Plotly not yet available from CDN');
+  return null;
 };
 
-// Lazy component that loads Plotly on demand
+/**
+ * Wait for Plotly to load from CDN
+ */
+const waitForPlotly = (): Promise<React.ComponentType<PlotParams>> => {
+  return new Promise((resolve, reject) => {
+    let attempts = 0;
+    const maxAttempts = 50; // 5 seconds max wait
+
+    const checkPlotly = () => {
+      attempts++;
+
+      const component = getPlotlyComponent();
+      if (component) {
+        resolve(component);
+        return;
+      }
+
+      if (attempts >= maxAttempts) {
+        reject(new Error('Plotly failed to load from CDN'));
+        return;
+      }
+
+      // Check again in 100ms
+      setTimeout(checkPlotly, 100);
+    };
+
+    checkPlotly();
+  });
+};
+
+// Lazy component that waits for CDN Plotly
 const LazyPlotlyChart = React.lazy(() =>
-  loadPlotly().then(Plot => ({
+  waitForPlotly().then(Plot => ({
     default: (props: PlotParams) => (
       <Plot
         {...props}
@@ -127,8 +147,7 @@ class ChartErrorBoundary extends Component<
           </p>
 
           <p className="text-sm text-gray-500 dark:text-gray-500 mb-4 text-center max-w-md">
-            The visualization could not be loaded. This may be due to browser extensions
-            or network issues. The data is still being processed.
+            The visualization could not be loaded. The data is still being processed.
           </p>
 
           {this.state.errorCount < 3 && (

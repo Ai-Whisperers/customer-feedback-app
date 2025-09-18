@@ -29,10 +29,20 @@ console.log(`[CONFIG] IS_PRODUCTION: ${IS_PRODUCTION}`);
 // Security middleware with environment-aware CSP
 const cspDirectives: any = IS_PRODUCTION ? {
   defaultSrc: ["'self'"],
-  scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'"], // Temporarily allow unsafe-eval for debugging
-  styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
+  scriptSrc: [
+    "'self'",
+    "'unsafe-inline'",
+    "'unsafe-eval'", // Required for Plotly
+    "https://cdn.plot.ly" // Plotly CDN
+  ],
+  styleSrc: [
+    "'self'",
+    "'unsafe-inline'",
+    "https://fonts.googleapis.com",
+    "https://unpkg.com" // MapLibre CSS
+  ],
   imgSrc: ["'self'", "data:", "https:"],
-  connectSrc: ["'self'"],
+  connectSrc: ["'self'", "https://cdn.plot.ly"],
   fontSrc: ["'self'", "https://fonts.gstatic.com"],
   objectSrc: ["'none'"],
   mediaSrc: ["'self'"],
@@ -42,10 +52,20 @@ const cspDirectives: any = IS_PRODUCTION ? {
 } : {
   // More permissive in development
   defaultSrc: ["'self'"],
-  scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'"],
-  styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
+  scriptSrc: [
+    "'self'",
+    "'unsafe-inline'",
+    "'unsafe-eval'",
+    "https://cdn.plot.ly"
+  ],
+  styleSrc: [
+    "'self'",
+    "'unsafe-inline'",
+    "https://fonts.googleapis.com",
+    "https://unpkg.com"
+  ],
   imgSrc: ["'self'", "data:", "https:"],
-  connectSrc: ["'self'", "ws:", "wss:"], // Allow WebSocket for HMR
+  connectSrc: ["'self'", "ws:", "wss:", "https://cdn.plot.ly"], // Allow WebSocket for HMR
   fontSrc: ["'self'", "https://fonts.gstatic.com"],
   objectSrc: ["'none'"],
   mediaSrc: ["'self'"],

@@ -72,6 +72,10 @@ export default defineConfig({
     },
     target: 'es2018', // Target ES2018 for better compatibility
     rollupOptions: {
+      // Mark Plotly as external since we're loading from CDN
+      external: (id) => {
+        return id.includes('plotly.js') || id.includes('plotly.js-dist-min');
+      },
       plugins: [
         nodeResolve({
           browser: true,
