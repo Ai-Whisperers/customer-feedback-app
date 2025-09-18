@@ -1,7 +1,8 @@
 import './index.css'
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
-import App from './App.tsx'
+import { ErrorBoundary } from '@/components/ErrorBoundary'
+import { AboutPage } from '@/pages/AboutPage'
 
 const rootElement = document.getElementById('root');
 if (!rootElement) {
@@ -10,6 +11,8 @@ if (!rootElement) {
 
 createRoot(rootElement).render(
   <StrictMode>
-    <App />
+    <ErrorBoundary>
+      <AboutPage />
+    </ErrorBoundary>
   </StrictMode>,
 )

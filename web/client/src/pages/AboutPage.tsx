@@ -1,9 +1,7 @@
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
 import { GlassCard, GlassButton } from '@/components/ui';
 
 export const AboutPage: React.FC = () => {
-  const navigate = useNavigate();
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 dark:from-gray-900 dark:via-indigo-900 dark:to-purple-900">
       <div className="absolute inset-0 bg-grid-pattern opacity-5"></div>
@@ -222,7 +220,7 @@ export const AboutPage: React.FC = () => {
             <GlassButton
               variant="primary"
               size="xl"
-              onClick={() => navigate('/analyzer')}
+              onClick={() => window.location.href = '/analyzer.html'}
               className="text-lg px-8 py-4"
             >
               Probar el Analizador
@@ -231,7 +229,7 @@ export const AboutPage: React.FC = () => {
               <GlassButton
                 variant="secondary"
                 size="lg"
-                onClick={() => navigate('/')}
+                onClick={() => window.location.href = '/'}
               >
                 Volver al Inicio
               </GlassButton>

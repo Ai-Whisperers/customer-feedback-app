@@ -112,9 +112,30 @@ if (IS_PRODUCTION) {
     },
   }));
 
-  // Serve index.html for all non-API routes (React Router support)
-  app.get('*', (req, res) => {
+  // MPA Routing - serve specific HTML files
+  app.get('/', (req, res) => {
     res.sendFile(path.join(buildPath, 'index.html'));
+  });
+
+  app.get('/about', (req, res) => {
+    res.sendFile(path.join(buildPath, 'about.html'));
+  });
+
+  app.get('/about.html', (req, res) => {
+    res.sendFile(path.join(buildPath, 'about.html'));
+  });
+
+  app.get('/analyzer', (req, res) => {
+    res.sendFile(path.join(buildPath, 'analyzer.html'));
+  });
+
+  app.get('/analyzer.html', (req, res) => {
+    res.sendFile(path.join(buildPath, 'analyzer.html'));
+  });
+
+  // 404 fallback
+  app.get('*', (req, res) => {
+    res.status(404).sendFile(path.join(buildPath, 'index.html'));
   });
 } else {
   // Development mode - Vite handles static files

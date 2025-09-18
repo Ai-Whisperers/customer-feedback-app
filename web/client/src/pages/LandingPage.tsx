@@ -1,9 +1,7 @@
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
 import { GlassCard, GlassButton } from '@/components/ui';
 
 export const LandingPage: React.FC = () => {
-  const navigate = useNavigate();
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 via-blue-50 to-indigo-100 dark:from-gray-900 dark:via-blue-900 dark:to-indigo-900">
       <div className="absolute inset-0 bg-grid-pattern opacity-5"></div>
@@ -29,14 +27,14 @@ export const LandingPage: React.FC = () => {
             <GlassButton
               variant="primary"
               size="lg"
-              onClick={() => navigate('/analyzer')}
+              onClick={() => window.location.href = '/analyzer.html'}
             >
               Comenzar Análisis
             </GlassButton>
             <GlassButton
               variant="secondary"
               size="lg"
-              onClick={() => navigate('/about')}
+              onClick={() => window.location.href = '/about.html'}
             >
               Saber Más
             </GlassButton>
@@ -148,7 +146,7 @@ export const LandingPage: React.FC = () => {
             <GlassButton
               variant="primary"
               size="xl"
-              onClick={() => navigate('/analyzer')}
+              onClick={() => window.location.href = '/analyzer.html'}
               className="text-lg px-8 py-4"
             >
               Iniciar Análisis Gratuito
