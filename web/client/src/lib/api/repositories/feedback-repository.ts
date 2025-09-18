@@ -14,7 +14,11 @@ import type {
 import { mapStatusResponseToTaskStatus } from '../mappers/status-mapper';
 
 export class FeedbackRepository {
-  constructor(private httpClient: IHttpClient) {}
+  private httpClient: IHttpClient;
+
+  constructor(httpClient: IHttpClient) {
+    this.httpClient = httpClient;
+  }
 
   /**
    * Uploads a file for analysis

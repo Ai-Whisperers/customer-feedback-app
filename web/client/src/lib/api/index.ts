@@ -11,7 +11,9 @@ import { requestManager } from './core/request-manager';
 export type {
   UploadResponse,
   TaskStatus,
-  AnalysisResults
+  StatusResponse,
+  AnalysisResults,
+  FileInfo
 } from './types/feedback-types';
 
 // Create HTTP client instance
