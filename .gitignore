@@ -6,8 +6,12 @@ claude.json
 # Local reports and internal documentation
 local-reports/
 
-# Dependencies
+# Dependencies - NEVER commit these
 node_modules/
+**/node_modules/
+web/node_modules/
+web/client/node_modules/
+api/node_modules/
 venv/
 env/
 .venv/
@@ -38,13 +42,24 @@ web/.env.*
 .DS_Store
 Thumbs.db
 
-# Build outputs
+# Build outputs - NEVER commit these
 dist/
+**/dist/
+web/dist/
+web/client/dist/
 build/
+**/build/
+web/build/
+web/client/build/
 *.egg-info/
 .pytest_cache/
 .coverage
 htmlcov/
+.vite/
+**/vite/
+web/client/.vite/
+.cache/
+**/.cache/
 
 # Logs
 logs/
