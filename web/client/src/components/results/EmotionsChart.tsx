@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react';
-import { LazyPlot as Plot } from '@/components/charts/LazyPlot';
+import { PlotlySafe as Plot } from '@/components/charts/PlotlySafe';
 import { defaultLayoutConfig, plotConfig } from './chartConfig';
 
 import type { AnalysisResults } from '@/lib/api';

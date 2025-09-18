@@ -49,6 +49,25 @@ export default defineConfig({
     chunkSizeWarningLimit: 1500, // Increase warning limit to 1500 kB
     // Disable modulePreload to prevent plotly from loading on all pages
     modulePreload: false,
+    // Use terser for better control over minification
+    minify: 'terser',
+    terserOptions: {
+      keep_fnames: true,
+      keep_classnames: true,
+      compress: {
+        passes: 2,
+        hoist_funs: false, // Prevent function hoisting that can cause TDZ
+        hoist_vars: false, // Prevent variable hoisting that can cause TDZ
+        reduce_funcs: false, // Prevent function inlining that might cause issues
+        drop_console: false, // Keep console logs for debugging
+        drop_debugger: true,
+      },
+      mangle: {
+        // Keep function names for better debugging
+        keep_fnames: true,
+      },
+    },
+    target: 'es2018', // Target ES2018 for better compatibility
     rollupOptions: {
       plugins: [
         nodeResolve({
