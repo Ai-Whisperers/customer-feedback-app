@@ -2,6 +2,8 @@ import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import path from 'path'
 import { resolve } from 'path'
+import { nodeResolve } from '@rollup/plugin-node-resolve'
+import commonjs from '@rollup/plugin-commonjs'
 
 // https://vite.dev/config/
 export default defineConfig({
@@ -21,24 +23,58 @@ export default defineConfig({
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src'),
+      // Add polyfills for Node.js modules
+      buffer: 'buffer',
+      process: 'process/browser',
+      stream: 'stream-browserify',
+      util: 'util'
     },
   },
+  define: {
+    // Define global for libraries that expect it
+    global: 'globalThis',
+    'process.env': {},
+  },
+  optimizeDeps: {
+    // Include these dependencies for optimization
+    include: ['buffer', 'process'],
+    esbuildOptions: {
+      // Define global for esbuild
+      define: {
+        global: 'globalThis'
+      }
+    }
+  },
   build: {
-    chunkSizeWarningLimit: 1000, // Increase warning limit to 1000 kB
+    chunkSizeWarningLimit: 1500, // Increase warning limit to 1500 kB
     rollupOptions: {
+      plugins: [
+        nodeResolve({
+          browser: true,
+          preferBuiltins: false
+        }),
+        commonjs()
+      ],
       input: {
         main: resolve(__dirname, 'index.html'),
         about: resolve(__dirname, 'about.html'),
         analyzer: resolve(__dirname, 'analyzer.html'),
       },
       output: {
-        manualChunks: {
-          // Separate Plotly into its own chunk (shared across pages)
-          'plotly-core': ['plotly.js'],
-          'react-plotly': ['react-plotly.js'],
-          // Vendor chunks for common dependencies
-          'vendor-react': ['react', 'react-dom'],
-          'vendor-utils': ['axios', 'date-fns', 'clsx'],
+        manualChunks: (id) => {
+          // Better chunking strategy
+          if (id.includes('plotly.js')) {
+            return 'plotly-core';
+          }
+          if (id.includes('react-plotly')) {
+            return 'react-plotly';
+          }
+          if (id.includes('node_modules/react') || id.includes('node_modules/react-dom')) {
+            return 'vendor-react';
+          }
+          if (id.includes('node_modules') && (id.includes('axios') || id.includes('date-fns') || id.includes('clsx'))) {
+            return 'vendor-utils';
+          }
         },
         // Ensure proper chunk naming
         chunkFileNames: (chunkInfo) => {
