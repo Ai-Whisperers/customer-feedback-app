@@ -26,21 +26,44 @@ console.log(`[CONFIG] API_TARGET: ${API_TARGET}`);
 console.log(`[CONFIG] NODE_ENV: ${process.env.NODE_ENV}`);
 console.log(`[CONFIG] IS_PRODUCTION: ${IS_PRODUCTION}`);
 
-// Security middleware
+// Security middleware with environment-aware CSP
+const cspDirectives = IS_PRODUCTION ? {
+  defaultSrc: ["'self'"],
+  scriptSrc: ["'self'", "'unsafe-inline'"], // Remove unsafe-eval in production
+  styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
+  imgSrc: ["'self'", "data:", "https:"],
+  connectSrc: ["'self'"],
+  fontSrc: ["'self'", "https://fonts.gstatic.com"],
+  objectSrc: ["'none'"],
+  mediaSrc: ["'self'"],
+  frameSrc: ["'none'"],
+  workerSrc: ["'self'", "blob:"], // Allow web workers for better performance
+  upgradeInsecureRequests: [], // Force HTTPS in production
+} : {
+  // More permissive in development
+  defaultSrc: ["'self'"],
+  scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'"],
+  styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
+  imgSrc: ["'self'", "data:", "https:"],
+  connectSrc: ["'self'", "ws:", "wss:"], // Allow WebSocket for HMR
+  fontSrc: ["'self'", "https://fonts.gstatic.com"],
+  objectSrc: ["'none'"],
+  mediaSrc: ["'self'"],
+  frameSrc: ["'none'"],
+  workerSrc: ["'self'", "blob:"],
+};
+
 app.use(helmet({
   contentSecurityPolicy: {
-    directives: {
-      defaultSrc: ["'self'"],
-      scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'"],
-      styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
-      imgSrc: ["'self'", "data:", "https:"],
-      connectSrc: ["'self'"],
-      fontSrc: ["'self'", "https://fonts.gstatic.com"],
-      objectSrc: ["'none'"],
-      mediaSrc: ["'self'"],
-      frameSrc: ["'none'"],
-    },
+    directives: cspDirectives,
   },
+  // Additional security headers
+  hsts: {
+    maxAge: 31536000,
+    includeSubDomains: true,
+    preload: true
+  },
+  crossOriginEmbedderPolicy: false, // Allow embedding of resources
 }));
 
 // Compression for responses

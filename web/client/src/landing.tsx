@@ -9,28 +9,57 @@ console.log('[Landing] Script loaded');
 console.log('[Landing] Current URL:', window.location.href);
 console.log('[Landing] Document ready state:', document.readyState);
 
-const rootElement = document.getElementById('root');
-console.log('[Landing] Root element found:', !!rootElement);
+// Wait for DOM to be ready
+function initApp() {
+  const rootElement = document.getElementById('root');
+  console.log('[Landing] Root element found:', !!rootElement);
 
-if (!rootElement) {
-  console.error('[Landing] Root element not found!');
-  throw new Error('Failed to find the root element. Please ensure the HTML file contains an element with id="root".');
+  if (!rootElement) {
+    console.error('[Landing] Root element not found!');
+    // Create a fallback UI
+    document.body.innerHTML = `
+      <div style="padding: 20px; font-family: system-ui, -apple-system, sans-serif;">
+        <h1>Loading Error</h1>
+        <p>Failed to initialize the application. Please refresh the page.</p>
+        <button onclick="location.reload()">Refresh Page</button>
+      </div>
+    `;
+    return;
+  }
+
+  try {
+    console.log('[Landing] Creating React root...');
+    const root = createRoot(rootElement);
+
+    console.log('[Landing] Rendering components...');
+    root.render(
+      <StrictMode>
+        <ErrorBoundary>
+          <LandingPage />
+        </ErrorBoundary>
+      </StrictMode>,
+    );
+    console.log('[Landing] Render call completed');
+  } catch (error) {
+    console.error('[Landing] Error during render:', error);
+    // Show error in UI instead of crashing
+    rootElement.innerHTML = `
+      <div style="padding: 20px; font-family: system-ui, -apple-system, sans-serif;">
+        <h1>Application Error</h1>
+        <p>An error occurred while loading the application.</p>
+        <details>
+          <summary>Error Details</summary>
+          <pre>${error}</pre>
+        </details>
+        <button onclick="location.reload()" style="margin-top: 10px;">Refresh Page</button>
+      </div>
+    `;
+  }
 }
 
-try {
-  console.log('[Landing] Creating React root...');
-  const root = createRoot(rootElement);
-
-  console.log('[Landing] Rendering components...');
-  root.render(
-    <StrictMode>
-      <ErrorBoundary>
-        <LandingPage />
-      </ErrorBoundary>
-    </StrictMode>,
-  );
-  console.log('[Landing] Render call completed');
-} catch (error) {
-  console.error('[Landing] Error during render:', error);
-  throw error;
+// Ensure DOM is ready
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initApp);
+} else {
+  initApp();
 }
