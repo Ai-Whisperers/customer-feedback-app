@@ -15,7 +15,8 @@ import { createProxyMiddleware } from 'http-proxy-middleware';
 dotenv.config();
 
 const app = express();
-const PORT = parseInt(process.env.PORT || '3000', 10);
+// Support both PORT and WEB_PORT for backward compatibility
+const PORT = parseInt(process.env.PORT || process.env.WEB_PORT || '3000', 10);
 const API_TARGET = process.env.API_PROXY_TARGET || 'http://localhost:8000';
 const IS_PRODUCTION = process.env.NODE_ENV === 'production';
 
@@ -71,44 +72,10 @@ const cspDirectives: any = IS_PRODUCTION ? {
   workerSrc: ["'self'", "blob:"],
 };
 
-app.use(helmet({
-  contentSecurityPolicy: {
-    directives: cspDirectives,
-  },
-  // Additional security headers
-  hsts: {
-    maxAge: 31536000,
-    includeSubDomains: true,
-    preload: true
-  },
-  crossOriginEmbedderPolicy: false, // Allow embedding of resources
-}));
-
 // Compression for responses
 app.use(compression());
 
-// Request logging
-app.use((req, res, next) => {
-  const start = Date.now();
-  res.on('finish', () => {
-    const duration = Date.now() - start;
-    console.log(
-      `[${new Date().toISOString()}] ${req.method} ${req.path} - ${res.statusCode} (${duration}ms)`
-    );
-  });
-  next();
-});
-
-// Health check endpoint
-app.get('/health', (req, res) => {
-  res.json({
-    status: 'healthy',
-    service: 'web-bff',
-    timestamp: new Date().toISOString(),
-    uptime: process.uptime(),
-  });
-});
-
+// API Proxy MUST come before helmet CSP to avoid blocking
 // API Proxy configuration
 const apiProxy = createProxyMiddleware({
   target: API_TARGET,
@@ -134,8 +101,46 @@ const apiProxy = createProxyMiddleware({
   logger: IS_PRODUCTION ? console : undefined,
 } as any);
 
-// Proxy API requests
+// Proxy API requests BEFORE other middleware
 app.use('/api', apiProxy);
+
+// Apply security headers AFTER proxy to avoid blocking API calls
+app.use(helmet({
+  contentSecurityPolicy: {
+    directives: cspDirectives,
+  },
+  // Additional security headers
+  hsts: {
+    maxAge: 31536000,
+    includeSubDomains: true,
+    preload: true
+  },
+  crossOriginEmbedderPolicy: false, // Allow embedding of resources
+}));
+
+// Request logging
+app.use((req, res, next) => {
+  const start = Date.now();
+  res.on('finish', () => {
+    const duration = Date.now() - start;
+    console.log(
+      `[${new Date().toISOString()}] ${req.method} ${req.path} - ${res.statusCode} (${duration}ms)`
+    );
+  });
+  next();
+});
+
+// Health check endpoint
+app.get('/health', (req, res) => {
+  res.json({
+    status: 'healthy',
+    service: 'web-bff',
+    timestamp: new Date().toISOString(),
+    uptime: process.uptime(),
+  });
+});
+
+// Note: API proxy moved before helmet to avoid CSP blocking
 
 // Serve static files in production
 if (IS_PRODUCTION) {

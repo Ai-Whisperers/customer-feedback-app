@@ -7,7 +7,7 @@ const AboutPage = lazy(() => import('@/pages/AboutPage').then(m => ({ default: m
 const AnalyzerPage = lazy(() => import('@/pages/AnalyzerPage').then(m => ({ default: m.AnalyzerPage })));
 
 export function App() {
-  console.log('[App] Rendering App component');
+  if (import.meta.env.DEV) console.log('[App] Rendering App component');
 
   return (
     <div className="min-h-screen bg-gray-50">

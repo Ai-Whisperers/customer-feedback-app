@@ -4,13 +4,15 @@ import { GlassCard, GlassButton } from '@/components/ui';
 
 export const LandingPage: React.FC = () => {
   const navigate = useNavigate();
-  console.log('[LandingPage] Component rendering');
+  if (import.meta.env.DEV) console.log('[LandingPage] Component rendering');
 
   React.useEffect(() => {
-    console.log('[LandingPage] Component mounted');
-    console.log('[LandingPage] Window dimensions:', window.innerWidth, 'x', window.innerHeight);
+    if (import.meta.env.DEV) {
+      console.log('[LandingPage] Component mounted');
+      console.log('[LandingPage] Window dimensions:', window.innerWidth, 'x', window.innerHeight);
+    }
     return () => {
-      console.log('[LandingPage] Component unmounting');
+      if (import.meta.env.DEV) console.log('[LandingPage] Component unmounting');
     };
   }, []);
 
