@@ -10,7 +10,7 @@
     "build": "npm run build:client && npm run build:bff",
     "build:client": "tsc -b && vite build",
     "build:bff": "tsc -p tsconfig.bff.json",
-    "start": "NODE_ENV=production node dist/bff/server.js",
+    "start": "node dist/bff/server.js",
     "preview": "vite preview",
     "lint": "eslint .",
     "type-check": "tsc --noEmit"
