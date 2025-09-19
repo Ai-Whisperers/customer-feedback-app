@@ -92,3 +92,42 @@ async def health_check() -> Dict[str, Any]:
         raise HTTPException(status_code=503, detail=health_status)
 
     return health_status
+
+
+@router.get("/debug/celery")
+async def debug_celery():
+    """
+    Debug endpoint to test Celery connection and task dispatch.
+    """
+    try:
+        # Import here to avoid circular imports
+        from app.workers.tasks import analyze_feedback
+        from app.workers.celery_app import celery_app
+
+        # Test simple task dispatch
+        test_task_id = "debug_test_task"
+
+        # Create a simple task
+        task = analyze_feedback.apply_async(
+            args=["/tmp/debug_test.csv", {"rows": 1, "test": True}],
+            task_id=test_task_id
+        )
+
+        # Check if task was created
+        return {
+            "celery_status": "connected",
+            "task_dispatched": True,
+            "task_id": test_task_id,
+            "task_state": task.state,
+            "worker_ready": True,
+            "message": "Test task dispatched successfully"
+        }
+
+    except Exception as e:
+        logger.error("Celery debug failed", error=str(e), exc_info=True)
+        return {
+            "celery_status": "error",
+            "task_dispatched": False,
+            "error": str(e),
+            "message": "Failed to dispatch test task"
+        }
