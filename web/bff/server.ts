@@ -77,6 +77,13 @@ const apiProxy = createProxyMiddleware({
   logger: console, // Always log in production for debugging
 } as any);
 
+// Intercept /api requests BEFORE proxy to log them
+app.use('/api', (req, res, next) => {
+  console.log(`[API REQUEST] ${req.method} ${req.path}`);
+  console.log(`[API REQUEST] Headers:`, req.headers.host);
+  next();
+});
+
 // Proxy API requests BEFORE other middleware
 app.use('/api', apiProxy);
 
@@ -112,6 +119,17 @@ app.get('/debug/proxy', (req, res) => {
     helmetDisabled: true,
     environment: process.env.NODE_ENV,
     message: 'Proxy should be working. Try /api/health'
+  });
+});
+
+// Test upload endpoint to verify proxy without CORS
+app.post('/api/test-upload', (req, res) => {
+  console.log('[TEST] Upload endpoint hit');
+  res.json({
+    success: true,
+    message: 'Test upload received by BFF',
+    headers: req.headers,
+    url: req.url
   });
 });
 
