@@ -63,11 +63,12 @@ celery_app.conf.update(
     timezone="UTC",
     enable_utc=True,
 
-    # Task routing
+    # Task routing - SIMPLIFIED: Use default queue for all tasks
+    # This ensures tasks are picked up by the worker
+    task_default_queue="celery",
     task_routes={
-        "app.workers.tasks.analyze_feedback": {"queue": "analysis"},
-        "app.workers.tasks.analyze_batch": {"queue": "analysis"},
-        "app.workers.tasks.merge_results": {"queue": "processing"},
+        # All tasks go to default "celery" queue for simplicity
+        # Can be refined later when multiple workers are needed
     },
 
     # Task execution
