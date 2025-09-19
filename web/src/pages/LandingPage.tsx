@@ -1,7 +1,9 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import { GlassCard, GlassButton } from '@/components/ui';
 
 export const LandingPage: React.FC = () => {
+  const navigate = useNavigate();
   console.log('[LandingPage] Component rendering');
 
   React.useEffect(() => {
@@ -37,14 +39,14 @@ export const LandingPage: React.FC = () => {
             <GlassButton
               variant="primary"
               size="lg"
-              onClick={() => window.location.href = '/analyzer.html'}
+              onClick={() => navigate('/analyzer')}
             >
               Comenzar Análisis
             </GlassButton>
             <GlassButton
               variant="secondary"
               size="lg"
-              onClick={() => window.location.href = '/about.html'}
+              onClick={() => navigate('/about')}
             >
               Saber Más
             </GlassButton>
@@ -156,7 +158,7 @@ export const LandingPage: React.FC = () => {
             <GlassButton
               variant="primary"
               size="xl"
-              onClick={() => window.location.href = '/analyzer.html'}
+              onClick={() => navigate('/analyzer')}
               className="text-lg px-8 py-4"
             >
               Iniciar Análisis Gratuito
