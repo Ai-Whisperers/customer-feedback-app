@@ -43,14 +43,30 @@ export const AnalyzerPage: React.FC = () => {
 
         // Show file info if available
         if (response.file_info) {
-          console.log(`Processing ${response.file_info.rows} rows from ${response.file_info.name}`);
+          if (import.meta.env.DEV) {
+            console.log(`Processing ${response.file_info.rows} rows from ${response.file_info.name}`);
+          }
         }
       } else {
         setError(response.message || 'Error al cargar el archivo');
         setAppState('error');
       }
-    } catch {
-      setError('Error al cargar el archivo. Por favor, intente nuevamente.');
+    } catch (error) {
+      // Log error details for debugging
+      console.error('[AnalyzerPage] Upload error:', error);
+
+      // Extract meaningful error message
+      let errorMessage = 'Error al cargar el archivo. Por favor, intente nuevamente.';
+
+      if (error && typeof error === 'object') {
+        if ('message' in error) {
+          errorMessage = `Error: ${error.message}`;
+        } else if ('details' in error) {
+          errorMessage = `Error: ${(error as any).details}`;
+        }
+      }
+
+      setError(errorMessage);
       setAppState('error');
     }
   };

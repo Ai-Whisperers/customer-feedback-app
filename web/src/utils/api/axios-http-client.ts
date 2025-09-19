@@ -29,6 +29,15 @@ export class AxiosHttpClient implements IHttpClient {
     this.axiosInstance.interceptors.response.use(
       (response) => response,
       (error) => {
+        // Log full error for debugging
+        console.error('[AxiosHttpClient] Request failed:', {
+          url: error.config?.url,
+          method: error.config?.method,
+          status: error.response?.status,
+          data: error.response?.data,
+          message: error.message
+        });
+
         const httpError: HttpError = {
           message: 'An error occurred',
           status: error.response?.status,
@@ -36,11 +45,32 @@ export class AxiosHttpClient implements IHttpClient {
         };
 
         if (error.response) {
-          const { detail } = error.response.data;
-          httpError.message = detail?.details || detail?.error || httpError.message;
-          httpError.details = detail;
+          // Handle different response formats from backend
+          const responseData = error.response.data;
+
+          if (responseData?.detail) {
+            // FastAPI error format
+            httpError.message = responseData.detail?.details ||
+                              responseData.detail?.error ||
+                              responseData.detail ||
+                              httpError.message;
+            httpError.details = responseData.detail;
+          } else if (responseData?.error) {
+            // Alternative error format
+            httpError.message = responseData.error;
+            httpError.details = responseData;
+          } else if (responseData?.message) {
+            // Generic message format
+            httpError.message = responseData.message;
+            httpError.details = responseData;
+          } else if (typeof responseData === 'string') {
+            // Plain text error
+            httpError.message = responseData;
+          }
         } else if (error.code === 'ECONNABORTED') {
           httpError.message = 'Request was cancelled';
+        } else if (error.code === 'ERR_NETWORK') {
+          httpError.message = 'Network error - Unable to connect to server';
         } else if (error.message) {
           httpError.message = error.message;
         }
