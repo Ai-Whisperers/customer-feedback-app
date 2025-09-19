@@ -2,12 +2,14 @@
 
 import os
 import uuid
+import base64
 from pathlib import Path
 import structlog
 from fastapi import APIRouter, UploadFile, File, HTTPException, Form
 from typing import Optional
 import pandas as pd
 import aiofiles
+import redis
 
 from app.config import settings
 from app.schemas.upload import UploadResponse, UploadError, FileInfo, UploadOptions
@@ -20,6 +22,9 @@ logger = structlog.get_logger()
 ALLOWED_EXTENSIONS = {'.xlsx', '.xls', '.csv'}
 TEMP_DIR = Path("/tmp/feedback_uploads")
 TEMP_DIR.mkdir(exist_ok=True, parents=True)
+
+# Redis client for file storage
+redis_client = redis.from_url(settings.REDIS_URL)
 
 
 @router.post("", response_model=UploadResponse)  # No trailing slash to prevent redirects
@@ -98,9 +103,30 @@ async def upload_file(
             priority=priority
         )
 
-        # Queue analysis task
+        # Store file content in Redis for worker access
+        # Files are stored with 1 hour TTL
+        file_key = f"file_content:{task_id}"
+        file_data = {
+            "content": base64.b64encode(content).decode('utf-8'),
+            "filename": file.filename,
+            "extension": file_extension
+        }
+        redis_client.setex(
+            file_key,
+            3600,  # 1 hour TTL
+            str(file_data)
+        )
+
+        logger.info(
+            "File stored in Redis",
+            task_id=task_id,
+            key=file_key,
+            ttl_seconds=3600
+        )
+
+        # Queue analysis task - pass task_id instead of file path
         task = analyze_feedback.apply_async(
-            args=[str(temp_path), file_info.dict()],
+            args=[task_id, file_info.dict()],
             task_id=task_id,
             priority=1 if priority == "high" else 0
         )
@@ -116,9 +142,10 @@ async def upload_file(
         )
 
     except pd.errors.EmptyDataError:
-        # Clean up temp file
+        # Clean up temp file and Redis
         if temp_path.exists():
             os.remove(temp_path)
+        redis_client.delete(f"file_content:{task_id}")
 
         raise HTTPException(
             status_code=400,
@@ -130,9 +157,10 @@ async def upload_file(
         )
 
     except Exception as e:
-        # Clean up temp file on error
+        # Clean up temp file and Redis on error
         if temp_path.exists():
             os.remove(temp_path)
+        redis_client.delete(f"file_content:{task_id}")
 
         logger.error(
             "File upload failed",

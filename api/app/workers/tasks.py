@@ -5,10 +5,16 @@ Entry point for async processing tasks.
 
 import asyncio
 import time
+import base64
+import json
+import tempfile
+import os
 from typing import Dict, List, Any
 from celery import group
 import structlog
+import redis
 
+from app.config import settings
 from app.workers.celery_app import celery_app
 from app.adapters.openai_client import openai_analyzer
 from app.schemas.base import Language, TaskStatus
@@ -20,15 +26,16 @@ from app.services import (
 from app.utils.logging import log_task_start, log_task_complete, log_task_error
 
 logger = structlog.get_logger()
+redis_client = redis.from_url(settings.REDIS_URL)
 
 
 @celery_app.task(bind=True, max_retries=3)
-def analyze_feedback(self, file_path: str, file_info: Dict[str, Any]) -> str:
+def analyze_feedback(self, task_id_param: str, file_info: Dict[str, Any]) -> str:
     """
     Main task to analyze a feedback file.
 
     Args:
-        file_path: Path to the uploaded file
+        task_id_param: Task ID (also used to retrieve file from Redis)
         file_info: Metadata about the file
 
     Returns:
@@ -37,15 +44,43 @@ def analyze_feedback(self, file_path: str, file_info: Dict[str, Any]) -> str:
     task_id = self.request.id
     start_time = time.time()
 
-    log_task_start("analyze_feedback", task_id, file_path=file_path)
+    log_task_start("analyze_feedback", task_id, task_id_param=task_id_param)
+
+    # Create a temporary file to work with
+    temp_file = None
 
     try:
         # Initialize task
         status_service.mark_task_started(task_id)
 
+        # Retrieve file from Redis
+        status_service.update_task_progress(task_id, 5, "Recuperando archivo")
+        file_key = f"file_content:{task_id_param}"
+        file_data_str = redis_client.get(file_key)
+
+        if not file_data_str:
+            raise FileNotFoundError(f"File not found in Redis: {file_key}")
+
+        # Parse file data
+        file_data = eval(file_data_str)  # Safe since we control the data format
+        content = base64.b64decode(file_data['content'])
+        extension = file_data['extension']
+
+        # Create temporary file
+        with tempfile.NamedTemporaryFile(suffix=extension, delete=False) as tmp:
+            tmp.write(content)
+            temp_file = tmp.name
+
+        logger.info(
+            "File retrieved from Redis and saved to temp",
+            task_id=task_id,
+            temp_file=temp_file,
+            size_bytes=len(content)
+        )
+
         # Load and validate file
         status_service.update_task_progress(task_id, 10, "Cargando archivo")
-        df = analysis_service.load_and_validate_file(file_path)
+        df = analysis_service.load_and_validate_file(temp_file)
 
         # Prepare data
         status_service.update_task_progress(task_id, 20, "Normalizando datos")
@@ -98,6 +133,21 @@ def analyze_feedback(self, file_path: str, file_info: Dict[str, Any]) -> str:
     except Exception as e:
         _handle_task_error(self, task_id, str(e), start_time)
         raise
+
+    finally:
+        # Clean up temporary file and Redis data
+        if temp_file and os.path.exists(temp_file):
+            try:
+                os.remove(temp_file)
+                logger.info("Temporary file cleaned up", file=temp_file)
+            except Exception as cleanup_error:
+                logger.warning("Failed to clean up temp file", error=str(cleanup_error))
+
+        # Clean up Redis file data (optional, has TTL anyway)
+        try:
+            redis_client.delete(f"file_content:{task_id_param}")
+        except Exception:
+            pass  # Non-critical, Redis has TTL
 
 
 @celery_app.task(bind=True)
