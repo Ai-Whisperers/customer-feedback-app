@@ -44,9 +44,6 @@ export default defineConfig({
             if (id.includes('react')) {
               return 'react-vendor';
             }
-            if (id.includes('plotly')) {
-              return 'plotly';
-            }
             if (id.includes('axios')) {
               return 'http-utils';
             }

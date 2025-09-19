@@ -1,60 +1,65 @@
 import React, { useMemo } from 'react';
-import { PlotlySafe as Plot } from '@/components/charts/PlotlySafe';
-import { defaultLayoutConfig, plotConfig } from './chartConfig';
 import type { AnalysisResults } from '@/utils/api';
 
 interface PainPointsChartProps {
-  painPoints: AnalysisResults['summary']['pain_points'];
+  rows: AnalysisResults['rows'];
 }
 
-export const PainPointsChart: React.FC<PainPointsChartProps> = ({ painPoints }) => {
-  const chartData = useMemo(() => {
-    const topPainPoints = painPoints.slice(0, 10);
+export const PainPointsChart: React.FC<PainPointsChartProps> = ({ rows }) => {
+  const painPointsData = useMemo(() => {
+    const painPointMap = new Map<string, number>();
 
-    return {
-      data: [
-        {
-          y: topPainPoints.map(pp => pp.category).reverse(),
-          x: topPainPoints.map(pp => pp.count).reverse(),
-          type: 'bar' as const,
-          orientation: 'h' as const,
-          marker: {
-            color: 'rgba(239, 68, 68, 0.8)',
-            line: {
-              color: 'rgba(239, 68, 68, 1)',
-              width: 1,
-            },
-          },
-          text: topPainPoints.map(pp => pp.count.toString()).reverse(),
-          textposition: 'outside' as const,
-          hovertemplate: '%{y}<br>Frecuencia: %{x}<extra></extra>',
-        },
-      ],
-      layout: {
-        ...defaultLayoutConfig,
-        title: {
-          text: 'Top 10 Puntos de Dolor',
-          font: { size: 18 },
-        },
-        xaxis: {
-          title: { text: 'Frecuencia' },
-          gridcolor: 'rgba(229, 231, 235, 0.3)',
-        },
-        yaxis: {
-          title: { text: '' },
-          gridcolor: 'rgba(229, 231, 235, 0.3)',
-        },
-      },
-    };
-  }, [painPoints]);
+    (rows || []).forEach(row => {
+      row.pain_points.forEach(point => {
+        const count = painPointMap.get(point) || 0;
+        painPointMap.set(point, count + 1);
+      });
+    });
+
+    return Array.from(painPointMap.entries())
+      .map(([point, count]) => ({ point, count }))
+      .sort((a, b) => b.count - a.count)
+      .slice(0, 10);
+  }, [rows]);
+
+  const maxCount = Math.max(...painPointsData.map(d => d.count), 1);
 
   return (
-    <Plot
-      data={chartData.data}
-      layout={chartData.layout}
-      config={plotConfig}
-      className="w-full"
-      chartName="Pain Points"
-    />
+    <div className="bg-white rounded-lg p-6 shadow-sm">
+      <h3 className="text-lg font-semibold mb-4">Principales Puntos de Dolor</h3>
+
+      {painPointsData.length === 0 ? (
+        <p className="text-gray-500 text-center py-8">
+          No se encontraron puntos de dolor en los comentarios
+        </p>
+      ) : (
+        <div className="space-y-3">
+          {painPointsData.map(({ point, count }, index) => (
+            <div key={point} className="flex items-center">
+              <div className="w-6 text-xs font-bold text-gray-500">
+                {index + 1}
+              </div>
+              <div className="flex-1 mx-3">
+                <div className="mb-1 text-sm font-medium text-gray-700">
+                  {point}
+                </div>
+                <div className="bg-gray-200 rounded-full h-4 relative">
+                  <div
+                    className="bg-purple-500 h-4 rounded-full flex items-center justify-end px-2"
+                    style={{ width: `${(count / maxCount) * 100}%` }}
+                  >
+                    {count > 1 && (
+                      <span className="text-white text-xs font-medium">
+                        {count}
+                      </span>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
   );
 };

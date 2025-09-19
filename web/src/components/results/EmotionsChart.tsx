@@ -1,7 +1,4 @@
-import React, { useMemo } from 'react';
-import { PlotlySafe as Plot } from '@/components/charts/PlotlySafe';
-import { defaultLayoutConfig, plotConfig } from './chartConfig';
-
+import React from 'react';
 import type { AnalysisResults } from '@/utils/api';
 
 interface EmotionsChartProps {
@@ -9,73 +6,47 @@ interface EmotionsChartProps {
 }
 
 export const EmotionsChart: React.FC<EmotionsChartProps> = ({ rows }) => {
-  const chartData = useMemo(() => {
-    if (!rows || rows.length === 0) return { data: [], layout: defaultLayoutConfig };
-
-    // Aggregate emotions from all rows
-    const emotionTotals: Record<string, number> = {};
-    rows.forEach(row => {
-      if (row.emotions) {
-        Object.entries(row.emotions).forEach(([emotion, value]) => {
-          emotionTotals[emotion] = (emotionTotals[emotion] || 0) + value;
-        });
-      }
+  // Calculate emotion averages
+  const emotionTotals = (rows || []).reduce((acc, row) => {
+    Object.entries(row.emotions).forEach(([emotion, value]) => {
+      if (!acc[emotion]) acc[emotion] = { total: 0, count: 0 };
+      acc[emotion].total += value;
+      acc[emotion].count++;
     });
+    return acc;
+  }, {} as Record<string, { total: number; count: number }>);
 
-    // Calculate averages
-    const emotionAverages = Object.entries(emotionTotals).map(([emotion, total]) => [
+  const emotionAverages = Object.entries(emotionTotals)
+    .map(([emotion, { total, count }]) => ({
       emotion,
-      total / rows.length
-    ] as [string, number]);
-
-    const sortedEmotions = emotionAverages
-      .sort(([, a], [, b]) => b - a)
-      .slice(0, 10);
-
-    return {
-      data: [
-        {
-          x: sortedEmotions.map(([emotion]) => emotion),
-          y: sortedEmotions.map(([, value]) => value),
-          type: 'bar' as const,
-          marker: {
-            color: 'rgba(59, 130, 246, 0.8)',
-            line: {
-              color: 'rgba(59, 130, 246, 1)',
-              width: 1,
-            },
-          },
-          text: sortedEmotions.map(([, value]) => `${(value * 100).toFixed(1)}%`),
-          textposition: 'outside' as const,
-          hovertemplate: '%{x}<br>Probabilidad: %{y:.2%}<extra></extra>',
-        },
-      ],
-      layout: {
-        ...defaultLayoutConfig,
-        title: {
-          text: 'Top 10 Emociones Detectadas',
-          font: { size: 18 },
-        },
-        xaxis: {
-          title: { text: 'Emociones' },
-          gridcolor: 'rgba(229, 231, 235, 0.3)',
-        },
-        yaxis: {
-          title: { text: 'Probabilidad' },
-          gridcolor: 'rgba(229, 231, 235, 0.3)',
-          tickformat: '.0%',
-        },
-      },
-    };
-  }, [rows]);
+      average: total / count
+    }))
+    .sort((a, b) => b.average - a.average);
 
   return (
-    <Plot
-      data={chartData.data}
-      layout={chartData.layout}
-      config={plotConfig}
-      className="w-full"
-      chartName="Emotions Analysis"
-    />
+    <div className="bg-white rounded-lg p-6 shadow-sm">
+      <h3 className="text-lg font-semibold mb-4">Distribución de Emociones</h3>
+      <div className="space-y-3">
+        {emotionAverages.slice(0, 8).map(({ emotion, average }) => (
+          <div key={emotion} className="flex items-center">
+            <span className="w-24 text-sm font-medium capitalize">
+              {emotion.replace(/_/g, ' ')}
+            </span>
+            <div className="flex-1 mx-3">
+              <div className="bg-gray-200 rounded-full h-6 relative">
+                <div
+                  className="bg-blue-500 h-6 rounded-full flex items-center justify-end px-2"
+                  style={{ width: `${average * 100}%` }}
+                >
+                  <span className="text-white text-xs font-medium">
+                    {(average * 100).toFixed(1)}%
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
   );
 };
