@@ -144,7 +144,7 @@ services:
         value: production
       # PORT is automatically assigned by Render, do not hardcode
       - key: API_PROXY_TARGET
-        value: http://customer-feedback-api-bmjp:10000  # Internal Render service URL with suffix
+        value: http://customer-feedback-api:10000  # Internal Render service URL
     healthCheckPath: /health
     autoDeploy: true
     buildFilter:
