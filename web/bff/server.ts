@@ -38,25 +38,34 @@ app.use(compression());
 const apiProxy = createProxyMiddleware({
   target: API_TARGET,
   changeOrigin: true,
+  secure: false, // IMPORTANT: Allow HTTP for internal services
   pathRewrite: {
     '^/api': '', // Remove /api prefix when forwarding
   },
+  followRedirects: false, // Don't follow redirects
   on: {
     proxyReq: (proxyReq: any, req: any, res: any) => {
       console.log(`[PROXY] Forwarding ${req.method} ${req.path} to ${API_TARGET}`);
+      console.log(`[PROXY] Target URL: ${proxyReq.protocol}//${proxyReq.host}${proxyReq.path}`);
       // Add custom headers if needed
       proxyReq.setHeader('X-Forwarded-Host', req.headers.host || '');
       proxyReq.setHeader('X-Real-IP', (req as any).ip || req.socket.remoteAddress || '');
+      proxyReq.setHeader('X-Forwarded-Proto', 'http'); // Force HTTP for internal
     },
     proxyRes: (proxyRes: any, req: any, res: any) => {
       console.log(`[PROXY] Response ${proxyRes.statusCode} from ${req.path}`);
+      // Log if there's a redirect
+      if (proxyRes.statusCode >= 300 && proxyRes.statusCode < 400) {
+        console.log(`[PROXY] Redirect detected:`, proxyRes.headers.location);
+      }
     },
     error: (err: any, req: any, res: any) => {
       console.error('[PROXY ERROR] Details:', {
         path: req.path,
         target: API_TARGET,
         error: err.message,
-        code: err.code
+        code: err.code,
+        syscall: err.syscall
       });
       (res as any).status(502).json({
         error: 'Bad Gateway',
