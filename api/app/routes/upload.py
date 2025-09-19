@@ -22,7 +22,7 @@ TEMP_DIR = Path("/tmp/feedback_uploads")
 TEMP_DIR.mkdir(exist_ok=True, parents=True)
 
 
-@router.post("/", response_model=UploadResponse)
+@router.post("", response_model=UploadResponse)  # No trailing slash to prevent redirects
 async def upload_file(
     file: UploadFile = File(...),
     language_hint: Optional[str] = Form(None),

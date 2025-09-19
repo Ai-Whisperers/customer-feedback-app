@@ -24,7 +24,7 @@ async def simple_health_check() -> Dict[str, Any]:
     }
 
 
-@router.get("/")
+@router.get("")  # No trailing slash to prevent redirects
 async def health_check() -> Dict[str, Any]:
     """
     Comprehensive health check endpoint.

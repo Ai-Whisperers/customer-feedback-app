@@ -34,7 +34,8 @@ app = FastAPI(
     version="3.1.0",
     docs_url="/docs" if settings.is_development else None,
     redoc_url="/redoc" if settings.is_development else None,
-    lifespan=lifespan
+    lifespan=lifespan,
+    redirect_slashes=False  # IMPORTANT: Disable automatic trailing slash redirects
 )
 
 # Security middleware
