@@ -6,7 +6,7 @@
 
 import express from 'express';
 import compression from 'compression';
-import helmet from 'helmet';
+// import helmet from 'helmet'; // TEMPORARILY DISABLED
 import path from 'path';
 import dotenv from 'dotenv';
 import { createProxyMiddleware } from 'http-proxy-middleware';
@@ -26,51 +26,9 @@ console.log(`[CONFIG] PORT: ${PORT}`);
 console.log(`[CONFIG] API_TARGET: ${API_TARGET}`);
 console.log(`[CONFIG] NODE_ENV: ${process.env.NODE_ENV}`);
 console.log(`[CONFIG] IS_PRODUCTION: ${IS_PRODUCTION}`);
+console.log(`[CONFIG] HELMET DISABLED - DEBUGGING MODE`);
 
-// Security middleware with environment-aware CSP
-const cspDirectives: any = IS_PRODUCTION ? {
-  defaultSrc: ["'self'"],
-  scriptSrc: [
-    "'self'",
-    "'unsafe-inline'",
-    "'unsafe-eval'", // Required for Plotly
-    "https://cdn.plot.ly" // Plotly CDN
-  ],
-  styleSrc: [
-    "'self'",
-    "'unsafe-inline'",
-    "https://fonts.googleapis.com"
-  ],
-  imgSrc: ["'self'", "data:", "https:"],
-  connectSrc: ["'self'", "https://cdn.plot.ly"],
-  fontSrc: ["'self'", "https://fonts.gstatic.com"],
-  objectSrc: ["'none'"],
-  mediaSrc: ["'self'"],
-  frameSrc: ["'none'"],
-  workerSrc: ["'self'", "blob:"], // Allow web workers for better performance
-  upgradeInsecureRequests: [], // Force HTTPS in production
-} : {
-  // More permissive in development
-  defaultSrc: ["'self'"],
-  scriptSrc: [
-    "'self'",
-    "'unsafe-inline'",
-    "'unsafe-eval'",
-    "https://cdn.plot.ly"
-  ],
-  styleSrc: [
-    "'self'",
-    "'unsafe-inline'",
-    "https://fonts.googleapis.com"
-  ],
-  imgSrc: ["'self'", "data:", "https:"],
-  connectSrc: ["'self'", "ws:", "wss:", "https://cdn.plot.ly"], // Allow WebSocket for HMR
-  fontSrc: ["'self'", "https://fonts.gstatic.com"],
-  objectSrc: ["'none'"],
-  mediaSrc: ["'self'"],
-  frameSrc: ["'none'"],
-  workerSrc: ["'self'", "blob:"],
-};
+// Helmet completely disabled for debugging
 
 // Compression for responses
 app.use(compression());
@@ -113,22 +71,7 @@ const apiProxy = createProxyMiddleware({
 // Proxy API requests BEFORE other middleware
 app.use('/api', apiProxy);
 
-// Apply security headers AFTER proxy to avoid blocking API calls
-// TEMPORARILY DISABLED CSP to debug production issue
-if (false) { // Temporarily disabled
-  app.use(helmet({
-    contentSecurityPolicy: {
-      directives: cspDirectives,
-    },
-    // Additional security headers
-    hsts: {
-      maxAge: 31536000,
-      includeSubDomains: true,
-      preload: true
-    },
-    crossOriginEmbedderPolicy: false, // Allow embedding of resources
-  }));
-}
+// Helmet completely removed for debugging
 
 // Request logging
 app.use((req, res, next) => {
@@ -149,6 +92,17 @@ app.get('/health', (req, res) => {
     service: 'web-bff',
     timestamp: new Date().toISOString(),
     uptime: process.uptime(),
+  });
+});
+
+// Debug endpoint to verify proxy configuration
+app.get('/debug/proxy', (req, res) => {
+  res.json({
+    proxyEnabled: true,
+    apiTarget: API_TARGET,
+    helmetDisabled: true,
+    environment: process.env.NODE_ENV,
+    message: 'Proxy should be working. Try /api/health'
   });
 });
 

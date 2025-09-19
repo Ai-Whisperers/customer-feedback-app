@@ -10,7 +10,10 @@
     "dev": "npm run dev --workspace=web",
     "build": "npm run build --workspace=web",
     "start": "npm run start --workspace=web",
-    "install:all": "npm install && npm install --workspace=web"
+    "install:all": "npm install && npm install --workspace=web",
+    "deploy:check": "cd web && npm run type-check && npm run lint",
+    "clean": "rm -rf web/dist web/node_modules api/__pycache__",
+    "fresh": "npm run clean && npm run install:all"
   },
   "devDependencies": {
     "@types/node": "^22.8.1",
