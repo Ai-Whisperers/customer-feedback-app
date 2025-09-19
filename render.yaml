@@ -132,9 +132,10 @@ services:
     runtime: node
     region: oregon
     plan: starter  # Match existing deployment
-    buildCommand: cd web && ./build.sh
+    # Force clean rebuild - remove old Plotly artifacts
+    buildCommand: cd web && rm -rf node_modules dist && ./build.sh
     startCommand: cd web && ./start.sh
-    # Disable cache to ensure fresh builds with our Tailwind fixes
+    # Disable cache to ensure fresh builds
     cache:
       profile: no-cache
     envVars:
@@ -144,7 +145,7 @@ services:
         value: production
       # PORT is automatically assigned by Render, do not hardcode
       - key: API_PROXY_TARGET
-        value: http://customer-feedback-api:10000  # Internal Render service URL
+        value: http://customer-feedback-api-bmjp:10000  # Internal Render service URL with suffix
     healthCheckPath: /health
     autoDeploy: true
     buildFilter:
