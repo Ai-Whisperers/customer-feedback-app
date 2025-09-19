@@ -85,12 +85,21 @@ const apiProxy = createProxyMiddleware({
   },
   on: {
     proxyReq: (proxyReq: any, req: any, res: any) => {
+      console.log(`[PROXY] Forwarding ${req.method} ${req.path} to ${API_TARGET}`);
       // Add custom headers if needed
       proxyReq.setHeader('X-Forwarded-Host', req.headers.host || '');
       proxyReq.setHeader('X-Real-IP', (req as any).ip || req.socket.remoteAddress || '');
     },
+    proxyRes: (proxyRes: any, req: any, res: any) => {
+      console.log(`[PROXY] Response ${proxyRes.statusCode} from ${req.path}`);
+    },
     error: (err: any, req: any, res: any) => {
-      console.error('Proxy error:', err);
+      console.error('[PROXY ERROR] Details:', {
+        path: req.path,
+        target: API_TARGET,
+        error: err.message,
+        code: err.code
+      });
       (res as any).status(502).json({
         error: 'Bad Gateway',
         message: 'Unable to connect to API service',
@@ -98,25 +107,28 @@ const apiProxy = createProxyMiddleware({
       });
     },
   },
-  logger: IS_PRODUCTION ? console : undefined,
+  logger: console, // Always log in production for debugging
 } as any);
 
 // Proxy API requests BEFORE other middleware
 app.use('/api', apiProxy);
 
 // Apply security headers AFTER proxy to avoid blocking API calls
-app.use(helmet({
-  contentSecurityPolicy: {
-    directives: cspDirectives,
-  },
-  // Additional security headers
-  hsts: {
-    maxAge: 31536000,
-    includeSubDomains: true,
-    preload: true
-  },
-  crossOriginEmbedderPolicy: false, // Allow embedding of resources
-}));
+// TEMPORARILY DISABLED CSP to debug production issue
+if (false) { // Temporarily disabled
+  app.use(helmet({
+    contentSecurityPolicy: {
+      directives: cspDirectives,
+    },
+    // Additional security headers
+    hsts: {
+      maxAge: 31536000,
+      includeSubDomains: true,
+      preload: true
+    },
+    crossOriginEmbedderPolicy: false, // Allow embedding of resources
+  }));
+}
 
 // Request logging
 app.use((req, res, next) => {
