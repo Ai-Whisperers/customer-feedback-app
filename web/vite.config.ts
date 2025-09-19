@@ -35,9 +35,7 @@ export default defineConfig({
       output: {
         manualChunks: (id) => {
           if (id.includes('node_modules')) {
-            if (id.includes('react-router')) {
-              return 'react-router';
-            }
+            // React and React Router must be in the same chunk
             if (id.includes('react')) {
               return 'react-vendor';
             }
