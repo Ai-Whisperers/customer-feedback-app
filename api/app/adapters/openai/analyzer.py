@@ -193,25 +193,47 @@ Provide a detailed analysis for EACH comment following the specified JSON struct
                 comments_analyzed=len(result.get("analyses", []))
             )
 
-            # Format the result to match expected structure
-            formatted_result = {
-                "comments": []
-            }
+            # Validate with Pydantic schemas for data integrity
+            validated_analyses = []
 
             for i, analysis in enumerate(result.get("analyses", [])):
-                # Expand simplified schema to full schema for compatibility
-                formatted_result["comments"].append({
-                    "index": i,
-                    "emotions": analysis.get("emotions", {}),
-                    "churn_risk": analysis.get("churn_risk", 0.5),
-                    "pain_points": self._expand_pain_points(analysis.get("pain_points", [])),
-                    "sentiment_score": self._calculate_sentiment_score(analysis.get("emotions", {})),
-                    "language": "es",  # Default to Spanish
-                    "nps_category": analysis.get("nps", "passive"),
-                    "key_phrases": []  # Removed to save tokens
-                })
+                try:
+                    # Validate emotions with Pydantic
+                    emotions = EmotionScores(**analysis.get("emotions", {}))
 
-            return formatted_result
+                    # Build validated comment analysis
+                    comment_data = {
+                        "index": i,
+                        "emotions": emotions.model_dump(),
+                        "churn_risk": analysis.get("churn_risk", 0.5),
+                        "pain_points": self._expand_pain_points(analysis.get("pain_points", [])),
+                        "sentiment_score": self._calculate_sentiment_score(emotions.model_dump()),
+                        "language": "es",  # Default to Spanish
+                        "nps_category": analysis.get("nps", "passive"),
+                        "key_phrases": []  # Removed to save tokens
+                    }
+
+                    validated_analyses.append(comment_data)
+
+                except Exception as e:
+                    logger.warning(
+                        "Validation failed for comment",
+                        index=i,
+                        error=str(e)
+                    )
+                    # Use raw data if validation fails
+                    validated_analyses.append({
+                        "index": i,
+                        "emotions": analysis.get("emotions", {}),
+                        "churn_risk": analysis.get("churn_risk", 0.5),
+                        "pain_points": self._expand_pain_points(analysis.get("pain_points", [])),
+                        "sentiment_score": 0.0,
+                        "language": "es",
+                        "nps_category": analysis.get("nps", "passive"),
+                        "key_phrases": []
+                    })
+
+            return {"comments": validated_analyses}
 
         except json.JSONDecodeError as e:
             logger.error(
