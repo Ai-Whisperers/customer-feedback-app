@@ -95,39 +95,58 @@ def analyze_feedback(self, task_id_param: str, file_info: Dict[str, Any]) -> str
 
         logger.info("Created batches", task_id=task_id, batch_count=len(batches))
 
-        # Process batches
+        # Process batches in parallel
         status_service.update_task_progress(
             task_id, 40,
-            f"Procesando {len(batches)} lotes con IA"
+            f"Procesando {len(batches)} lotes en paralelo (max {settings.CELERY_WORKER_CONCURRENCY} simultáneos)"
         )
 
-        # Create and execute batch tasks
+        # Create and execute batch tasks in parallel
         batch_tasks = group(
             analyze_batch.s(batch, idx, language_hint)
             for idx, batch in enumerate(batches)
         )
         batch_results = batch_tasks.apply_async()
 
-        # Wait for all batches to complete without blocking
-        # Using join() instead of get() to avoid blocking the worker
-        status_service.update_task_progress(task_id, 85, "Esperando resultados de batches")
+        # Monitor progress without blocking
+        status_service.update_task_progress(task_id, 50, f"Procesando {len(batches)} lotes...")
 
-        # Poll for completion instead of blocking
+        # Improved progress monitoring
         import time as time_module
-        max_wait = 300  # 5 minutes max
-        poll_interval = 2
+        max_wait = 180  # 3 minutes max (reduced from 5)
+        poll_interval = 1  # Check more frequently
         elapsed = 0
+        last_ready_count = 0
 
         while elapsed < max_wait:
             if batch_results.ready():
                 break
+
+            # Check how many tasks are complete
+            completed_count = sum(1 for result in batch_results.results if result.ready())
+
+            # Update progress based on actual completion
+            if completed_count > last_ready_count:
+                last_ready_count = completed_count
+                progress_pct = 50 + int(40 * completed_count / len(batches))
+                status_service.update_task_progress(
+                    task_id, progress_pct,
+                    f"Completados {completed_count}/{len(batches)} lotes"
+                )
+
             time_module.sleep(poll_interval)
             elapsed += poll_interval
-            progress = min(85 + int(15 * elapsed / max_wait), 99)
-            status_service.update_task_progress(task_id, progress, "Procesando batches")
 
         if not batch_results.ready():
-            raise TimeoutError("Batch processing timeout")
+            # Try to get partial results
+            completed_count = sum(1 for result in batch_results.results if result.ready())
+            logger.warning(
+                "Batch processing timeout",
+                task_id=task_id,
+                completed=completed_count,
+                total=len(batches)
+            )
+            raise TimeoutError(f"Batch processing timeout: {completed_count}/{len(batches)} completed")
 
         # Now safely get the results
         status_service.update_task_progress(task_id, 90, "Consolidando resultados")
@@ -168,7 +187,7 @@ def analyze_feedback(self, task_id_param: str, file_info: Dict[str, Any]) -> str
             pass  # Non-critical, Redis has TTL
 
 
-@celery_app.task(bind=True)
+@celery_app.task(bind=True, max_retries=2, default_retry_delay=5)
 def analyze_batch(
     self,
     comments: List[str],
@@ -214,8 +233,18 @@ def analyze_batch(
             "Batch analysis failed",
             task_id=task_id,
             batch_index=batch_index,
-            error=str(e)
+            error=str(e),
+            retry_count=self.request.retries
         )
+        # Retry with exponential backoff
+        if self.request.retries < self.max_retries:
+            retry_delay = 5 * (2 ** self.request.retries)  # 5, 10 seconds
+            logger.info(
+                "Retrying batch analysis",
+                batch_index=batch_index,
+                retry_in=retry_delay
+            )
+            raise self.retry(countdown=retry_delay)
         raise
 
 

@@ -40,14 +40,14 @@ class Settings(BaseSettings):
 
     # File Processing
     FILE_MAX_MB: int = Field(default=20)
-    MAX_BATCH_SIZE: int = Field(default=15)  # Reduced from 50 to prevent token overflow
+    MAX_BATCH_SIZE: int = Field(default=20)  # Optimized for token limits
     RESULTS_TTL_SECONDS: int = Field(default=86400)  # 24 hours
 
     # Rate Limiting
     MAX_RPS: int = Field(default=8)
 
     # Celery Worker Configuration
-    CELERY_WORKER_CONCURRENCY: int = Field(default=4)
+    CELERY_WORKER_CONCURRENCY: int = Field(default=6)  # Increased for parallel processing
 
     # Optional
     SENTRY_DSN: Optional[str] = Field(default=None)
