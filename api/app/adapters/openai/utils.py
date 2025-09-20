@@ -226,13 +226,13 @@ def calculate_optimal_concurrency(
     if max_rps is None:
         max_rps = settings.MAX_RPS
 
-    # Dynamic batch size according to blueprint: 30-100 comments per batch based on tokens
+    # Optimized batch size for Chat Completions API token limits
     if total_comments <= 100:
-        batch_size = min(50, total_comments)  # Small datasets: 50 per batch
+        batch_size = min(30, total_comments)  # Small datasets: 30 per batch
     elif total_comments <= 500:
-        batch_size = 75  # Medium datasets: 75 per batch
+        batch_size = 40  # Medium datasets: 40 per batch
     else:
-        batch_size = 100  # Large datasets: 100 per batch
+        batch_size = 50  # Large datasets: 50 per batch
 
     # Respect configured maximum
     batch_size = min(batch_size, settings.MAX_BATCH_SIZE)

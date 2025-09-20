@@ -1,7 +1,7 @@
 """
 OpenAI Chat Completions API analyzer for feedback analysis.
-Uses structured outputs with GPT-4o-mini for optimal performance.
-Implements JSON schema validation for consistent responses.
+Uses structured outputs with JSON mode for optimal performance.
+Implements stable, production-ready Chat Completions with GPT-4o-mini.
 """
 
 import json
@@ -167,7 +167,8 @@ Provide a detailed analysis for EACH comment following the specified JSON struct
                     }
                 },
                 temperature=0.3,
-                max_tokens=4096  # Ensure we get complete responses
+                max_tokens=4096,  # Ensure complete responses
+                seed=42  # For reproducibility
             )
 
             # Extract content from Chat Completions response
