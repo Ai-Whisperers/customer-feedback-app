@@ -23,11 +23,6 @@ from app.schemas.ai_schemas import (
 )
 from app.adapters.openai.client import create_rate_limiter
 from app.adapters.openai.utils import optimize_batch_size
-from app.adapters.openai.optimized_schema import (
-    get_optimized_analysis_schema,
-    get_optimized_system_prompt,
-    get_optimized_user_prompt
-)
 
 logger = structlog.get_logger()
 
@@ -40,67 +35,7 @@ class OpenAIAnalyzer:
         self.client = AsyncOpenAI(api_key=settings.OPENAI_API_KEY)
         self.rate_limiter = create_rate_limiter()
 
-    def _build_system_prompt(self, language_hint: Optional[Language] = None) -> str:
-        """
-        Build the system prompt for analysis.
-
-        Args:
-            language_hint: Optional language hint for the batch
-
-        Returns:
-            System prompt string
-        """
-        lang_instruction = ""
-        if language_hint:
-            lang_map = {"es": "Spanish", "en": "English"}
-            lang_instruction = f"The comments are primarily in {lang_map.get(language_hint.value, 'Spanish')}."
-
-        return f"""You are an expert customer feedback analyst specializing in emotional intelligence and business insights.
-
-{lang_instruction}
-
-Analyze each customer comment and provide:
-
-1. EMOTIONS: Score each of the 16 emotions from 0 to 1:
-   - Positive: alegria, gratitud, esperanza, amor, orgullo, satisfaccion, confianza
-   - Negative: enojo, frustracion, miedo, tristeza, disgusto, decepcion, confusion
-   - Neutral: sorpresa, anticipacion
-
-2. CHURN RISK: Estimate probability (0-1) that customer will stop using the service
-
-3. PAIN POINTS: Extract up to 5 main issues with categories and severity
-
-4. NPS CATEGORY: Classify as 'promoter', 'passive', or 'detractor' based on sentiment
-
-5. KEY PHRASES: Extract 1-3 phrases that best summarize the feedback
-
-6. SENTIMENT: Overall sentiment score from -1 (very negative) to 1 (very positive)
-
-7. LANGUAGE: Detect if comment is in 'es' (Spanish) or 'en' (English)
-
-Focus on accuracy and nuance in emotional detection. Be precise with churn risk assessment."""
-
-    def _build_user_prompt(self, comments: List[str]) -> str:
-        """
-        Build the user prompt with comments.
-
-        Args:
-            comments: List of comments to analyze
-
-        Returns:
-            User prompt string
-        """
-        formatted_comments = []
-        for i, comment in enumerate(comments, 1):
-            # Clean and truncate if needed
-            clean_comment = comment.strip()[:1000]
-            formatted_comments.append(f"[{i}] {clean_comment}")
-
-        return f"""Analyze these {len(comments)} customer feedback comments:
-
-{chr(10).join(formatted_comments)}
-
-Provide a detailed analysis for EACH comment following the specified JSON structure."""
+    # Removed old verbose methods - now using optimized versions below
 
     @retry(
         stop=stop_after_attempt(3),
@@ -144,12 +79,12 @@ Provide a detailed analysis for EACH comment following the specified JSON struct
         )
 
         try:
-            # Build prompts using optimized versions
-            system_prompt = get_optimized_system_prompt()
-            user_prompt = get_optimized_user_prompt(comments, batch_index)
+            # Build prompts inline - simpler and clearer
+            system_prompt = self._build_optimized_system_prompt()
+            user_prompt = self._build_optimized_user_prompt(comments)
 
-            # Get optimized schema (external, modular)
-            response_schema = get_optimized_analysis_schema()
+            # Define schema inline - no need for external module
+            response_schema = self._get_response_schema()
 
             # Use Chat Completions API with structured output
             response = await self.client.chat.completions.create(
@@ -305,3 +240,58 @@ Provide a detailed analysis for EACH comment following the specified JSON struct
 
         # Calculate weighted sentiment
         return round((positive - negative) / max(1, positive + negative + neutral), 2)
+
+    def _build_optimized_system_prompt(self) -> str:
+        """Build optimized system prompt with minimal tokens."""
+        return """Analyze customer feedback. Extract for each:
+EMOTIONS (0-1): satisfaccion, frustracion, enojo, confianza, decepcion, confusion, anticipacion
+CHURN_RISK (0-1): probability to leave
+PAIN_POINTS: max 2, short strings
+NPS: promoter/passive/detractor
+Be precise. JSON only."""
+
+    def _build_optimized_user_prompt(self, comments: List[str]) -> str:
+        """Build user prompt for batch."""
+        formatted = "\n".join([f"{i+1}. {c[:200]}" for i, c in enumerate(comments)])
+        return f"Analyze {len(comments)} comments:\n{formatted}\nReturn JSON with 'analyses' array."
+
+    def _get_response_schema(self) -> Dict[str, Any]:
+        """Get JSON schema for structured output."""
+        return {
+            "type": "object",
+            "properties": {
+                "analyses": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "emotions": {
+                                "type": "object",
+                                "properties": {
+                                    "satisfaccion": {"type": "number", "minimum": 0, "maximum": 1},
+                                    "frustracion": {"type": "number", "minimum": 0, "maximum": 1},
+                                    "enojo": {"type": "number", "minimum": 0, "maximum": 1},
+                                    "confianza": {"type": "number", "minimum": 0, "maximum": 1},
+                                    "decepcion": {"type": "number", "minimum": 0, "maximum": 1},
+                                    "confusion": {"type": "number", "minimum": 0, "maximum": 1},
+                                    "anticipacion": {"type": "number", "minimum": 0, "maximum": 1}
+                                },
+                                "required": ["satisfaccion", "frustracion", "enojo", "confianza", "decepcion", "confusion", "anticipacion"]
+                            },
+                            "churn_risk": {"type": "number", "minimum": 0, "maximum": 1},
+                            "pain_points": {
+                                "type": "array",
+                                "items": {"type": "string", "maxLength": 30},
+                                "maxItems": 2
+                            },
+                            "nps": {
+                                "type": "string",
+                                "enum": ["promoter", "passive", "detractor"]
+                            }
+                        },
+                        "required": ["emotions", "churn_risk", "pain_points", "nps"]
+                    }
+                }
+            },
+            "required": ["analyses"]
+        }

@@ -16,7 +16,7 @@ import redis
 
 from app.config import settings
 from app.workers.celery_app import celery_app
-from app.adapters.openai_client import openai_analyzer
+from app.adapters.openai import openai_analyzer
 from app.schemas.base import Language, TaskStatus
 from app.services import (
     analysis_service,
