@@ -104,7 +104,7 @@ async def upload_file(
         )
 
         # Store file content in Redis for worker access
-        # Files are stored with 1 hour TTL
+        # Files are stored with 4 hour TTL to support retries
         file_key = f"file_content:{task_id}"
         file_data = {
             "content": base64.b64encode(content).decode('utf-8'),
@@ -113,7 +113,7 @@ async def upload_file(
         }
         redis_client.setex(
             file_key,
-            3600,  # 1 hour TTL
+            14400,  # 4 hour TTL to support retries
             str(file_data)
         )
 

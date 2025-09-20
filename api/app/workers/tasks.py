@@ -108,12 +108,30 @@ def analyze_feedback(self, task_id_param: str, file_info: Dict[str, Any]) -> str
         )
         batch_results = batch_tasks.apply_async()
 
-        # Monitor progress
-        _monitor_batch_progress(task_id, batch_results, len(batches))
+        # Wait for all batches to complete without blocking
+        # Using join() instead of get() to avoid blocking the worker
+        status_service.update_task_progress(task_id, 85, "Esperando resultados de batches")
 
-        # Merge results
+        # Poll for completion instead of blocking
+        import time as time_module
+        max_wait = 300  # 5 minutes max
+        poll_interval = 2
+        elapsed = 0
+
+        while elapsed < max_wait:
+            if batch_results.ready():
+                break
+            time_module.sleep(poll_interval)
+            elapsed += poll_interval
+            progress = min(85 + int(15 * elapsed / max_wait), 99)
+            status_service.update_task_progress(task_id, progress, "Procesando batches")
+
+        if not batch_results.ready():
+            raise TimeoutError("Batch processing timeout")
+
+        # Now safely get the results
         status_service.update_task_progress(task_id, 90, "Consolidando resultados")
-        batch_analysis_results = batch_results.get()
+        batch_analysis_results = batch_results.join()
 
         final_results = analysis_service.merge_batch_results(
             batch_analysis_results, df, task_id, start_time
@@ -201,19 +219,7 @@ def analyze_batch(
         raise
 
 
-def _monitor_batch_progress(task_id: str, batch_results: Any, total_batches: int):
-    """Monitor batch processing progress."""
-    completed_batches = 0
-    while not batch_results.ready():
-        time.sleep(2)
-        current_completed = sum(1 for r in batch_results.results if r.ready())
-        if current_completed > completed_batches:
-            completed_batches = current_completed
-            progress = 40 + int(50 * completed_batches / total_batches)
-            status_service.update_task_progress(
-                task_id, progress,
-                f"Procesados {completed_batches}/{total_batches} lotes"
-            )
+# Function removed - monitoring now done inline in analyze_feedback
 
 
 def _handle_task_error(task_obj: Any, task_id: str, error: str, start_time: float):
