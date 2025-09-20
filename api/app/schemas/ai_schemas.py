@@ -8,29 +8,16 @@ from pydantic import BaseModel, Field, field_validator
 
 
 class EmotionScores(BaseModel):
-    """Emotion scores from 0 to 1 for each emotion category."""
+    """Emotion scores from 0 to 1 for each of the 7 core emotions."""
 
-    # Positive emotions (7)
-    alegria: float = Field(ge=0, le=1, description="Joy/Happiness level")
-    gratitud: float = Field(ge=0, le=1, description="Gratitude level")
-    esperanza: float = Field(ge=0, le=1, description="Hope/Optimism level")
-    amor: float = Field(ge=0, le=1, description="Love/Affection level")
-    orgullo: float = Field(ge=0, le=1, description="Pride level")
-    satisfaccion: float = Field(ge=0, le=1, description="Satisfaction level")
-    confianza: float = Field(ge=0, le=1, description="Trust/Confidence level")
-
-    # Negative emotions (7)
-    enojo: float = Field(ge=0, le=1, description="Anger level")
+    # Core emotions covering full spectrum
+    satisfaccion: float = Field(ge=0, le=1, description="Satisfaction/Joy level")
     frustracion: float = Field(ge=0, le=1, description="Frustration level")
-    miedo: float = Field(ge=0, le=1, description="Fear/Anxiety level")
-    tristeza: float = Field(ge=0, le=1, description="Sadness level")
-    disgusto: float = Field(ge=0, le=1, description="Disgust level")
-    decepcion: float = Field(ge=0, le=1, description="Disappointment level")
-    confusion: float = Field(ge=0, le=1, description="Confusion level")
-
-    # Neutral emotions (2)
-    sorpresa: float = Field(ge=0, le=1, description="Surprise level")
-    anticipacion: float = Field(ge=0, le=1, description="Anticipation level")
+    enojo: float = Field(ge=0, le=1, description="Anger level")
+    confianza: float = Field(ge=0, le=1, description="Trust/Confidence level")
+    decepcion: float = Field(ge=0, le=1, description="Disappointment/Sadness level")
+    confusion: float = Field(ge=0, le=1, description="Confusion/Neutral level")
+    anticipacion: float = Field(ge=0, le=1, description="Anticipation/Surprise level")
 
     @field_validator('*')
     @classmethod

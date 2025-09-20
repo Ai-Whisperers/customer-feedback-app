@@ -226,15 +226,16 @@ def calculate_optimal_concurrency(
     if max_rps is None:
         max_rps = settings.MAX_RPS
 
-    # Determine optimal batch size based on total comments
-    if total_comments <= 50:
-        batch_size = min(25, total_comments)
-    elif total_comments <= 200:
-        batch_size = 30
+    # Dynamic batch size according to blueprint: 30-100 comments per batch based on tokens
+    if total_comments <= 100:
+        batch_size = min(50, total_comments)  # Small datasets: 50 per batch
     elif total_comments <= 500:
-        batch_size = 40
+        batch_size = 75  # Medium datasets: 75 per batch
     else:
-        batch_size = 50
+        batch_size = 100  # Large datasets: 100 per batch
+
+    # Respect configured maximum
+    batch_size = min(batch_size, settings.MAX_BATCH_SIZE)
 
     # Calculate concurrency based on RPS limit
     # Leave some buffer for rate limiting

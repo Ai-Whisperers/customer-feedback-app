@@ -1,6 +1,7 @@
 """
-OpenAI Responses API analyzer for feedback analysis.
-Uses structured outputs with Pydantic schemas for reliable JSON responses.
+OpenAI Responses API (GPT-5) analyzer for feedback analysis.
+Uses structured outputs exclusively with Responses API for optimal performance.
+No Chat Completions fallback - pure Responses API implementation.
 """
 
 import json
@@ -32,7 +33,7 @@ logger = structlog.get_logger()
 
 
 class OpenAIAnalyzer:
-    """OpenAI Responses API client for feedback analysis with structured outputs."""
+    """GPT-5 Responses API client for feedback analysis - no fallbacks, pure performance."""
 
     def __init__(self):
         """Initialize the OpenAI analyzer."""
@@ -150,28 +151,30 @@ Provide a detailed analysis for EACH comment following the specified JSON struct
             # Get optimized schema (external, modular)
             response_schema = get_optimized_analysis_schema()
 
-            # Make API call using chat completions (Responses API not yet available in SDK)
-            # Using structured outputs with response_format
-            response = await self.client.chat.completions.create(
+            # Use Responses API exclusively (no fallback)
+            response = await self.client.responses.create(
                 model=settings.AI_MODEL,
-                messages=[
-                    {"role": "system", "content": system_prompt},
-                    {"role": "user", "content": user_prompt}
-                ],
-                response_format={
-                    "type": "json_schema",
+                instructions=system_prompt,
+                input=user_prompt,
+                text={
+                    "format": "json_schema",
                     "json_schema": {
                         "name": "batch_analysis",
                         "schema": response_schema,
                         "strict": True
                     }
                 },
-                temperature=0.3,  # Low for consistency
-                max_tokens=1500  # Reduced for optimized schema
+                temperature=0.3,
+                verbosity="low",  # Concise responses for speed
+                reasoning_effort="minimal",  # Faster responses without reasoning
+                store=False  # Don't store for compliance/ZDR
             )
 
+            # Extract output_text from Responses API
+            result_text = response.output_text
+
             # Parse the structured output
-            result = json.loads(response.choices[0].message.content)
+            result = json.loads(result_text)
 
             # Validate we got analysis for each comment
             if len(result.get("analyses", [])) != len(comments):
@@ -199,7 +202,7 @@ Provide a detailed analysis for EACH comment following the specified JSON struct
                 # Expand simplified schema to full schema for compatibility
                 formatted_result["comments"].append({
                     "index": i,
-                    "emotions": self._expand_emotions(analysis.get("emotions", {})),
+                    "emotions": analysis.get("emotions", {}),
                     "churn_risk": analysis.get("churn_risk", 0.5),
                     "pain_points": self._expand_pain_points(analysis.get("pain_points", [])),
                     "sentiment_score": self._calculate_sentiment_score(analysis.get("emotions", {})),
@@ -215,7 +218,7 @@ Provide a detailed analysis for EACH comment following the specified JSON struct
                 "Failed to parse OpenAI response",
                 batch_index=batch_index,
                 error=str(e),
-                response_text=response.choices[0].message.content[:500] if 'response' in locals() else None
+                response_text=result_text[:500] if 'result_text' in locals() else None
             )
             raise
 
@@ -230,6 +233,7 @@ Provide a detailed analysis for EACH comment following the specified JSON struct
             )
             raise
 
+
     def optimize_batch_size(self, comments: List[str]) -> List[List[str]]:
         """
         Optimize batch sizes for API calls.
@@ -242,45 +246,6 @@ Provide a detailed analysis for EACH comment following the specified JSON struct
         """
         return optimize_batch_size(comments)
 
-    def _expand_emotions(self, simple_emotions: Dict[str, float]) -> Dict[str, float]:
-        """
-        Expand simplified 5 emotions to full 16 emotions for compatibility.
-
-        Args:
-            simple_emotions: Dict with 5 emotions (frustracion, enojo, etc.)
-
-        Returns:
-            Dict with 16 emotions matching the original schema
-        """
-        # Get values from simplified schema
-        frustracion = simple_emotions.get("frustracion", 0)
-        enojo = simple_emotions.get("enojo", 0)
-        satisfaccion = simple_emotions.get("satisfaccion", 0)
-        insatisfaccion = simple_emotions.get("insatisfaccion", 0)
-        neutral = simple_emotions.get("neutral", 0)
-
-        # Map to 16 emotions
-        return {
-            # Positive emotions (based on satisfaction)
-            "alegria": satisfaccion * 0.8,
-            "gratitud": satisfaccion * 0.3,
-            "esperanza": max(0, satisfaccion - insatisfaccion) * 0.5,
-            "amor": satisfaccion * 0.2,
-            "orgullo": satisfaccion * 0.3,
-            "satisfaccion": satisfaccion,
-            "confianza": satisfaccion * 0.6,
-            # Negative emotions (based on frustration/anger)
-            "enojo": enojo,
-            "frustracion": frustracion,
-            "miedo": insatisfaccion * 0.3,
-            "tristeza": insatisfaccion * 0.4,
-            "disgusto": enojo * 0.6,
-            "decepcion": insatisfaccion * 0.7,
-            "confusion": neutral * 0.8,
-            # Neutral emotions
-            "sorpresa": neutral * 0.3,
-            "anticipacion": neutral * 0.4
-        }
 
     def _expand_pain_points(self, simple_pain_points: List[str]) -> List[Dict[str, Any]]:
         """
@@ -311,7 +276,9 @@ Provide a detailed analysis for EACH comment following the specified JSON struct
         Returns:
             Sentiment score from -1 to 1
         """
-        positive = emotions.get("satisfaccion", 0)
-        negative = (emotions.get("frustracion", 0) + emotions.get("enojo", 0) +
-                   emotions.get("insatisfaccion", 0)) / 3
-        return round(positive - negative, 2)
+        positive = emotions.get("satisfaccion", 0) + emotions.get("confianza", 0) + emotions.get("anticipacion", 0)
+        negative = emotions.get("frustracion", 0) + emotions.get("enojo", 0) + emotions.get("decepcion", 0)
+        neutral = emotions.get("confusion", 0)
+
+        # Calculate weighted sentiment
+        return round((positive - negative) / max(1, positive + negative + neutral), 2)

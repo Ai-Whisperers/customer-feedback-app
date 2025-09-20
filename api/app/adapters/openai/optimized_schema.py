@@ -1,6 +1,6 @@
 """
-Optimized OpenAI JSON Schema for minimal token usage.
-Single source of truth for structured outputs.
+Optimized OpenAI JSON Schema for 7 core emotions.
+Centralized schema - no expansion needed.
 """
 
 from typing import Dict, Any
@@ -22,13 +22,15 @@ def get_optimized_analysis_schema() -> Dict[str, Any]:
                         "emotions": {
                             "type": "object",
                             "properties": {
+                                "satisfaccion": {"type": "number", "minimum": 0, "maximum": 1},
                                 "frustracion": {"type": "number", "minimum": 0, "maximum": 1},
                                 "enojo": {"type": "number", "minimum": 0, "maximum": 1},
-                                "satisfaccion": {"type": "number", "minimum": 0, "maximum": 1},
-                                "insatisfaccion": {"type": "number", "minimum": 0, "maximum": 1},
-                                "neutral": {"type": "number", "minimum": 0, "maximum": 1}
+                                "confianza": {"type": "number", "minimum": 0, "maximum": 1},
+                                "decepcion": {"type": "number", "minimum": 0, "maximum": 1},
+                                "confusion": {"type": "number", "minimum": 0, "maximum": 1},
+                                "anticipacion": {"type": "number", "minimum": 0, "maximum": 1}
                             },
-                            "required": ["frustracion", "enojo", "satisfaccion", "insatisfaccion", "neutral"],
+                            "required": ["satisfaccion", "frustracion", "enojo", "confianza", "decepcion", "confusion", "anticipacion"],
                             "additionalProperties": False
                         },
                         "churn_risk": {
@@ -63,11 +65,13 @@ def get_optimized_system_prompt() -> str:
     return """Analiza comentarios de clientes. Para cada uno extrae:
 
 EMOCIONES (0-1):
+- satisfaccion: nivel de satisfacción/alegría
 - frustracion: nivel de frustración
-- enojo: nivel de enojo
-- satisfaccion: nivel de satisfacción
-- insatisfaccion: nivel de insatisfacción
-- neutral: nivel neutral/confuso
+- enojo: nivel de enojo/ira
+- confianza: nivel de confianza/esperanza
+- decepcion: nivel de decepción/tristeza
+- confusion: nivel de confusión/neutral
+- anticipacion: nivel de anticipación/sorpresa
 
 CHURN_RISK (0-1):
 - 0.8-1.0: menciona cancelar/cambiar
@@ -111,13 +115,16 @@ Responde con JSON array 'analyses' con {len(comments)} elementos en orden."""
 
 
 # Example output size calculation:
-# Per comment: ~150 chars
+# Per comment: ~180 chars (7 emotions)
 # {
-#   "emotions": {"frustracion": 0.8, "enojo": 0.7, "satisfaccion": 0.1, "insatisfaccion": 0.9, "neutral": 0.1},
+#   "emotions": {"satisfaccion": 0.1, "frustracion": 0.8, "enojo": 0.7, "confianza": 0.2, "decepcion": 0.9, "confusion": 0.1, "anticipacion": 0.3},
 #   "churn_risk": 0.85,
 #   "pain_points": ["servicio lento", "precio alto"],
 #   "nps": "detractor"
 # }
 #
-# 15 comments × 150 = 2,250 chars (well within limits)
-# 20 comments × 150 = 3,000 chars (still safe)
+# Blueprint batch sizes:
+# 50 comments × 180 = 9,000 chars (small datasets)
+# 75 comments × 180 = 13,500 chars (medium datasets)
+# 100 comments × 180 = 18,000 chars (large datasets)
+# No max_tokens limit - structured output controls size

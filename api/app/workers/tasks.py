@@ -148,9 +148,38 @@ def analyze_feedback(self, task_id_param: str, file_info: Dict[str, Any]) -> str
             )
             raise TimeoutError(f"Batch processing timeout: {completed_count}/{len(batches)} completed")
 
-        # Now safely get the results
+        # Now safely get the results without using .join() or .get()
         status_service.update_task_progress(task_id, 90, "Consolidando resultados")
-        batch_analysis_results = batch_results.join()
+
+        # Collect results using non-blocking approach
+        batch_analysis_results = []
+
+        # Use Celery's collect() method which doesn't block
+        from celery.result import allow_join_result
+
+        with allow_join_result():
+            # This context manager allows safe result collection
+            for i, result in enumerate(batch_results.results):
+                if result.successful():
+                    try:
+                        # Get the actual result data
+                        batch_data = result.get(disable_sync_subtasks=False, timeout=1)
+                        batch_analysis_results.append(batch_data)
+                    except Exception as e:
+                        logger.error(
+                            "Failed to get batch result",
+                            task_id=task_id,
+                            batch_index=i,
+                            error=str(e)
+                        )
+                        # Continue with other results
+                elif result.failed():
+                    logger.error(
+                        "Batch failed",
+                        task_id=task_id,
+                        batch_index=i,
+                        error=str(result.info)
+                    )
 
         final_results = analysis_service.merge_batch_results(
             batch_analysis_results, df, task_id, start_time

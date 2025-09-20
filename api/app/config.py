@@ -31,7 +31,7 @@ class Settings(BaseSettings):
 
     # OpenAI Configuration
     OPENAI_API_KEY: str = Field(default="", min_length=0)  # Allow empty for health checks
-    AI_MODEL: str = Field(default="gpt-4o-mini")
+    AI_MODEL: str = Field(default="gpt-5")  # Using Responses API
 
     # Redis Configuration
     REDIS_URL: str = Field(default="redis://localhost:6379/0")
@@ -40,14 +40,14 @@ class Settings(BaseSettings):
 
     # File Processing
     FILE_MAX_MB: int = Field(default=20)
-    MAX_BATCH_SIZE: int = Field(default=20)  # Optimized for token limits
+    MAX_BATCH_SIZE: int = Field(default=100)  # Blueprint: dynamic 30-100 per batch
     RESULTS_TTL_SECONDS: int = Field(default=86400)  # 24 hours
 
     # Rate Limiting
-    MAX_RPS: int = Field(default=8)
+    MAX_RPS: int = Field(default=10)  # Increased for faster processing
 
     # Celery Worker Configuration
-    CELERY_WORKER_CONCURRENCY: int = Field(default=6)  # Increased for parallel processing
+    CELERY_WORKER_CONCURRENCY: int = Field(default=4)  # Blueprint recommendation
 
     # Optional
     SENTRY_DSN: Optional[str] = Field(default=None)
