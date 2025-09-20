@@ -22,6 +22,11 @@ from app.schemas.ai_schemas import (
 )
 from app.adapters.openai.client import create_rate_limiter
 from app.adapters.openai.utils import optimize_batch_size
+from app.adapters.openai.optimized_schema import (
+    get_optimized_analysis_schema,
+    get_optimized_system_prompt,
+    get_optimized_user_prompt
+)
 
 logger = structlog.get_logger()
 
@@ -138,78 +143,12 @@ Provide a detailed analysis for EACH comment following the specified JSON struct
         )
 
         try:
-            # Build prompts
-            system_prompt = self._build_system_prompt(language_hint)
-            user_prompt = self._build_user_prompt(comments)
+            # Build prompts using optimized versions
+            system_prompt = get_optimized_system_prompt()
+            user_prompt = get_optimized_user_prompt(comments, batch_index)
 
-            # Create the structured schema for the response
-            response_schema = {
-                "type": "object",
-                "properties": {
-                    "analyses": {
-                        "type": "array",
-                        "items": {
-                            "type": "object",
-                            "properties": {
-                                "emotions": {
-                                    "type": "object",
-                                    "properties": {
-                                        "alegria": {"type": "number", "minimum": 0, "maximum": 1},
-                                        "gratitud": {"type": "number", "minimum": 0, "maximum": 1},
-                                        "esperanza": {"type": "number", "minimum": 0, "maximum": 1},
-                                        "amor": {"type": "number", "minimum": 0, "maximum": 1},
-                                        "orgullo": {"type": "number", "minimum": 0, "maximum": 1},
-                                        "satisfaccion": {"type": "number", "minimum": 0, "maximum": 1},
-                                        "confianza": {"type": "number", "minimum": 0, "maximum": 1},
-                                        "enojo": {"type": "number", "minimum": 0, "maximum": 1},
-                                        "frustracion": {"type": "number", "minimum": 0, "maximum": 1},
-                                        "miedo": {"type": "number", "minimum": 0, "maximum": 1},
-                                        "tristeza": {"type": "number", "minimum": 0, "maximum": 1},
-                                        "disgusto": {"type": "number", "minimum": 0, "maximum": 1},
-                                        "decepcion": {"type": "number", "minimum": 0, "maximum": 1},
-                                        "confusion": {"type": "number", "minimum": 0, "maximum": 1},
-                                        "sorpresa": {"type": "number", "minimum": 0, "maximum": 1},
-                                        "anticipacion": {"type": "number", "minimum": 0, "maximum": 1}
-                                    },
-                                    "required": ["alegria", "gratitud", "esperanza", "amor", "orgullo",
-                                                "satisfaccion", "confianza", "enojo", "frustracion", "miedo",
-                                                "tristeza", "disgusto", "decepcion", "confusion", "sorpresa",
-                                                "anticipacion"],
-                                    "additionalProperties": False
-                                },
-                                "churn_risk": {"type": "number", "minimum": 0, "maximum": 1},
-                                "pain_points": {
-                                    "type": "array",
-                                    "items": {
-                                        "type": "object",
-                                        "properties": {
-                                            "category": {"type": "string"},
-                                            "description": {"type": "string"},
-                                            "severity": {"type": "number", "minimum": 0, "maximum": 1}
-                                        },
-                                        "required": ["category", "description", "severity"],
-                                        "additionalProperties": False
-                                    },
-                                    "maxItems": 5
-                                },
-                                "sentiment_score": {"type": "number", "minimum": -1, "maximum": 1},
-                                "language": {"type": "string", "enum": ["es", "en"]},
-                                "nps_category": {"type": "string", "enum": ["promoter", "passive", "detractor"]},
-                                "key_phrases": {
-                                    "type": "array",
-                                    "items": {"type": "string"},
-                                    "maxItems": 3
-                                }
-                            },
-                            "required": ["emotions", "churn_risk", "pain_points", "sentiment_score",
-                                       "language", "nps_category", "key_phrases"],
-                            "additionalProperties": False
-                        }
-                    }
-                },
-                "required": ["analyses"],
-                "additionalProperties": False
-            }
+            # Get optimized schema (external, modular)
+            response_schema = get_optimized_analysis_schema()
 
             # Make API call using chat completions (Responses API not yet available in SDK)
             # Using structured outputs with response_format
@@ -228,7 +167,7 @@ Provide a detailed analysis for EACH comment following the specified JSON struct
                     }
                 },
                 temperature=0.3,  # Low for consistency
-                max_tokens=4000
+                max_tokens=1500  # Reduced for optimized schema
             )
 
             # Parse the structured output
@@ -257,15 +196,16 @@ Provide a detailed analysis for EACH comment following the specified JSON struct
             }
 
             for i, analysis in enumerate(result.get("analyses", [])):
+                # Expand simplified schema to full schema for compatibility
                 formatted_result["comments"].append({
                     "index": i,
-                    "emotions": analysis["emotions"],
-                    "churn_risk": analysis["churn_risk"],
-                    "pain_points": analysis["pain_points"],
-                    "sentiment_score": analysis["sentiment_score"],
-                    "language": analysis["language"],
-                    "nps_category": analysis["nps_category"],
-                    "key_phrases": analysis.get("key_phrases", [])
+                    "emotions": self._expand_emotions(analysis.get("emotions", {})),
+                    "churn_risk": analysis.get("churn_risk", 0.5),
+                    "pain_points": self._expand_pain_points(analysis.get("pain_points", [])),
+                    "sentiment_score": self._calculate_sentiment_score(analysis.get("emotions", {})),
+                    "language": "es",  # Default to Spanish
+                    "nps_category": analysis.get("nps", "passive"),
+                    "key_phrases": []  # Removed to save tokens
                 })
 
             return formatted_result
@@ -301,3 +241,77 @@ Provide a detailed analysis for EACH comment following the specified JSON struct
             List of comment batches
         """
         return optimize_batch_size(comments)
+
+    def _expand_emotions(self, simple_emotions: Dict[str, float]) -> Dict[str, float]:
+        """
+        Expand simplified 5 emotions to full 16 emotions for compatibility.
+
+        Args:
+            simple_emotions: Dict with 5 emotions (frustracion, enojo, etc.)
+
+        Returns:
+            Dict with 16 emotions matching the original schema
+        """
+        # Get values from simplified schema
+        frustracion = simple_emotions.get("frustracion", 0)
+        enojo = simple_emotions.get("enojo", 0)
+        satisfaccion = simple_emotions.get("satisfaccion", 0)
+        insatisfaccion = simple_emotions.get("insatisfaccion", 0)
+        neutral = simple_emotions.get("neutral", 0)
+
+        # Map to 16 emotions
+        return {
+            # Positive emotions (based on satisfaction)
+            "alegria": satisfaccion * 0.8,
+            "gratitud": satisfaccion * 0.3,
+            "esperanza": max(0, satisfaccion - insatisfaccion) * 0.5,
+            "amor": satisfaccion * 0.2,
+            "orgullo": satisfaccion * 0.3,
+            "satisfaccion": satisfaccion,
+            "confianza": satisfaccion * 0.6,
+            # Negative emotions (based on frustration/anger)
+            "enojo": enojo,
+            "frustracion": frustracion,
+            "miedo": insatisfaccion * 0.3,
+            "tristeza": insatisfaccion * 0.4,
+            "disgusto": enojo * 0.6,
+            "decepcion": insatisfaccion * 0.7,
+            "confusion": neutral * 0.8,
+            # Neutral emotions
+            "sorpresa": neutral * 0.3,
+            "anticipacion": neutral * 0.4
+        }
+
+    def _expand_pain_points(self, simple_pain_points: List[str]) -> List[Dict[str, Any]]:
+        """
+        Convert simple string pain points to structured format.
+
+        Args:
+            simple_pain_points: List of simple strings
+
+        Returns:
+            List of structured pain point dicts
+        """
+        return [
+            {
+                "category": "General",
+                "description": pain[:50],  # Truncate if needed
+                "severity": 0.7  # Default severity
+            }
+            for pain in simple_pain_points
+        ]
+
+    def _calculate_sentiment_score(self, emotions: Dict[str, float]) -> float:
+        """
+        Calculate sentiment score from emotions.
+
+        Args:
+            emotions: Emotion scores dict
+
+        Returns:
+            Sentiment score from -1 to 1
+        """
+        positive = emotions.get("satisfaccion", 0)
+        negative = (emotions.get("frustracion", 0) + emotions.get("enojo", 0) +
+                   emotions.get("insatisfaccion", 0)) / 3
+        return round(positive - negative, 2)

@@ -40,7 +40,7 @@ class Settings(BaseSettings):
 
     # File Processing
     FILE_MAX_MB: int = Field(default=20)
-    MAX_BATCH_SIZE: int = Field(default=50)
+    MAX_BATCH_SIZE: int = Field(default=15)  # Reduced from 50 to prevent token overflow
     RESULTS_TTL_SECONDS: int = Field(default=86400)  # 24 hours
 
     # Rate Limiting
