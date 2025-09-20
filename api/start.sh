@@ -14,7 +14,7 @@ echo "Environment configuration:"
 echo "  - Port: ${PORT:-8000}"
 echo "  - Workers: ${API_WORKERS:-1}"
 echo "  - Log level: ${LOG_LEVEL:-info}"
-echo "  - AI Model: ${AI_MODEL:-gpt-5}"
+echo "  - AI Model: ${AI_MODEL:-gpt-4o-mini}"
 echo "  - Max batch size: ${MAX_BATCH_SIZE:-50}"
 echo "  - Max RPS: ${MAX_RPS:-8}"
 

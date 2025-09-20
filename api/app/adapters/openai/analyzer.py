@@ -1,7 +1,7 @@
 """
-OpenAI Responses API (GPT-5) analyzer for feedback analysis.
-Uses structured outputs exclusively with Responses API for optimal performance.
-No Chat Completions fallback - pure Responses API implementation.
+OpenAI Chat Completions API analyzer for feedback analysis.
+Uses structured outputs with GPT-4o-mini for optimal performance.
+Implements JSON schema validation for consistent responses.
 """
 
 import json
@@ -33,7 +33,7 @@ logger = structlog.get_logger()
 
 
 class OpenAIAnalyzer:
-    """GPT-5 Responses API client for feedback analysis - no fallbacks, pure performance."""
+    """GPT-4o-mini Chat Completions API client for feedback analysis with structured outputs."""
 
     def __init__(self):
         """Initialize the OpenAI analyzer."""
@@ -151,13 +151,15 @@ Provide a detailed analysis for EACH comment following the specified JSON struct
             # Get optimized schema (external, modular)
             response_schema = get_optimized_analysis_schema()
 
-            # Use Responses API exclusively (no fallback)
-            response = await self.client.responses.create(
+            # Use Chat Completions API with structured output
+            response = await self.client.chat.completions.create(
                 model=settings.AI_MODEL,
-                instructions=system_prompt,
-                input=user_prompt,
-                text={
-                    "format": "json_schema",
+                messages=[
+                    {"role": "system", "content": system_prompt},
+                    {"role": "user", "content": user_prompt}
+                ],
+                response_format={
+                    "type": "json_schema",
                     "json_schema": {
                         "name": "batch_analysis",
                         "schema": response_schema,
@@ -165,13 +167,11 @@ Provide a detailed analysis for EACH comment following the specified JSON struct
                     }
                 },
                 temperature=0.3,
-                verbosity="low",  # Concise responses for speed
-                reasoning_effort="minimal",  # Faster responses without reasoning
-                store=False  # Don't store for compliance/ZDR
+                max_tokens=4096  # Ensure we get complete responses
             )
 
-            # Extract output_text from Responses API
-            result_text = response.output_text
+            # Extract content from Chat Completions response
+            result_text = response.choices[0].message.content
 
             # Parse the structured output
             result = json.loads(result_text)

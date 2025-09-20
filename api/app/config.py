@@ -31,7 +31,7 @@ class Settings(BaseSettings):
 
     # OpenAI Configuration
     OPENAI_API_KEY: str = Field(default="", min_length=0)  # Allow empty for health checks
-    AI_MODEL: str = Field(default="gpt-5")  # Using Responses API
+    AI_MODEL: str = Field(default="gpt-4o-mini")  # Using Chat Completions API
 
     # Redis Configuration
     REDIS_URL: str = Field(default="redis://localhost:6379/0")
@@ -40,7 +40,7 @@ class Settings(BaseSettings):
 
     # File Processing
     FILE_MAX_MB: int = Field(default=20)
-    MAX_BATCH_SIZE: int = Field(default=100)  # Blueprint: dynamic 30-100 per batch
+    MAX_BATCH_SIZE: int = Field(default=50)  # Balanced for token limits and performance
     RESULTS_TTL_SECONDS: int = Field(default=86400)  # 24 hours
 
     # Rate Limiting

@@ -1,5 +1,5 @@
 """
-Pydantic schemas for OpenAI Responses API with structured outputs.
+Pydantic schemas for OpenAI Chat Completions API with structured outputs.
 Defines the exact JSON structure for AI analysis results.
 """
 
