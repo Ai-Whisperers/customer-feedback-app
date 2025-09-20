@@ -82,14 +82,19 @@ def analyze_feedback(self, task_id_param: str, file_info: Dict[str, Any]) -> str
         status_service.update_task_progress(task_id, 10, "Cargando archivo")
         df = analysis_service.load_and_validate_file(temp_file)
 
-        # Prepare data
-        status_service.update_task_progress(task_id, 20, "Normalizando datos")
-        comments, ratings, language_hint = analysis_service.prepare_analysis_data(df)
+        # Prepare data with deduplication
+        status_service.update_task_progress(task_id, 20, "Normalizando y deduplicando datos")
+        comments, ratings, language_hint, dedup_info = analysis_service.prepare_analysis_data(df)
 
         # Create batches
+        # Show deduplication savings
+        original_count = dedup_info['original_count']
+        filtered_count = dedup_info['filtered_count']
+        savings_pct = round((1 - filtered_count/original_count) * 100, 1)
+
         status_service.update_task_progress(
             task_id, 30,
-            f"Creando lotes para {len(comments)} comentarios"
+            f"Procesando {filtered_count} comentarios únicos de {original_count} (ahorro: {savings_pct}%)"
         )
         batches = openai_analyzer.optimize_batch_size(comments)
 
@@ -182,7 +187,9 @@ def analyze_feedback(self, task_id_param: str, file_info: Dict[str, Any]) -> str
                     )
 
         final_results = analysis_service.merge_batch_results(
-            batch_analysis_results, df, task_id, start_time
+            batch_analysis_results, df, task_id, start_time,
+            model_used=settings.AI_MODEL,
+            dedup_info=dedup_info
         )
 
         # Store results

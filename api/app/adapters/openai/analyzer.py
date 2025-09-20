@@ -109,15 +109,16 @@ class OpenAIAnalyzer:
             # Extract content from Chat Completions response
             result_text = response.choices[0].message.content
 
-            # Parse the structured output
+            # Parse the minimal object output
             result = json.loads(result_text)
+            objects = result.get("r", [])
 
             # Validate we got analysis for each comment
-            if len(result.get("analyses", [])) != len(comments):
+            if len(objects) != len(comments):
                 logger.warning(
                     "Analysis count mismatch",
                     expected=len(comments),
-                    received=len(result.get("analyses", []))
+                    received=len(objects)
                 )
 
             processing_time = time.time() - start_time
@@ -126,50 +127,80 @@ class OpenAIAnalyzer:
                 "Batch analysis completed",
                 batch_index=batch_index,
                 processing_time=processing_time,
-                comments_analyzed=len(result.get("analyses", []))
+                comments_analyzed=len(objects)
             )
 
-            # Validate with Pydantic schemas for data integrity
-            validated_analyses = []
+            # Process minimal object format
+            processed_results = []
 
-            for i, analysis in enumerate(result.get("analyses", [])):
+            for i, obj in enumerate(objects):
                 try:
-                    # Validate emotions with Pydantic
-                    emotions = EmotionScores(**analysis.get("emotions", {}))
+                    # Extract emotions array
+                    emotions_array = obj.get("e", [])
+                    if len(emotions_array) < 7:
+                        logger.warning(f"Incomplete emotions for comment {i}: {emotions_array}")
+                        continue
 
-                    # Build validated comment analysis
-                    comment_data = {
-                        "index": i,
-                        "emotions": emotions.model_dump(),
-                        "churn_risk": analysis.get("churn_risk", 0.5),
-                        "pain_points": self._expand_pain_points(analysis.get("pain_points", [])),
-                        "sentiment_score": self._calculate_sentiment_score(emotions.model_dump()),
-                        "language": "es",  # Default to Spanish
-                        "nps_category": analysis.get("nps", "passive"),
-                        "key_phrases": []  # Removed to save tokens
+                    # Build emotions dict from array
+                    emotions_dict = {
+                        "satisfaccion": float(emotions_array[0]),
+                        "frustracion": float(emotions_array[1]),
+                        "enojo": float(emotions_array[2]),
+                        "confianza": float(emotions_array[3]),
+                        "decepcion": float(emotions_array[4]),
+                        "confusion": float(emotions_array[5]),
+                        "anticipacion": float(emotions_array[6])
                     }
 
-                    validated_analyses.append(comment_data)
+                    # Churn risk
+                    churn_risk = float(obj.get("c", 0.5))
+
+                    # Pain point (optional)
+                    pain_point = obj.get("p") if obj.get("p") else None
+
+                    # Calculate NPS locally from emotions
+                    positive = emotions_dict["satisfaccion"] + emotions_dict["confianza"]
+                    negative = emotions_dict["frustracion"] + emotions_dict["enojo"] + emotions_dict["decepcion"]
+
+                    if positive > 0.7 and negative < 0.3:
+                        nps_category = "promoter"
+                    elif negative > 0.5:
+                        nps_category = "detractor"
+                    else:
+                        nps_category = "passive"
+
+                    # Build result
+                    processed_results.append({
+                        "index": i,
+                        "emotions": emotions_dict,
+                        "churn_risk": churn_risk,
+                        "pain_points": [pain_point] if pain_point else [],
+                        "sentiment_score": self._calculate_sentiment_score(emotions_dict),
+                        "language": "es",  # Default
+                        "nps_category": nps_category,
+                        "key_phrases": []  # Not used
+                    })
 
                 except Exception as e:
                     logger.warning(
-                        "Validation failed for comment",
+                        "Failed to process object",
                         index=i,
+                        obj=obj,
                         error=str(e)
                     )
-                    # Use raw data if validation fails
-                    validated_analyses.append({
+                    # Add default result
+                    processed_results.append({
                         "index": i,
-                        "emotions": analysis.get("emotions", {}),
-                        "churn_risk": analysis.get("churn_risk", 0.5),
-                        "pain_points": self._expand_pain_points(analysis.get("pain_points", [])),
+                        "emotions": {k: 0.5 for k in ["satisfaccion", "frustracion", "enojo", "confianza", "decepcion", "confusion", "anticipacion"]},
+                        "churn_risk": 0.5,
+                        "pain_points": [],
                         "sentiment_score": 0.0,
                         "language": "es",
-                        "nps_category": analysis.get("nps", "passive"),
+                        "nps_category": "passive",
                         "key_phrases": []
                     })
 
-            return {"comments": validated_analyses}
+            return {"comments": processed_results}
 
         except json.JSONDecodeError as e:
             logger.error(
@@ -186,8 +217,7 @@ class OpenAIAnalyzer:
                 "Batch analysis failed",
                 batch_index=batch_index,
                 error=str(e),
-                processing_time=processing_time,
-                exc_info=True
+                processing_time=processing_time
             )
             raise
 
@@ -242,56 +272,52 @@ class OpenAIAnalyzer:
         return round((positive - negative) / max(1, positive + negative + neutral), 2)
 
     def _build_optimized_system_prompt(self) -> str:
-        """Build optimized system prompt with minimal tokens."""
-        return """Analyze customer feedback. Extract for each:
-EMOTIONS (0-1): satisfaccion, frustracion, enojo, confianza, decepcion, confusion, anticipacion
-CHURN_RISK (0-1): probability to leave
-PAIN_POINTS: max 2, short strings
-NPS: promoter/passive/detractor
-Be precise. JSON only."""
+        """Build ultra-minimal system prompt."""
+        return """Output JSON {"r":[{"e":[7 nums],"c":num,"p":"word?"},...]} per comment.
+e: 7 emotions (satisf,frust,anger,trust,disap,confus,antic) 0-1.
+c: churn risk 0-1.
+p: ONE pain keyword (max 10 chars) if critical, else omit.
+Examples: precio,espera,calidad,servicio,app"""
 
     def _build_optimized_user_prompt(self, comments: List[str]) -> str:
-        """Build user prompt for batch."""
-        formatted = "\n".join([f"{i+1}. {c[:200]}" for i, c in enumerate(comments)])
-        return f"Analyze {len(comments)} comments:\n{formatted}\nReturn JSON with 'analyses' array."
+        """Build minimal user prompt."""
+        # Ultra-compact format: just number and truncated comment
+        formatted = "\n".join([f"{i+1}.{c[:150]}" for i, c in enumerate(comments)])
+        return formatted
 
     def _get_response_schema(self) -> Dict[str, Any]:
-        """Get JSON schema for structured output."""
+        """Get minimal JSON schema for array output."""
+        # OpenAI doesn't support oneOf in structured outputs
+        # We'll handle mixed types in post-processing
         return {
             "type": "object",
             "properties": {
-                "analyses": {
+                "r": {  # 'r' saves tokens vs 'results' or 'analyses'
                     "type": "array",
                     "items": {
                         "type": "object",
                         "properties": {
-                            "emotions": {
-                                "type": "object",
-                                "properties": {
-                                    "satisfaccion": {"type": "number", "minimum": 0, "maximum": 1},
-                                    "frustracion": {"type": "number", "minimum": 0, "maximum": 1},
-                                    "enojo": {"type": "number", "minimum": 0, "maximum": 1},
-                                    "confianza": {"type": "number", "minimum": 0, "maximum": 1},
-                                    "decepcion": {"type": "number", "minimum": 0, "maximum": 1},
-                                    "confusion": {"type": "number", "minimum": 0, "maximum": 1},
-                                    "anticipacion": {"type": "number", "minimum": 0, "maximum": 1}
-                                },
-                                "required": ["satisfaccion", "frustracion", "enojo", "confianza", "decepcion", "confusion", "anticipacion"]
-                            },
-                            "churn_risk": {"type": "number", "minimum": 0, "maximum": 1},
-                            "pain_points": {
+                            "e": {  # emotions array
                                 "type": "array",
-                                "items": {"type": "string", "maxLength": 30},
-                                "maxItems": 2
+                                "items": {"type": "number", "minimum": 0, "maximum": 1},
+                                "minItems": 7,
+                                "maxItems": 7
                             },
-                            "nps": {
+                            "c": {  # churn risk
+                                "type": "number",
+                                "minimum": 0,
+                                "maximum": 1
+                            },
+                            "p": {  # pain point (optional)
                                 "type": "string",
-                                "enum": ["promoter", "passive", "detractor"]
+                                "maxLength": 10
                             }
                         },
-                        "required": ["emotions", "churn_risk", "pain_points", "nps"]
+                        "required": ["e", "c", "p"],  # OpenAI requires all properties
+                        "additionalProperties": False
                     }
                 }
             },
-            "required": ["analyses"]
+            "required": ["r"],
+            "additionalProperties": False
         }

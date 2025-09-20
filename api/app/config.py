@@ -19,7 +19,8 @@ class Settings(BaseSettings):
         env_file_encoding="utf-8",
         case_sensitive=True,
         # This ensures environment variables override .env file values
-        env_ignore_empty=False
+        env_ignore_empty=False,
+        extra="ignore"  # Ignore extra environment variables
     )
 
     # Application
