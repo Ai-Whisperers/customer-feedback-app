@@ -165,6 +165,13 @@ def analyze_feedback(self, task_id_param: str, file_info: Dict[str, Any]) -> str
         status_service.mark_task_completed(task_id)
         log_task_complete("analyze_feedback", task_id, duration)
 
+        # Clean up Redis file data on success
+        try:
+            redis_client.delete(f"file_content:{task_id_param}")
+            logger.info("Redis file cleaned up on success", key=f"file_content:{task_id_param}")
+        except Exception:
+            pass  # Non-critical, Redis has TTL
+
         return task_id
 
     except Exception as e:
@@ -172,7 +179,7 @@ def analyze_feedback(self, task_id_param: str, file_info: Dict[str, Any]) -> str
         raise
 
     finally:
-        # Clean up temporary file and Redis data
+        # Clean up temporary file
         if temp_file and os.path.exists(temp_file):
             try:
                 os.remove(temp_file)
@@ -180,11 +187,9 @@ def analyze_feedback(self, task_id_param: str, file_info: Dict[str, Any]) -> str
             except Exception as cleanup_error:
                 logger.warning("Failed to clean up temp file", error=str(cleanup_error))
 
-        # Clean up Redis file data (optional, has TTL anyway)
-        try:
-            redis_client.delete(f"file_content:{task_id_param}")
-        except Exception:
-            pass  # Non-critical, Redis has TTL
+        # Only delete Redis file on success (not on retry)
+        # Redis TTL will handle cleanup for failed tasks
+        # This ensures retries can still access the file
 
 
 @celery_app.task(bind=True, max_retries=2, default_retry_delay=5)
