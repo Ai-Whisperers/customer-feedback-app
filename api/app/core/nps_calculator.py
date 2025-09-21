@@ -35,7 +35,7 @@ def calculate_nps_score(
         NPS score value
     """
     if method is None:
-        method = os.getenv("NPS_CALCULATION_METHOD", NPSMethod.STANDARD.value)
+        method = os.getenv("NPS_CALCULATION_METHOD", NPSMethod.SHIFTED.value)
 
     total_responses = promoter_count + passive_count + detractor_count
 
@@ -78,7 +78,7 @@ def get_nps_interpretation(score: float, method: str = None) -> str:
         Interpretation string
     """
     if method is None:
-        method = os.getenv("NPS_CALCULATION_METHOD", NPSMethod.STANDARD.value)
+        method = os.getenv("NPS_CALCULATION_METHOD", NPSMethod.SHIFTED.value)
 
     if method == NPSMethod.SHIFTED.value:
         # Shifted scale interpretation (0-100)
@@ -118,8 +118,8 @@ def calculate_nps_metrics_modular(nps_counts: Dict[str, int]) -> Dict[str, Any]:
 
     if total_responses == 0:
         return {
-            "score": 0,
-            "method": os.getenv("NPS_CALCULATION_METHOD", NPSMethod.STANDARD.value),
+            "score": 50,  # Neutral score for shifted method when no data
+            "method": os.getenv("NPS_CALCULATION_METHOD", NPSMethod.SHIFTED.value),
             "promoters": 0,
             "promoters_percentage": 0,
             "passives": 0,
@@ -135,7 +135,7 @@ def calculate_nps_metrics_modular(nps_counts: Dict[str, int]) -> Dict[str, Any]:
         nps_counts.get("detractor", 0)
     )
 
-    method = os.getenv("NPS_CALCULATION_METHOD", NPSMethod.STANDARD.value)
+    method = os.getenv("NPS_CALCULATION_METHOD", NPSMethod.SHIFTED.value)
 
     return {
         "score": round(nps_score, 1),

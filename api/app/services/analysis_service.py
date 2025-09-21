@@ -6,6 +6,7 @@ Coordinates the feedback analysis workflow.
 import time
 from datetime import datetime
 from typing import Dict, List, Any, Optional
+from pathlib import Path
 import pandas as pd
 import structlog
 
@@ -15,6 +16,7 @@ from app.core.validation import (
     detect_dominant_language,
     calculate_nps_category
 )
+from app.core.file_parser import get_parser
 from app.core.aggregation import (
     aggregate_emotions,
     aggregate_sentiments,
@@ -41,7 +43,7 @@ logger = structlog.get_logger()
 
 def load_and_validate_file(file_path: str) -> pd.DataFrame:
     """
-    Load and validate uploaded file.
+    Load and validate uploaded file using modular parser.
 
     Args:
         file_path: Path to the uploaded file
@@ -53,13 +55,23 @@ def load_and_validate_file(file_path: str) -> pd.DataFrame:
         ValueError: If file is invalid or missing required columns
     """
     try:
-        # Determine file type and read
-        if file_path.endswith('.csv'):
-            df = pd.read_csv(file_path, encoding='utf-8')
-        else:  # Excel files
-            df = pd.read_excel(file_path)
+        # Use modular parser for loading and validation
+        parser = get_parser()
+        file_path_obj = Path(file_path)
 
-        # Validate required columns
+        # Parse file with validation
+        df, metadata = parser.parse_file(file_path_obj)
+
+        # Log parsing results
+        logger.info(
+            "File parsed successfully",
+            file_path=file_path,
+            rows=metadata['total_rows'],
+            has_nps=metadata.get('has_nps_column', False),
+            parser_mode=metadata.get('parser_mode', 'base')
+        )
+
+        # Additional validation if needed
         missing_columns = validate_required_columns(df)
         if missing_columns:
             raise ValueError(f"Missing required columns: {missing_columns}")

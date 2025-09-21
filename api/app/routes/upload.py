@@ -14,6 +14,7 @@ import redis
 from app.config import settings
 from app.schemas.upload import UploadResponse, UploadError, FileInfo, UploadOptions
 from app.workers.tasks import analyze_feedback
+from app.core.file_parser import get_parser
 
 router = APIRouter()
 logger = structlog.get_logger()
@@ -181,7 +182,7 @@ async def upload_file(
 
 async def validate_file_structure(file_path: Path) -> FileInfo:
     """
-    Validate the structure of uploaded file.
+    Validate the structure of uploaded file using modular parser.
 
     Args:
         file_path: Path to the uploaded file
@@ -193,46 +194,40 @@ async def validate_file_structure(file_path: Path) -> FileInfo:
         HTTPException if validation fails
     """
     try:
-        # Read file based on extension
-        if file_path.suffix.lower() == '.csv':
-            df = pd.read_csv(file_path, encoding='utf-8')
-        else:
-            df = pd.read_excel(file_path)
+        # Get parser based on configuration
+        parser = get_parser()
 
-        # Check for required columns
-        required_columns = ['Nota', 'Comentario Final']
-        missing_columns = [col for col in required_columns if col not in df.columns]
+        # Parse file with validation
+        try:
+            df, metadata = parser.parse_file(file_path)
+        except ValueError as e:
+            # Handle parser validation errors
+            error_msg = str(e)
+            suggestions = []
 
-        if missing_columns:
+            if "Missing required columns" in error_msg:
+                suggestions = [
+                    "Ensure your file has a 'Nota' column with ratings (0-10)",
+                    "Ensure your file has a 'Comentario Final' column with feedback text"
+                ]
+                error_code = "MISSING_COLUMNS"
+            else:
+                error_code = "PARSE_ERROR"
+
             raise HTTPException(
                 status_code=400,
                 detail={
-                    "error": "Missing required columns",
-                    "details": f"File must contain columns: {', '.join(required_columns)}",
-                    "code": "MISSING_COLUMNS",
-                    "suggestions": [
-                        "Ensure your file has a 'Nota' column with ratings (0-10)",
-                        "Ensure your file has a 'Comentario Final' column with feedback text"
-                    ]
+                    "error": "File structure validation failed",
+                    "details": error_msg,
+                    "code": error_code,
+                    "suggestions": suggestions
                 }
             )
 
-        # Validate data types and ranges
-        valid_rows = 0
+        # Validate data quality
+        quality_stats = parser.validate_data_quality(df)
 
-        # Check Nota column
-        if 'Nota' in df.columns:
-            df['Nota'] = pd.to_numeric(df['Nota'], errors='coerce')
-            valid_ratings = df['Nota'].between(0, 10, inclusive='both')
-            valid_rows = valid_ratings.sum()
-
-        # Check Comentario Final column
-        if 'Comentario Final' in df.columns:
-            df['Comentario Final'] = df['Comentario Final'].astype(str)
-            valid_comments = df['Comentario Final'].str.len() >= 3
-            valid_rows = min(valid_rows, valid_comments.sum())
-
-        if valid_rows == 0:
+        if quality_stats['valid_rows'] == 0:
             raise HTTPException(
                 status_code=400,
                 detail={
@@ -242,22 +237,19 @@ async def validate_file_structure(file_path: Path) -> FileInfo:
                     "suggestions": [
                         "Check that 'Nota' values are between 0 and 10",
                         "Check that 'Comentario Final' has at least 3 characters"
-                    ]
+                    ] + quality_stats.get('issues', [])
                 }
             )
-
-        # Check if NPS column exists
-        has_nps = 'NPS' in df.columns
 
         # Get file size in MB
         file_size_mb = round(os.path.getsize(file_path) / 1024 / 1024, 2)
 
         return FileInfo(
             name=file_path.name,
-            rows=valid_rows,
+            rows=quality_stats['valid_rows'],
             size_mb=file_size_mb,
             columns_found=list(df.columns),
-            has_nps_column=has_nps
+            has_nps_column=metadata['has_nps_column']
         )
 
     except HTTPException:
