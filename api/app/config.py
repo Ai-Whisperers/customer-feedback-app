@@ -47,6 +47,17 @@ class Settings(BaseSettings):
     # Rate Limiting
     MAX_RPS: int = Field(default=10)  # Increased for faster processing
 
+    # Parallel Processing Configuration
+    OPENAI_CONCURRENT_WORKERS: int = Field(default=4, ge=1, le=10)
+    BATCH_SIZE_OPTIMAL: int = Field(default=120, ge=50, le=200)
+    ENABLE_PARALLEL_PROCESSING: bool = Field(default=True)
+    ENABLE_COMMENT_CACHE: bool = Field(default=True)
+    CACHE_TTL_DAYS: int = Field(default=7, ge=1, le=30)
+
+    # Performance Monitoring
+    LOG_PERFORMANCE_METRICS: bool = Field(default=True)
+    ALERT_THRESHOLD_SECONDS: int = Field(default=15)
+
     # Celery Worker Configuration
     CELERY_WORKER_CONCURRENCY: int = Field(default=4)  # Blueprint recommendation
 

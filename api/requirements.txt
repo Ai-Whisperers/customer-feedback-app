@@ -12,6 +12,7 @@ transformers==4.45.0  # Updated for compatibility, use GPT2TokenizerFast for tok
 celery==5.4.0
 redis==5.2.0
 kombu==5.3.4  # Required for Celery serialization
+aiohttp==3.9.1  # For parallel OpenAI API calls
 
 # Data Processing
 pandas==2.2.3
