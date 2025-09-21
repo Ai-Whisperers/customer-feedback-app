@@ -6,6 +6,7 @@ Pure functions for aggregating and calculating metrics.
 from typing import Dict, List, Any, Tuple
 from datetime import datetime
 import structlog
+from .nps_calculator import calculate_nps_metrics_modular
 
 logger = structlog.get_logger()
 
@@ -175,7 +176,7 @@ def calculate_churn_metrics(comments: List[Dict[str, Any]]) -> Dict[str, Any]:
 
 def calculate_nps_metrics(nps_counts: Dict[str, int]) -> Dict[str, Any]:
     """
-    Calculate NPS score and percentages.
+    Calculate NPS score and percentages using the external modular calculator.
 
     Args:
         nps_counts: Dictionary with promoter, passive, detractor counts
@@ -183,30 +184,8 @@ def calculate_nps_metrics(nps_counts: Dict[str, int]) -> Dict[str, Any]:
     Returns:
         Dictionary of NPS metrics
     """
-    total_responses = sum(nps_counts.values())
-
-    if total_responses == 0:
-        return {
-            "score": 0,
-            "promoters": 0,
-            "promoters_percentage": 0,
-            "passives": 0,
-            "passives_percentage": 0,
-            "detractors": 0,
-            "detractors_percentage": 0
-        }
-
-    nps_score = (nps_counts["promoter"] - nps_counts["detractor"]) / total_responses * 100
-
-    return {
-        "score": round(nps_score, 1),
-        "promoters": nps_counts["promoter"],
-        "promoters_percentage": round(nps_counts["promoter"] / total_responses * 100, 1),
-        "passives": nps_counts["passive"],
-        "passives_percentage": round(nps_counts["passive"] / total_responses * 100, 1),
-        "detractors": nps_counts["detractor"],
-        "detractors_percentage": round(nps_counts["detractor"] / total_responses * 100, 1)
-    }
+    # Delegate to the modular NPS calculator with configurable method
+    return calculate_nps_metrics_modular(nps_counts)
 
 
 def build_metadata(
