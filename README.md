@@ -59,11 +59,11 @@ Neutrales: confusión, sorpresa, anticipación
 
 ### 📁 Formatos Soportados
 
-| Entrada | Salida |
-|---------|---------|
-| CSV | JSON |
-| XLSX | CSV |
-| XLS | XLSX |
+| Entrada | Salida | Tamaño Máximo |
+|---------|--------|---------------|
+| CSV | JSON | 20 MB |
+| XLSX | CSV | 20 MB |
+| XLS | XLSX | 20 MB |
 
 ## 🎮 Demo
 
