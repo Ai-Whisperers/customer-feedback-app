@@ -23,6 +23,11 @@ from app.schemas.ai_schemas import (
 )
 from app.adapters.openai.client import create_rate_limiter
 from app.adapters.openai.utils import optimize_batch_size
+from app.utils.openai_logging import (
+    OpenAIMetricsCollector,
+    ResponseValidator,
+    global_metrics
+)
 
 logger = structlog.get_logger()
 
@@ -34,6 +39,7 @@ class OpenAIAnalyzer:
         """Initialize the OpenAI analyzer."""
         self.client = AsyncOpenAI(api_key=settings.OPENAI_API_KEY)
         self.rate_limiter = create_rate_limiter()
+        self.metrics = global_metrics  # Use global metrics collector
 
     # Removed old verbose methods - now using optimized versions below
 
@@ -71,11 +77,12 @@ class OpenAIAnalyzer:
 
         start_time = time.time()
 
-        logger.info(
-            "Starting batch analysis",
+        # Enhanced logging with metrics
+        prompt_length = sum(len(c) for c in comments)
+        context = self.metrics.log_request_start(
             batch_index=batch_index,
             comment_count=len(comments),
-            model=settings.AI_MODEL
+            prompt_length=prompt_length
         )
 
         try:
@@ -102,12 +109,37 @@ class OpenAIAnalyzer:
                     }
                 },
                 temperature=0.3,
-                max_tokens=4096,  # Ensure complete responses
+                max_tokens=min(4096, len(comments) * 100),  # Scale with batch size
                 seed=42  # For reproducibility
             )
 
             # Extract content from Chat Completions response
             result_text = response.choices[0].message.content
+
+            # Validate and repair if needed
+            validated_text, is_valid, issues = ResponseValidator.validate_and_repair(
+                result_text,
+                expected_count=len(comments)
+            )
+
+            if issues:
+                logger.warning(
+                    "Response validation issues",
+                    batch_index=batch_index,
+                    issues=issues,
+                    repaired=validated_text != result_text
+                )
+
+            # Log detailed response metrics
+            self.metrics.log_response_details(
+                context={'batch_index': batch_index, 'comment_count': len(comments), 'timestamp': start_time},
+                response=response,
+                response_text=validated_text,
+                is_complete=is_valid
+            )
+
+            # Use validated text
+            result_text = validated_text
 
             # Parse the minimal object output
             result = json.loads(result_text)
@@ -123,11 +155,16 @@ class OpenAIAnalyzer:
 
             processing_time = time.time() - start_time
 
+            # Enhanced completion logging
+            tokens_used = response.usage.total_tokens if response.usage else 0
             logger.info(
                 "Batch analysis completed",
                 batch_index=batch_index,
                 processing_time=processing_time,
-                comments_analyzed=len(objects)
+                comments_analyzed=len(objects),
+                tokens_used=tokens_used,
+                tokens_per_comment=round(tokens_used/len(comments), 1) if comments else 0,
+                finish_reason=response.choices[0].finish_reason if response.choices else 'unknown'
             )
 
             # Process minimal object format
@@ -203,22 +240,52 @@ class OpenAIAnalyzer:
             return {"comments": processed_results}
 
         except json.JSONDecodeError as e:
+            # Enhanced error logging with recovery attempt
             logger.error(
                 "Failed to parse OpenAI response",
                 batch_index=batch_index,
                 error=str(e),
-                response_text=result_text[:500] if 'result_text' in locals() else None
+                response_text=result_text[:500] if 'result_text' in locals() else None,
+                response_length=len(result_text) if 'result_text' in locals() else 0
             )
+
+            # Log to metrics collector
+            if hasattr(self, 'metrics'):
+                self.metrics.log_error(
+                    context={'batch_index': batch_index, 'comment_count': len(comments), 'timestamp': start_time},
+                    error=e
+                )
+
             raise
 
         except Exception as e:
             processing_time = time.time() - start_time
+
+            # Detailed error logging
+            error_context = {
+                "batch_index": batch_index,
+                "error": str(e),
+                "error_type": type(e).__name__,
+                "processing_time": processing_time,
+                "comment_count": len(comments)
+            }
+
+            # Add rate limit info if available
+            if "rate_limit" in str(e).lower():
+                error_context["rate_limited"] = True
+
             logger.error(
                 "Batch analysis failed",
-                batch_index=batch_index,
-                error=str(e),
-                processing_time=processing_time
+                **error_context
             )
+
+            # Log to metrics
+            if hasattr(self, 'metrics'):
+                self.metrics.log_error(
+                    context={'batch_index': batch_index, 'comment_count': len(comments), 'timestamp': start_time},
+                    error=e
+                )
+
             raise
 
 

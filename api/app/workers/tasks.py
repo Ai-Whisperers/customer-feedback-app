@@ -24,6 +24,7 @@ from app.services import (
     storage_service
 )
 from app.utils.logging import log_task_start, log_task_complete, log_task_error
+from app.utils.openai_logging import global_metrics
 
 logger = structlog.get_logger()
 redis_client = redis.from_url(settings.REDIS_URL)
@@ -116,19 +117,31 @@ def analyze_feedback(self, task_id_param: str, file_info: Dict[str, Any]) -> str
         # Monitor progress without blocking
         status_service.update_task_progress(task_id, 50, f"Procesando {len(batches)} lotes...")
 
-        # Improved progress monitoring
+        # Improved progress monitoring with detailed logging
         import time as time_module
-        max_wait = 180  # 3 minutes max (reduced from 5)
+        max_wait = 180  # 3 minutes max
         poll_interval = 1  # Check more frequently
         elapsed = 0
         last_ready_count = 0
+        failed_batches = []
 
         while elapsed < max_wait:
             if batch_results.ready():
                 break
 
-            # Check how many tasks are complete
-            completed_count = sum(1 for result in batch_results.results if result.ready())
+            # Check how many tasks are complete and failed
+            completed_count = 0
+            for idx, result in enumerate(batch_results.results):
+                if result.ready():
+                    completed_count += 1
+                    # Check if failed
+                    if result.failed() and idx not in failed_batches:
+                        failed_batches.append(idx)
+                        logger.warning(
+                            "Batch failed during processing",
+                            batch_index=idx,
+                            total_batches=len(batches)
+                        )
 
             # Update progress based on actual completion
             if completed_count > last_ready_count:
@@ -136,21 +149,34 @@ def analyze_feedback(self, task_id_param: str, file_info: Dict[str, Any]) -> str
                 progress_pct = 50 + int(40 * completed_count / len(batches))
                 status_service.update_task_progress(
                     task_id, progress_pct,
-                    f"Completados {completed_count}/{len(batches)} lotes"
+                    f"Completados {completed_count}/{len(batches)} lotes (fallos: {len(failed_batches)})"
                 )
 
             time_module.sleep(poll_interval)
             elapsed += poll_interval
 
         if not batch_results.ready():
-            # Try to get partial results
+            # Try to get partial results and log summary
             completed_count = sum(1 for result in batch_results.results if result.ready())
+
+            # Log detailed timeout info
             logger.warning(
                 "Batch processing timeout",
                 task_id=task_id,
                 completed=completed_count,
-                total=len(batches)
+                total=len(batches),
+                failed_batches=failed_batches,
+                timeout_after_seconds=elapsed
             )
+
+            # Log OpenAI metrics summary
+            if hasattr(global_metrics, 'log_batch_summary'):
+                global_metrics.log_batch_summary(
+                    total_batches=len(batches),
+                    completed_batches=completed_count,
+                    failed_batches=failed_batches
+                )
+
             raise TimeoutError(f"Batch processing timeout: {completed_count}/{len(batches)} completed")
 
         # Now safely get the results without using .join() or .get()
@@ -179,11 +205,13 @@ def analyze_feedback(self, task_id_param: str, file_info: Dict[str, Any]) -> str
                         )
                         # Continue with other results
                 elif result.failed():
+                    error_info = str(result.info) if result.info else "Unknown error"
                     logger.error(
-                        "Batch failed",
+                        "Batch failed in final collection",
                         task_id=task_id,
                         batch_index=i,
-                        error=str(result.info)
+                        error=error_info,
+                        traceback=result.traceback if hasattr(result, 'traceback') else None
                     )
 
         final_results = analysis_service.merge_batch_results(
@@ -196,8 +224,18 @@ def analyze_feedback(self, task_id_param: str, file_info: Dict[str, Any]) -> str
         status_service.update_task_progress(task_id, 95, "Guardando resultados")
         storage_service.store_analysis_results(task_id, final_results)
 
-        # Complete
+        # Complete with final metrics
         duration = time.time() - start_time
+
+        # Log final OpenAI metrics
+        if hasattr(global_metrics, 'log_batch_summary'):
+            successful_count = len(batch_analysis_results)
+            global_metrics.log_batch_summary(
+                total_batches=len(batches),
+                completed_batches=successful_count,
+                failed_batches=list(set(range(len(batches))) - set(range(successful_count)))
+            )
+
         status_service.mark_task_completed(task_id)
         log_task_complete("analyze_feedback", task_id, duration)
 
