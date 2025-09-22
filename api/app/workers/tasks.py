@@ -18,6 +18,7 @@ from app.config import settings
 from app.workers.celery_app import celery_app
 from app.adapters.openai import openai_analyzer
 from app.schemas.base import Language, TaskStatus
+from app.utils.event_loop_monitor import monitor_event_loop, log_loop_state
 from app.services import (
     analysis_service,
     status_service,
@@ -31,6 +32,7 @@ redis_client = redis.from_url(settings.REDIS_URL)
 
 
 @celery_app.task(bind=True, max_retries=3)
+@monitor_event_loop("analyze_feedback_main_task")
 def analyze_feedback(self, task_id_param: str, file_info: Dict[str, Any]) -> str:
     """
     Main task to analyze a feedback file.
@@ -267,6 +269,7 @@ def analyze_feedback(self, task_id_param: str, file_info: Dict[str, Any]) -> str
 
 
 @celery_app.task(bind=True, max_retries=2, default_retry_delay=5)
+@monitor_event_loop("analyze_batch_subtask")
 def analyze_batch(
     self,
     comments: List[str],
@@ -296,16 +299,26 @@ def analyze_batch(
     try:
         lang_hint = Language(language_hint) if language_hint else None
 
+        # Log event loop state before creating new loop
+        log_loop_state("Before creating new event loop", batch_index=batch_index)
+
         # Run async analysis
         loop = asyncio.new_event_loop()
         asyncio.set_event_loop(loop)
+
+        log_loop_state("After creating new event loop",
+                      batch_index=batch_index,
+                      loop_id=id(loop))
+
         try:
             result = loop.run_until_complete(
                 openai_analyzer.analyze_batch(comments, batch_index, lang_hint)
             )
             return result
         finally:
+            log_loop_state("Before closing event loop", batch_index=batch_index)
             loop.close()
+            log_loop_state("After closing event loop", batch_index=batch_index)
 
     except Exception as e:
         logger.error(

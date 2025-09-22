@@ -13,6 +13,7 @@ from app.config import settings
 from app.core.cache_manager import CommentCacheManager, BatchCacheProcessor
 from .async_analyzer import AsyncOpenAIAnalyzer
 from .analyzer import OpenAIAnalyzer  # Fallback to sync analyzer
+from app.utils.event_loop_monitor import monitor_event_loop, log_loop_state
 
 logger = structlog.get_logger()
 
@@ -110,6 +111,7 @@ class ParallelProcessor:
 
         return results
 
+    @monitor_event_loop("parallel_process_wrapper")
     def _process_parallel(
         self,
         comments: List[str],
@@ -129,25 +131,46 @@ class ParallelProcessor:
         Returns:
             Analysis results
         """
+        # Log state before attempting to get/create loop
+        log_loop_state("Before getting event loop in parallel processor")
+
         # Create event loop if not exists
         try:
             loop = asyncio.get_event_loop()
+            log_loop_state("Got existing event loop",
+                          loop_id=id(loop),
+                          is_running=loop.is_running(),
+                          is_closed=loop.is_closed())
+
             if loop.is_closed():
+                log_loop_state("Loop is closed, creating new one")
                 loop = asyncio.new_event_loop()
                 asyncio.set_event_loop(loop)
-        except RuntimeError:
+        except RuntimeError as e:
+            log_loop_state(f"RuntimeError getting loop: {e}, creating new one")
             loop = asyncio.new_event_loop()
             asyncio.set_event_loop(loop)
 
         # Run async processing
-        return loop.run_until_complete(
-            self._async_process(
-                comments,
-                language_hint,
-                batch_size,
-                progress_callback
+        log_loop_state("Before run_until_complete",
+                      loop_id=id(loop),
+                      is_running=loop.is_running())
+
+        try:
+            return loop.run_until_complete(
+                self._async_process(
+                    comments,
+                    language_hint,
+                    batch_size,
+                    progress_callback
+                )
             )
-        )
+        except RuntimeError as e:
+            log_loop_state(f"RuntimeError in run_until_complete: {e}",
+                          level="error",
+                          loop_id=id(loop),
+                          is_running=loop.is_running())
+            raise
 
     async def _async_process(
         self,
