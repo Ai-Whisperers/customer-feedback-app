@@ -7,40 +7,67 @@ El **Customer AI Driven Feedback Analyzer** utiliza una arquitectura de microser
 ## Topología de Servicios
 
 ### 1. Servicio Web (Público)
-**Tecnología**: Node.js 18+ con React + TypeScript
+**Tecnología**: Node.js 18+ con React + TypeScript + Express
 **Función**: Backend-for-Frontend (BFF) y servidor de aplicación
+**Ubicación**: `web/bff/server.ts`
 **Características**:
-- Sirve la aplicación React en producción
-- Proxy reverso para llamadas API (`/api/*`)
-- Elimina necesidad de CORS
-- Puerto: 3000
+- Sirve la aplicación React build desde `dist/client`
+- Proxy reverso para llamadas API (`/api/*` → backend privado)
+- Elimina necesidad de CORS completamente
+- Puerto: 3000 (configurable via `PORT`)
+- Middleware de seguridad con Helmet (configurable)
+- Logging detallado de requests y duración
+- Health checks en `/health` y `/debug/proxy`
 
 ### 2. Servicio API (Privado)
-**Tecnología**: Python 3.11+ con FastAPI
+**Tecnología**: Python 3.11+ con FastAPI + Pydantic
 **Función**: Orquestación y lógica de negocio
+**Ubicación**: `api/app/main.py`
 **Características**:
-- No expuesto a Internet directamente
-- Maneja uploads, validación y coordinación
+- No expuesto a Internet directamente (solo via BFF)
+- Maneja uploads con validación modular (BaseFileParser/FlexibleParser)
+- Sistema de parseo configurable via `PARSER_TYPE` env var
 - Gestiona tasks asíncronas con Celery
 - Puerto interno: 8000
+- Rutas principales:
+  - `/upload` - Recepción y validación de archivos
+  - `/status` - Tracking de progreso de tasks
+  - `/results` - Obtención de resultados analizados
+  - `/export` - Exportación a Excel/CSV con formato profesional
+- Almacena archivos en Redis (base64, TTL 4h para reintentos)
 
 ### 3. Servicio Worker (Privado)
-**Tecnología**: Python 3.11+ con Celery
+**Tecnología**: Python 3.11+ con Celery + asyncio
 **Función**: Procesamiento asíncrono y llamadas a OpenAI
+**Ubicación**: `api/app/workers/`
 **Características**:
-- Procesamiento paralelo de batches
-- Rate limiting inteligente
-- Reintentos con backoff exponencial
-- Concurrencia configurable (default: 4)
+- Tasks principales:
+  - `analyze_feedback` - Task principal, coordina el análisis
+  - `analyze_batch` - Subtask para procesar lotes en paralelo
+  - `cleanup_expired_tasks` - Limpieza horaria de datos expirados
+- Procesamiento paralelo de batches (actualmente deshabilitado)
+- Rate limiting: 8 RPS máximo
+- Reintentos con backoff exponencial (máx 3 para main, 2 para batch)
+- Concurrencia configurable via `CELERY_WORKER_CONCURRENCY` (default: 4)
+- Gestión de event loops con monitoreo (`@monitor_event_loop`)
+- Deduplicación de comentarios via hash SHA256
+- Cache de comentarios analizados (7 días TTL)
 
 ### 4. Redis (Externo)
 **Proveedor**: Upstash o Redis privado
 **Función**: Message broker y cache de resultados
+**Namespaces de datos**:
+- `file_content:{task_id}` - Archivos subidos (4h TTL)
+- `task_status:{task_id}` - Estado de progreso (24h TTL)
+- `task_results:{task_id}` - Resultados finales (24h TTL)
+- `celery-task-meta-*` - Metadata de Celery
+- `comment_cache:*` - Cache de análisis (7d TTL)
 **Características**:
-- Broker para Celery tasks
-- Almacenamiento temporal de resultados
-- TTL configurable (default: 24h)
-- Gestión de estado de tasks
+- Broker para Celery tasks (cola "celery" por defecto)
+- Almacenamiento temporal con TTL automático
+- Limpieza horaria de datos expirados
+- Uso de memoria: ~100MB para 3000 comentarios
+- Sin persistencia permanente (todos los datos son efímeros)
 
 ## Flujo de Comunicación
 
@@ -87,13 +114,17 @@ customer-feedback-app/
 │
 ├─ web/                        # Frontend React + BFF
 │  ├─ src/
-│  │  ├─ app/                 # Routing y páginas
-│  │  ├─ components/          # UI reutilizable
-│  │  ├─ features/            # Módulos funcionales
-│  │  ├─ api/                 # Cliente tipado
-│  │  └─ styles/              # Tailwind config
-│  ├─ server/
-│  │  └─ server.ts           # BFF proxy (≤150 loc)
+│  │  ├─ pages/               # Páginas con lazy loading
+│  │  ├─ components/          # UI modularizado
+│  │  │  ├─ ui/              # Glass Design System
+│  │  │  ├─ upload/          # Componentes de carga (4 módulos)
+│  │  │  ├─ results/         # Visualización (7 módulos)
+│  │  │  ├─ progress/        # Tracking de progreso
+│  │  │  └─ export/          # Exportación de resultados
+│  │  ├─ lib/                 # API client y utilidades
+│  │  └─ App.tsx             # Router con Suspense
+│  ├─ bff/
+│  │  └─ server.ts           # Express proxy server
 │  └─ package.json
 │
 ├─ docs/                       # Documentación pública
@@ -230,6 +261,40 @@ GET /api/health
 - **Queue depth** (tasks pendientes)
 - **Worker utilization**
 - **OpenAI API usage**
+
+## Módulos Recientes Implementados
+
+### Sistema de Cálculo NPS Modular
+**Ubicación**: `api/app/core/nps_calculator.py`
+- Métodos disponibles: standard, absolute, weighted, shifted
+- Configurable via `NPS_CALCULATION_METHOD` env var
+- Método shifted por defecto (escala 0-100 positiva)
+
+### Parser de Archivos Flexible
+**Ubicación**: `api/app/core/file_parser.py` y `flexible_parser.py`
+- BaseFileParser: Validación mecánica estricta
+- FlexibleParser: Detección dinámica de columnas
+- Selección via `PARSER_TYPE` env var
+
+### Formateador Excel Profesional
+**Ubicación**: `api/app/core/excel_formatter.py`
+- 5 hojas con formato profesional
+- Gráficos integrados con openpyxl
+- Formato condicional y colores corporativos
+- Habilitado via `EXCEL_FORMATTING_ENABLED`
+
+### Monitor de Event Loops
+**Ubicación**: `api/app/utils/event_loop_monitor.py`
+- Decoradores no intrusivos para debugging
+- Tracking de estados de loops y threads
+- Logging detallado para diagnóstico de conflictos async
+- Crítico para resolver conflictos Celery/asyncio
+
+### Procesador Paralelo (Deshabilitado)
+**Ubicación**: `api/app/adapters/openai/parallel_processor.py`
+- Diseñado para procesamiento concurrente
+- Actualmente deshabilitado por conflicto de event loops
+- Configurado via `ENABLE_PARALLEL_PROCESSING=false`
 
 ## Decisiones Técnicas Clave
 

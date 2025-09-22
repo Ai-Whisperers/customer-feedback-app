@@ -10,7 +10,7 @@ El sistema procesa comentarios de clientes a través de un pipeline asíncrono o
 
 #### 1.1 Upload del Archivo
 ```javascript
-// Frontend: Validación inicial
+// Frontend: Validación inicial en FileUpload.tsx
 const validateFile = (file) => {
   const validExtensions = ['.xlsx', '.xls', '.csv'];
   const maxSizeMB = 20;
@@ -23,33 +23,48 @@ const validateFile = (file) => {
     throw new Error('Archivo demasiado grande');
   }
 };
+
+// El archivo pasa por el BFF proxy:
+// Browser → BFF (port 3000) → API (port 8000)
 ```
 
 #### 1.2 Transmisión al Backend
 ```python
-# API: Recepción y almacenamiento temporal
+# API: Recepción y almacenamiento en Redis
 @router.post("/upload")
 async def upload_file(file: UploadFile):
     # Validación de seguridad
     validate_file_security(file)
 
-    # Guardar en /tmp con UUID único
-    file_path = save_temp_file(file)
+    # Generar task_id único
+    task_id = f"t_{uuid.uuid4().hex[:12]}"
 
-    # Parseo inicial para validación
-    df = parse_file(file_path)
-    validate_columns(df)
+    # Guardar en /tmp temporalmente
+    temp_path = save_temp_file(file, task_id)
 
-    # Crear task asíncrona
-    task = analyze_feedback.delay(file_path)
+    # Parseo con sistema modular
+    parser = get_parser()  # BaseFileParser o FlexibleParser
+    df, metadata = parser.parse_file(temp_path)
+    quality_stats = parser.validate_data_quality(df)
 
-    return {"task_id": task.id}
+    # Almacenar en Redis para workers (base64, TTL 4h)
+    file_key = f"file_content:{task_id}"
+    redis_client.setex(file_key, 14400, base64_content)
+
+    # Crear task asíncrona en Celery
+    task = analyze_feedback.apply_async(
+        args=[task_id, file_info],
+        task_id=task_id
+    )
+
+    return {"task_id": task_id}
 ```
 
 ### Fase 2: Normalización y Preparación
 
 #### 2.1 Validación de Columnas
 ```python
+# Sistema de parseo modular configurable
 REQUIRED_COLUMNS = {
     'Nota': int,           # Obligatorio: 0-10
     'Comentario Final': str # Obligatorio: min 3 chars
@@ -59,6 +74,18 @@ OPTIONAL_COLUMNS = {
     'NPS': str,            # Si existe, usar directamente
     'Fecha': datetime,     # Para análisis temporal
     'Segmento': str        # Para agrupación
+}
+
+# FlexibleParser soporta detección dinámica:
+COLUMN_MAPPINGS = {
+    'nota': {
+        'patterns': [r'nota', r'rating', r'score', r'calificaci[oó]n'],
+        'target': 'Nota'
+    },
+    'comment': {
+        'patterns': [r'comentario', r'comment', r'feedback', r'observaci'],
+        'target': 'Comentario Final'
+    }
 }
 ```
 
@@ -79,9 +106,13 @@ def normalize_data(df: pd.DataFrame) -> pd.DataFrame:
     df = df[df['Nota'].between(0, 10)]
     df = df[df['Comentario Final'].str.len() >= 3]
 
-    # Calcular NPS si no existe
+    # Calcular NPS con sistema modular
     if 'NPS' not in df.columns:
+        from app.core.nps_calculator import calculate_nps_category
         df['NPS'] = df['Nota'].apply(calculate_nps_category)
+
+    # Método de cálculo NPS configurable (shifted por defecto)
+    # NPS_CALCULATION_METHOD=shifted → escala 0-100 positiva
 
     return df
 ```
@@ -112,7 +143,7 @@ def detect_language(text: str) -> str:
 
 #### 4.1 Estrategia de Batching
 ```python
-def create_batches(comments: List[str], max_batch_size: int = 50) -> List[List[str]]:
+def create_batches(comments: List[str], max_batch_size: int = 120) -> List[List[str]]:
     """Crea batches optimizados por tokens"""
     batches = []
     current_batch = []
@@ -140,15 +171,25 @@ def create_batches(comments: List[str], max_batch_size: int = 50) -> List[List[s
 #### 4.2 Distribución a Workers
 ```python
 @celery.task
-def analyze_feedback(file_path: str) -> dict:
-    df = load_and_normalize(file_path)
+@monitor_event_loop("analyze_feedback_main_task")
+def analyze_feedback(task_id: str, file_info: dict) -> dict:
+    # Recuperar archivo de Redis
+    file_content = redis_client.get(f"file_content:{task_id}")
+    df = load_and_normalize(file_content)
+
+    # Deduplicación de comentarios
+    comments, dedup_info = deduplicate_comments(df['Comentario Final'])
     batches = create_batches(df['Comentario Final'].tolist())
 
-    # Crear subtasks paralelas
+    # Crear subtasks paralelas con Celery group
     job = group(
-        analyze_batch.s(batch, idx)
+        analyze_batch.s(batch, idx, language_hint)
         for idx, batch in enumerate(batches)
     )
+
+    # NOTA: Procesamiento paralelo OpenAI deshabilitado
+    # debido a conflicto de event loops con Celery
+    # ENABLE_PARALLEL_PROCESSING=false
 
     # Ejecutar y esperar resultados
     results = job.apply_async()
@@ -161,8 +202,22 @@ def analyze_feedback(file_path: str) -> dict:
 
 #### 5.1 Llamada a Responses API
 ```python
-def analyze_batch_with_openai(comments: List[str]) -> dict:
-    """Analiza batch usando Responses API con Structured Outputs"""
+@celery.task
+@monitor_event_loop("analyze_batch_subtask")
+def analyze_batch(comments: List[str], batch_index: int, language_hint: str) -> dict:
+    """Analiza batch con nuevo event loop aislado"""
+
+    # Crear nuevo event loop para evitar conflictos
+    loop = asyncio.new_event_loop()
+    asyncio.set_event_loop(loop)
+
+    try:
+        result = loop.run_until_complete(
+            openai_analyzer.analyze_batch(comments, batch_index, language_hint)
+        )
+        return result
+    finally:
+        loop.close()
 
     client = OpenAI()
 
@@ -335,6 +390,13 @@ def calculate_aggregated_metrics(data: dict) -> dict:
 def store_results(task_id: str, results: dict):
     """Almacena resultados con TTL"""
 
+    # Incluir formato Excel profesional si está habilitado
+    if settings.EXCEL_FORMATTING_ENABLED:
+        from app.core.excel_formatter import ExcelFormatter
+        formatter = ExcelFormatter()
+        excel_buffer = formatter.create_formatted_excel(results)
+        # Almacenar Excel formateado en Redis
+
     # Serializar resultados
     serialized = json.dumps(results, cls=CustomJSONEncoder)
 
@@ -366,22 +428,22 @@ def generate_export_files(task_id: str, results: dict):
     csv_path = f"/tmp/{task_id}_detailed.csv"
     df_detailed.to_csv(csv_path, index=False)
 
-    # Excel con múltiples hojas
-    excel_path = f"/tmp/{task_id}_analysis.xlsx"
-    with pd.ExcelWriter(excel_path) as writer:
-        # Hoja 1: Resumen
-        df_summary = pd.DataFrame([results['summary']])
-        df_summary.to_excel(writer, sheet_name='Resumen', index=False)
-
-        # Hoja 2: Detalle
-        df_detailed.to_excel(writer, sheet_name='Detalle', index=False)
-
-        # Hoja 3: Pain Points
-        df_pain = pd.DataFrame(
-            results['aggregated']['top_pain_points'],
-            columns=['Pain Point', 'Frecuencia']
-        )
-        df_pain.to_excel(writer, sheet_name='Pain Points', index=False)
+    # Excel profesional con formato y gráficos
+    if settings.EXCEL_FORMATTING_ENABLED:
+        from app.core.excel_formatter import ExcelFormatter
+        formatter = ExcelFormatter()
+        excel_buffer = formatter.create_formatted_excel(results)
+        # Genera 5 hojas con formato profesional:
+        # 1. Resumen Ejecutivo (con métricas clave)
+        # 2. Análisis NPS (con gráfico de distribución)
+        # 3. Análisis de Emociones (con heatmap)
+        # 4. Pain Points (con gráfico de barras)
+        # 5. Datos Detallados (tabla formateada)
+    else:
+        # Excel básico sin formato
+        with pd.ExcelWriter(excel_path) as writer:
+            df_summary.to_excel(writer, sheet_name='Resumen', index=False)
+            df_detailed.to_excel(writer, sheet_name='Detalle', index=False)
 
     return {
         'csv': csv_path,
@@ -455,10 +517,16 @@ const renderCharts = (results) => {
 
 ## Optimizaciones del Pipeline
 
+### Deduplicación de Comentarios
+- Hash SHA256 para detectar duplicados
+- Cache de comentarios analizados (Redis, 7 días TTL)
+- Reduce llamadas a OpenAI en 15-20%
+
 ### Paralelización
-- Procesamiento simultáneo de batches
-- Workers Celery concurrentes
-- Async I/O donde sea posible
+- Procesamiento simultáneo de batches via Celery group
+- Workers Celery concurrentes (CELERY_WORKER_CONCURRENCY=4)
+- Async I/O con aiohttp (cuando parallel está habilitado)
+- **NOTA**: Parallel processing OpenAI deshabilitado temporalmente
 
 ### Caching
 - Cache de resultados frecuentes
@@ -522,12 +590,13 @@ if get_available_memory() < MINIMUM_MEMORY_MB:
 
 ## Performance Benchmarks
 
-| Métrica | Objetivo | Actual |
-|---------|----------|--------|
-| 850 comentarios | <10s | 8.5s |
-| 1200 comentarios | <15s | 12s |
-| 2000 comentarios | <25s | 22s |
-| 3000 comentarios | <40s | 35s |
+| Métrica | Objetivo | Actual | Estado |
+|---------|----------|--------|--------|
+| 850 comentarios | <10s | 8.5s | ✓ Cumple |
+| 1800 comentarios | <10s | ~18s | ✗ No cumple* |
+| 3000 comentarios | <40s | ~30s | ✓ Cumple |
+
+*Debido a procesamiento paralelo deshabilitado por conflicto de event loops
 | Concurrent tasks | 10 | 10 |
 | Memory per task | <500MB | 350MB |
 | API efficiency | >90% | 94% |

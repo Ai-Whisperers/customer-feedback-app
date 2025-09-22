@@ -1,6 +1,6 @@
 # 📊 Customer Feedback Analyzer - Análisis Inteligente con IA
 
-[![Version](https://img.shields.io/badge/version-4.1.0-blue.svg)](https://github.com/Ai-Whisperers/customer-feedback-app)
+[![Version](https://img.shields.io/badge/version-4.2.0-blue.svg)](https://github.com/Ai-Whisperers/customer-feedback-app)
 [![Cost Reduction](https://img.shields.io/badge/cost%20reduction-87%25-success.svg)](https://github.com/Ai-Whisperers/customer-feedback-app)
 [![Status](https://img.shields.io/badge/status-production-success.svg)](https://customer-feedback-app.onrender.com)
 [![OpenAI](https://img.shields.io/badge/OpenAI-GPT--4o--mini-412991.svg)](https://openai.com/)
@@ -90,12 +90,13 @@ Puedes descargar:
 
 ## ⚡ Rendimiento y Costos
 
-| Cantidad de Comentarios | Tiempo Estimado | Costo Aproximado |
-|------------------------|-----------------|------------------|
-| 100 | 3 segundos | $0.002 USD |
-| 500 | 12 segundos | $0.01 USD |
-| 1000 | 25 segundos | $0.02 USD |
-| 3000 | 75 segundos | $0.06 USD |
+| Cantidad de Comentarios | Tiempo Estimado | Costo Aproximado | Estado |
+|------------------------|-----------------|------------------|--------|
+| 100 | 2-3 segundos | $0.002 USD | ✓ Óptimo |
+| 500 | 5-8 segundos | $0.01 USD | ✓ Óptimo |
+| 850 | 8-10 segundos | $0.017 USD | ✓ Óptimo |
+| 1800 | 18-20 segundos | $0.036 USD | ⚠ Mejorable |
+| 3000 | 30-35 segundos | $0.06 USD | ✓ Óptimo |
 
 **✨ Optimización del 87%**: Procesamos tus datos de manera ultra-eficiente, reduciendo costos sin sacrificar calidad.
 
@@ -149,10 +150,18 @@ Puedes descargar:
 
 #### 🚀 Optimización Ultra-Eficiente
 - **87% reducción en costos** de OpenAI API
-- Procesamiento de **25-30 tokens/comentario** (vs 250 anterior)
-- Sistema de **deduplicación inteligente** (25-35% ahorro)
-- **Batching paralelo** con 4 workers simultáneos
-- **Recuperación automática** de respuestas truncadas
+- Procesamiento de **200-300 tokens/comentario** optimizado
+- Sistema de **deduplicación inteligente** (15-20% ahorro)
+- **Cache de comentarios** en Redis (7 días TTL)
+- **Batching dinámico** de 50-120 comentarios
+- **NPS modular** con método shifted (escala 0-100 positiva)
+
+#### 🎨 Nuevas Funcionalidades v4.2
+- **Excel profesional** con 5 hojas formateadas y gráficos
+- **Parser flexible** con detección dinámica de columnas
+- **Monitor de event loops** para debugging avanzado
+- **Formato condicional** en exportaciones Excel
+- **Deduplicación SHA256** de comentarios repetidos
 
 #### 🔧 Arquitectura Robusta
 ```
@@ -202,8 +211,13 @@ npm run dev
 OPENAI_API_KEY=sk-xxxxx
 REDIS_URL=redis://localhost:6379
 AI_MODEL=gpt-4o-mini
-MAX_BATCH_SIZE=50
+BATCH_SIZE_OPTIMAL=120
 CELERY_WORKER_CONCURRENCY=4
+NPS_CALCULATION_METHOD=shifted  # Nuevo: NPS siempre positivo
+EXCEL_FORMATTING_ENABLED=true   # Nuevo: Excel profesional
+ENABLE_COMMENT_CACHE=true       # Nuevo: Cache de comentarios
+PARSER_TYPE=flexible             # Nuevo: Parser dinámico
+ENABLE_PARALLEL_PROCESSING=false # Deshabilitado temporalmente
 ```
 
 ### API REST
@@ -322,4 +336,12 @@ Este proyecto está licenciado bajo MIT License - ver [LICENSE](LICENSE) para m�
 
 **Desarrollado con ❤️ por AI Whisperers Team**
 
-*Versión 4.1.0 - Estado: PRODUCCIÓN - Última actualización: 21 de Septiembre 2025*
+*Versión 4.2.0 - Estado: PRODUCCIÓN - Última actualización: 21 de Septiembre 2025*
+
+### Cambios Recientes (v4.2.0)
+- ✅ NPS modular con escala positiva (0-100)
+- ✅ Parser flexible para diferentes formatos de archivo
+- ✅ Excel profesional con formato y gráficos
+- ✅ Monitor de event loops para debugging
+- ✅ Deduplicación inteligente de comentarios
+- ⚠️ Procesamiento paralelo temporalmente deshabilitado
