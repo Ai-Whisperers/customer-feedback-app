@@ -50,7 +50,7 @@ class Settings(BaseSettings):
     # Parallel Processing Configuration
     OPENAI_CONCURRENT_WORKERS: int = Field(default=4, ge=1, le=10)
     BATCH_SIZE_OPTIMAL: int = Field(default=120, ge=50, le=200)
-    ENABLE_PARALLEL_PROCESSING: bool = Field(default=True)
+    ENABLE_PARALLEL_PROCESSING: bool = Field(default=False)  # Disabled due to event loop conflict
     ENABLE_COMMENT_CACHE: bool = Field(default=True)
     CACHE_TTL_DAYS: int = Field(default=7, ge=1, le=30)
 
