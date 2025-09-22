@@ -58,6 +58,11 @@ class Settings(BaseSettings):
     LOG_PERFORMANCE_METRICS: bool = Field(default=True)
     ALERT_THRESHOLD_SECONDS: int = Field(default=15)
 
+    # Excel Export Formatting
+    EXCEL_FORMATTING_ENABLED: bool = Field(default=True)
+    EXCEL_ENABLE_CHARTS: bool = Field(default=True)
+    EXCEL_ENABLE_CONDITIONAL: bool = Field(default=True)
+
     # Celery Worker Configuration
     CELERY_WORKER_CONCURRENCY: int = Field(default=4)  # Blueprint recommendation
 

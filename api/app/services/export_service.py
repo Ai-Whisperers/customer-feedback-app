@@ -9,6 +9,7 @@ from typing import Dict, Any, Tuple
 import pandas as pd
 import structlog
 
+from app.config import settings
 from app.schemas.export import ExportFormat, ExportInclude
 
 logger = structlog.get_logger()
@@ -74,6 +75,52 @@ def _generate_xlsx_export(
     task_id: str
 ) -> Tuple[bytes, str]:
     """Generate Excel export with multiple sheets."""
+
+    # Check if formatting is enabled
+    if settings.EXCEL_FORMATTING_ENABLED:
+        try:
+            # Use the enhanced formatter
+            from app.core.excel_formatter import create_formatter
+
+            formatter = create_formatter()
+
+            # Prepare data for formatter
+            df = _create_detailed_dataframe(results.get("rows", []))
+            aggregated_results = results.get("summary", {})
+            metadata = results.get("metadata", {})
+            metadata['processing_date'] = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+
+            # Generate formatted workbook
+            excel_buffer = formatter.format_analysis_workbook(
+                df=df,
+                aggregated_results=aggregated_results,
+                metadata=metadata
+            )
+
+            logger.info("Excel export using enhanced formatter", task_id=task_id)
+
+        except Exception as e:
+            # Fallback to basic export
+            logger.warning(
+                "Failed to use enhanced formatter, falling back to basic",
+                task_id=task_id,
+                error=str(e)
+            )
+            excel_buffer = _generate_basic_xlsx(results, include)
+    else:
+        # Use basic export
+        excel_buffer = _generate_basic_xlsx(results, include)
+
+    excel_buffer.seek(0)
+    excel_content = excel_buffer.read()
+
+    filename = f"analysis_{task_id}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.xlsx"
+
+    return excel_content, filename
+
+
+def _generate_basic_xlsx(results: Dict[str, Any], include: ExportInclude) -> io.BytesIO:
+    """Generate basic Excel export (fallback)."""
     excel_buffer = io.BytesIO()
 
     with pd.ExcelWriter(excel_buffer, engine='openpyxl') as writer:
@@ -91,12 +138,7 @@ def _generate_xlsx_export(
             _add_pain_points_sheet(writer, results)
             _add_metadata_sheet(writer, results)
 
-    excel_buffer.seek(0)
-    excel_content = excel_buffer.read()
-
-    filename = f"analysis_{task_id}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.xlsx"
-
-    return excel_content, filename
+    return excel_buffer
 
 
 def _create_dataframe(results: Dict[str, Any], include: ExportInclude) -> pd.DataFrame:
