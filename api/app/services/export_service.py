@@ -154,16 +154,25 @@ def _create_dataframe(results: Dict[str, Any], include: ExportInclude) -> pd.Dat
 def _create_summary_dataframe(results: Dict[str, Any]) -> pd.DataFrame:
     """Create summary dataframe."""
     summary = results.get("summary", {})
+    nps_data = summary.get("nps", {})
+    churn_data = summary.get("churn_risk", {})
+    metadata = results.get("metadata", {})
+
     summary_data = {
-        "NPS Score": summary.get("nps", {}).get("score"),
-        "Total Comments": results.get("metadata", {}).get("total_comments"),
-        "Promoters": summary.get("nps", {}).get("promoters"),
-        "Passives": summary.get("nps", {}).get("passives"),
-        "Detractors": summary.get("nps", {}).get("detractors"),
-        "Avg Churn Risk": summary.get("churn_risk", {}).get("average"),
-        "High Risk Count": summary.get("churn_risk", {}).get("high_risk_count")
+        "Métrica": ["NPS Score", "Total Comentarios", "Promotores", "Pasivos", "Detractores",
+                   "Riesgo Promedio (%)", "Alto Riesgo", "Tiempo Procesamiento (s)"],
+        "Valor": [
+            round(nps_data.get("score", 0), 1),
+            metadata.get("total_comments", 0),
+            f"{nps_data.get('promoters', 0)} ({round(nps_data.get('promoters_percentage', 0), 1)}%)",
+            f"{nps_data.get('passives', 0)} ({round(nps_data.get('passives_percentage', 0), 1)}%)",
+            f"{nps_data.get('detractors', 0)} ({round(nps_data.get('detractors_percentage', 0), 1)}%)",
+            round(churn_data.get("average", 0) * 100, 1),
+            f"{churn_data.get('high_risk_count', 0)} ({round(churn_data.get('high_risk_percentage', 0), 1)}%)",
+            round(metadata.get("processing_time_seconds", 0), 1)
+        ]
     }
-    return pd.DataFrame([summary_data])
+    return pd.DataFrame(summary_data)
 
 
 def _create_detailed_dataframe(rows_data: list) -> pd.DataFrame:
@@ -172,20 +181,24 @@ def _create_detailed_dataframe(rows_data: list) -> pd.DataFrame:
 
     for row in rows_data:
         row_data = {
-            "Index": row.get("index"),
-            "Original Text": row.get("original_text"),
-            "Rating": row.get("nota"),
-            "NPS Category": row.get("nps_category"),
-            "Sentiment": row.get("sentiment"),
-            "Language": row.get("language"),
-            "Churn Risk": row.get("churn_risk"),
-            "Pain Points": "; ".join(row.get("pain_points", []))
+            "Index": row.get("index", 0) + 1,  # 1-based index for Excel
+            "Comentario": row.get("original_text", ""),
+            "Nota": row.get("nota", 5),
+            "Categoría NPS": row.get("nps_category", "passive"),
+            "Sentimiento": row.get("sentiment", "neutral"),
+            "Idioma": row.get("language", "es"),
+            "Riesgo de Abandono (%)": round(row.get("churn_risk", 0.5) * 100, 1),
+            "Puntos de Dolor": "; ".join(row.get("pain_points", [])) if row.get("pain_points") else "N/A"
         }
 
-        # Add emotion columns
+        # Add top emotions only (above 0.3 threshold)
         emotions = row.get("emotions", {})
-        for emotion, value in emotions.items():
-            row_data[f"Emotion_{emotion}"] = value
+        top_emotions = {k: v for k, v in emotions.items() if v > 0.3}
+        if top_emotions:
+            sorted_emotions = sorted(top_emotions.items(), key=lambda x: x[1], reverse=True)[:3]
+            row_data["Emociones Principales"] = ", ".join([f"{e[0].replace('_', ' ').title()}: {round(e[1]*100)}%" for e in sorted_emotions])
+        else:
+            row_data["Emociones Principales"] = "N/A"
 
         detailed_data.append(row_data)
 
@@ -219,15 +232,24 @@ def _add_detailed_sheet(writer: pd.ExcelWriter, results: Dict[str, Any]):
         detailed_data = []
         for row in rows_data:
             row_data = {
-                "Index": row.get("index"),
-                "Text": row.get("original_text", "")[:100],  # Truncate for Excel
-                "Rating": row.get("nota"),
-                "NPS": row.get("nps_category"),
-                "Sentiment": row.get("sentiment"),
-                "Language": row.get("language"),
-                "Churn Risk": row.get("churn_risk"),
-                "Pain Points": "; ".join(row.get("pain_points", []))
+                "Index": row.get("index", 0) + 1,
+                "Comentario": row.get("original_text", "")[:500],  # More text for Excel
+                "Nota": row.get("nota", 5),
+                "NPS": row.get("nps_category", "passive"),
+                "Sentimiento": row.get("sentiment", "neutral"),
+                "Idioma": row.get("language", "es"),
+                "Riesgo (%)": round(row.get("churn_risk", 0.5) * 100, 1),
+                "Puntos de Dolor": "; ".join(row.get("pain_points", [])) if row.get("pain_points") else ""
             }
+
+            # Add top emotions
+            emotions = row.get("emotions", {})
+            top_emotions = sorted([(k, v) for k, v in emotions.items() if v > 0.2], key=lambda x: x[1], reverse=True)[:3]
+            if top_emotions:
+                row_data["Emociones"] = ", ".join([f"{e[0].replace('_', ' ')}: {round(e[1]*100)}%" for e in top_emotions])
+            else:
+                row_data["Emociones"] = ""
+
             detailed_data.append(row_data)
 
         detailed_df = pd.DataFrame(detailed_data)
