@@ -174,7 +174,8 @@ def merge_batch_results(
             api_results,
             dedup_info['all_comments'],
             dedup_info['filtered_indices'],
-            dedup_info['duplicate_map']
+            dedup_info['duplicate_map'],
+            dedup_info.get('all_ratings', [])
         )
     else:
         all_comments = api_results
@@ -240,7 +241,8 @@ def expand_results_with_duplicates(
     api_results: List[Dict[str, Any]],
     all_comments: List[str],
     filtered_indices: List[int],
-    duplicate_map: Dict[int, int]
+    duplicate_map: Dict[int, int],
+    all_ratings: List[int] = None
 ) -> List[Dict[str, Any]]:
     """
     Expand API results to include duplicates.
@@ -270,20 +272,30 @@ def expand_results_with_duplicates(
             if original_idx in index_to_result:
                 result = index_to_result[original_idx].copy()
                 result['index'] = idx
+                result['original_text'] = all_comments[idx]
+                result['nota'] = all_ratings[idx] if all_ratings and idx < len(all_ratings) else 5
                 result['is_duplicate'] = True
                 complete_results.append(result)
             else:
                 # Original not found, create default
-                complete_results.append(create_default_result(idx))
+                result = create_default_result(idx)
+                result['original_text'] = all_comments[idx]
+                result['nota'] = all_ratings[idx] if all_ratings and idx < len(all_ratings) else 5
+                complete_results.append(result)
         elif idx in index_to_result:
             # This is a unique comment with API result
             result = index_to_result[idx].copy()
             result['index'] = idx
+            result['original_text'] = all_comments[idx]
+            result['nota'] = all_ratings[idx] if all_ratings and idx < len(all_ratings) else 5
             result['is_duplicate'] = False
             complete_results.append(result)
         else:
             # This was filtered out (trivial), create default
-            complete_results.append(create_default_result(idx))
+            result = create_default_result(idx)
+            result['original_text'] = all_comments[idx]
+            result['nota'] = all_ratings[idx] if all_ratings and idx < len(all_ratings) else 5
+            complete_results.append(result)
 
     return complete_results
 
