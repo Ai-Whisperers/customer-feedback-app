@@ -63,9 +63,14 @@ export const ProgressTracker: React.FC<ProgressTrackerProps> = ({
     <GlassCard variant="gradient" className="w-full">
       <div className="space-y-6">
         <div className="flex items-center justify-between">
-          <h2 className="text-xl font-bold text-gray-800 dark:text-gray-100">
-            Análisis en Progreso
-          </h2>
+          <div>
+            <h2 className="text-xl font-bold text-gray-800 dark:text-gray-100">
+              Análisis en Progreso
+            </h2>
+            <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+              <strong>El procesamiento completo tomará de 3 a 5 minutos</strong>
+            </p>
+          </div>
           <GlassBadge variant={getStatusColor()} size="md">
             {getStatusText()}
           </GlassBadge>

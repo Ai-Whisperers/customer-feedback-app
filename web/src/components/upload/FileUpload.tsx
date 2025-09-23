@@ -88,6 +88,9 @@ export const FileUpload: React.FC<FileUploadProps> = ({
           <p className="body-lg">
             Sube un archivo CSV o Excel con los comentarios de clientes
           </p>
+          <p className="text-sm text-gray-600 dark:text-gray-400">
+            <strong>El procesamiento del archivo tomará de 3 a 5 minutos</strong>
+          </p>
         </div>
 
         <input
