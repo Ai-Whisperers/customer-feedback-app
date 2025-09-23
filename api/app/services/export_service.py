@@ -473,26 +473,69 @@ def _add_styled_pain_points_sheet(writer: pd.ExcelWriter, results: Dict[str, Any
     """Add styled pain points sheet to Excel file."""
     pain_points = results.get("summary", {}).get("pain_points", [])
 
+    # If no pain_points in summary, aggregate from rows data (like UI does)
+    if not pain_points and results.get("rows"):
+        pain_points_counter = {}
+        total_comments = len(results["rows"])
+
+        for row in results["rows"]:
+            for pain_point in row.get("pain_points", []):
+                pain_points_counter[pain_point] = pain_points_counter.get(pain_point, 0) + 1
+
+        # Convert to list format
+        pain_points = [
+            {
+                "issue": issue,
+                "frequency": freq,
+                "percentage": round(freq / total_comments * 100, 1) if total_comments > 0 else 0
+            }
+            for issue, freq in sorted(pain_points_counter.items(), key=lambda x: x[1], reverse=True)[:10]
+        ]
+
     if pain_points:
-        pain_df = pd.DataFrame(pain_points)
+        # Transform pain_points to proper format for Excel
+        formatted_pain_points = []
+        for point in pain_points:
+            formatted_pain_points.append({
+                "Punto de Dolor": point.get("issue", point.get("category", "N/A")),
+                "Frecuencia": point.get("frequency", point.get("count", 0)),
+                "Porcentaje": f"{point.get('percentage', 0)}%",
+                "Ejemplos": ", ".join(point.get("examples", [])) if point.get("examples") else "N/A"
+            })
+
+        if formatted_pain_points:
+            pain_df = pd.DataFrame(formatted_pain_points)
+        else:
+            # Create empty dataframe with proper columns if no data
+            pain_df = pd.DataFrame(columns=["Punto de Dolor", "Frecuencia", "Porcentaje", "Ejemplos"])
+
+        pain_df.to_excel(writer, sheet_name='Puntos de Dolor', index=False)
+    else:
+        # Create empty dataframe with message
+        pain_df = pd.DataFrame([{
+            "Punto de Dolor": "No se encontraron puntos de dolor",
+            "Frecuencia": 0,
+            "Porcentaje": "0%",
+            "Ejemplos": "N/A"
+        }])
         pain_df.to_excel(writer, sheet_name='Puntos de Dolor', index=False)
 
-        # Style worksheet
-        worksheet = writer.sheets['Puntos de Dolor']
+    # Style worksheet
+    worksheet = writer.sheets['Puntos de Dolor']
 
-        # Style headers
-        for col in range(1, worksheet.max_column + 1):
-            cell = worksheet.cell(row=1, column=col)
-            cell.font = Font(bold=True, color="FFFFFF")
-            cell.fill = PatternFill(start_color="C65911", end_color="C65911", fill_type="solid")
-            cell.alignment = Alignment(horizontal="center")
+    # Style headers
+    for col in range(1, worksheet.max_column + 1):
+        cell = worksheet.cell(row=1, column=col)
+        cell.font = Font(bold=True, color="FFFFFF")
+        cell.fill = PatternFill(start_color="C65911", end_color="C65911", fill_type="solid")
+        cell.alignment = Alignment(horizontal="center")
 
-        # Auto-adjust column widths
-        for col in worksheet.columns:
-            max_length = 0
-            column = col[0].column_letter
-            for cell in col:
-                if cell.value:
-                    max_length = max(max_length, len(str(cell.value)))
-            adjusted_width = min(max_length + 2, 50)
-            worksheet.column_dimensions[column].width = adjusted_width
+    # Auto-adjust column widths
+    for col in worksheet.columns:
+        max_length = 0
+        column = col[0].column_letter
+        for cell in col:
+            if cell.value:
+                max_length = max(max_length, len(str(cell.value)))
+        adjusted_width = min(max_length + 2, 50)
+        worksheet.column_dimensions[column].width = adjusted_width
