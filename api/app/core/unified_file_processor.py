@@ -217,12 +217,13 @@ class UnifiedFileProcessor:
             too_short = df['comment_length'] < self.min_comment_length
             too_long = df['comment_length'] > self.max_comment_length
 
+            # Initialize all as valid
+            df['comment_valid'] = True
+
             if too_short.any():
                 logger.warning(f"Found {too_short.sum()} comments too short")
                 # Mark but don't remove
                 df.loc[too_short, 'comment_valid'] = False
-            else:
-                df['comment_valid'] = True
 
             if too_long.any():
                 logger.warning(f"Found {too_long.sum()} comments too long, truncating")
@@ -288,7 +289,7 @@ class UnifiedFileProcessor:
             'file_name': file_path.name,
             'file_size_mb': file_path.stat().st_size / (1024 * 1024),
             'total_rows': len(df),
-            'valid_rows': len(df[df.get('comment_valid', True) == True]) if 'comment_valid' in df else len(df),
+            'valid_rows': len(df[df['comment_valid'] == True]) if 'comment_valid' in df.columns else len(df),
             'columns_found': list(df.columns),
             'has_nps_column': 'NPS' in df.columns,
             'processing_time_seconds': round(processing_time, 2),
