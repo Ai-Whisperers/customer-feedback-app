@@ -14,7 +14,7 @@ import redis
 from app.config import settings
 from app.schemas.upload import UploadResponse, UploadError, FileInfo, UploadOptions
 from app.workers.tasks import analyze_feedback
-from app.core.file_parser import get_parser
+from app.core.unified_file_processor import UnifiedFileProcessor
 
 router = APIRouter()
 logger = structlog.get_logger()
@@ -195,11 +195,11 @@ async def validate_file_structure(file_path: Path) -> FileInfo:
     """
     try:
         # Get parser based on configuration
-        parser = get_parser()
+        processor = UnifiedFileProcessor()
 
         # Parse file with validation
         try:
-            df, metadata = parser.parse_file(file_path)
+            df, metadata = processor.process_file(file_path)
         except ValueError as e:
             # Handle parser validation errors
             error_msg = str(e)
