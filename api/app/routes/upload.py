@@ -3,6 +3,7 @@
 import os
 import uuid
 import base64
+import json
 from pathlib import Path
 import structlog
 from fastapi import APIRouter, UploadFile, File, HTTPException, Form

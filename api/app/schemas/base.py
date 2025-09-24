@@ -91,8 +91,8 @@ class ChurnMetrics(BaseModel):
 
 class PainPoint(BaseModel):
     """Pain point with frequency and examples."""
-    issue: str = Field(min_length=1, max_length=100)
-    frequency: int = Field(ge=0)
+    category: str = Field(min_length=1, max_length=100)
+    count: int = Field(ge=0)
     percentage: float = Field(ge=0, le=100)
     examples: List[str] = Field(max_items=5, description="Example comments")
 
