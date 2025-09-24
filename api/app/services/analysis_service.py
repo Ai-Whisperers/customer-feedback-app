@@ -17,22 +17,8 @@ from app.core.validation import (
     calculate_nps_category
 )
 from app.core.file_parser import get_parser
-from app.core.aggregation import (
-    aggregate_emotions,
-    aggregate_sentiments,
-    aggregate_languages,
-    aggregate_pain_points,
-    calculate_churn_metrics,
-    calculate_nps_metrics,
-    build_metadata
-)
+from app.core.unified_aggregation import UnifiedAggregator
 from app.services.efficient_deduplication import EfficientDeduplicationService
-from app.services.aggregation_service import (
-    aggregate_pain_points as aggregate_optimized_pain_points,
-    aggregate_emotions as aggregate_optimized_emotions,
-    calculate_nps_distribution,
-    calculate_churn_risk_stats
-)
 from app.config import settings
 
 logger = structlog.get_logger()
@@ -173,52 +159,50 @@ def merge_batch_results(
     else:
         all_comments = api_results
 
-    # Aggregate metrics
-    avg_emotions = aggregate_emotions(all_comments)
-    sentiment_counts = aggregate_sentiments(all_comments)
-    language_counts = aggregate_languages(all_comments)
-    pain_points = aggregate_pain_points(all_comments)
-    churn_metrics = calculate_churn_metrics(all_comments)
+    # Use unified aggregator
+    aggregator = UnifiedAggregator()
 
-    # Calculate NPS from original data
+    # Calculate NPS from original data (not from comments)
     nps_counts = {"promoter": 0, "passive": 0, "detractor": 0}
     for _, row in original_df.iterrows():
         nps_cat = calculate_nps_category(row['Nota'])
         nps_counts[nps_cat] += 1
 
-    nps_metrics = calculate_nps_metrics(nps_counts)
+    # Calculate all NPS metrics
+    total = sum(nps_counts.values())
+    if total > 0:
+        promoters_pct = (nps_counts["promoter"] / total) * 100
+        detractors_pct = (nps_counts["detractor"] / total) * 100
+        passives_pct = (nps_counts["passive"] / total) * 100
+        nps_score = promoters_pct - detractors_pct
+    else:
+        promoters_pct = detractors_pct = passives_pct = nps_score = 0
+
+    nps_metrics = {
+        "score": round(nps_score, 1),
+        "promoters": nps_counts["promoter"],
+        "promoters_percentage": round(promoters_pct, 1),
+        "passives": nps_counts["passive"],
+        "passives_percentage": round(passives_pct, 1),
+        "detractors": nps_counts["detractor"],
+        "detractors_percentage": round(detractors_pct, 1)
+    }
 
     # Calculate processing time
     processing_time = time.time() - start_time
 
-    # Build metadata
-    metadata = build_metadata(
-        total_comments=len(all_comments),
+    # Use unified aggregator to format complete response
+    results = aggregator.format_complete_response(
+        task_id=task_id,
+        comments=all_comments,
         processing_time=processing_time,
         model_used=model_used or settings.AI_MODEL,
-        language_counts=language_counts,
-        batch_count=len(batch_results)
+        include_rows=True,
+        nps_metrics=nps_metrics
     )
 
-    # Build final results structure
-    results = {
-        "task_id": task_id,
-        "metadata": metadata,
-        "summary": {
-            "nps": nps_metrics,
-            "emotions": avg_emotions,
-            "churn_risk": churn_metrics,
-            "pain_points": pain_points,
-            "sentiment_distribution": sentiment_counts
-        },
-        "rows": all_comments,
-        "aggregated_insights": {
-            "top_positive_themes": [],
-            "top_negative_themes": [],
-            "recommendations": [],
-            "segment_analysis": {}
-        }
-    }
+    # Update batch count in metadata
+    results["metadata"]["batches_processed"] = len(batch_results)
 
     logger.info(
         "Results merged successfully",
