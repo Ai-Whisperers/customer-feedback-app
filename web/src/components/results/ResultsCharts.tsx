@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { EmotionsChart } from './EmotionsChart';
 import { NPSChart } from './NPSChart';
 import { ChurnRiskChart } from './ChurnRiskChart';
@@ -11,14 +11,24 @@ interface ResultsChartsProps {
   results: AnalysisResults;
 }
 
-export const ResultsCharts: React.FC<ResultsChartsProps> = ({ results }) => {
-  // Calculate key metrics
-  const rows = results.rows || [];
-  const totalComments = rows.length;
-  const avgChurnRisk = totalComments > 0 ? rows.reduce((sum, r) => sum + r.churn_risk, 0) / totalComments : 0;
-  const promoters = rows.filter(r => r.nps_category === 'promoter').length;
-  const detractors = rows.filter(r => r.nps_category === 'detractor').length;
-  const npsScore = totalComments > 0 ? ((promoters - detractors) / totalComments) * 100 : 0;
+export const ResultsCharts: React.FC<ResultsChartsProps> = React.memo(({ results }) => {
+  // Memoize rows extraction
+  const rows = useMemo(() => results.rows || [], [results.rows]);
+
+  // Memoize key metrics calculations
+  const { totalComments, avgChurnRisk, npsScore } = useMemo(() => {
+    const total = rows.length;
+    const churnRisk = total > 0 ? rows.reduce((sum, r) => sum + r.churn_risk, 0) / total : 0;
+    const promoterCount = rows.filter(r => r.nps_category === 'promoter').length;
+    const detractorCount = rows.filter(r => r.nps_category === 'detractor').length;
+    const nps = total > 0 ? ((promoterCount - detractorCount) / total) * 100 : 0;
+
+    return {
+      totalComments: total,
+      avgChurnRisk: churnRisk,
+      npsScore: nps
+    };
+  }, [rows]);
 
   return (
     <div className="space-y-6">
@@ -62,4 +72,6 @@ export const ResultsCharts: React.FC<ResultsChartsProps> = ({ results }) => {
       <SampleCommentsTable rows={rows} />
     </div>
   );
-};
+});
+
+ResultsCharts.displayName = 'ResultsCharts';
