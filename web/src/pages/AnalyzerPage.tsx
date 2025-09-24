@@ -25,6 +25,9 @@ export const AnalyzerPage: React.FC = () => {
   const [processedRows, setProcessedRows] = useState(0);
   const [totalRows, setTotalRows] = useState(0);
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
+  const lastProgressRef = useRef<number>(0);
+  const stallTimeRef = useRef<number>(Date.now());
+  const currentTaskIdRef = useRef<string>('');
 
   const handleFileUpload = async (file: File) => {
     setAppState('uploading');
@@ -75,12 +78,28 @@ export const AnalyzerPage: React.FC = () => {
   useEffect(() => {
     if (!taskId || appState !== 'processing') return;
 
+    // Cancel previous task's polling
+    if (currentTaskIdRef.current && currentTaskIdRef.current !== taskId) {
+      cancelAllRequests(); // Cancel previous task's requests
+    }
+    currentTaskIdRef.current = taskId;
+
+    // Reset stall detection on new task
+    lastProgressRef.current = 0;
+    stallTimeRef.current = Date.now();
+
     const pollStatus = async () => {
+      // Guard against race condition - only process if still the current task
+      if (currentTaskIdRef.current !== taskId) {
+        return;
+      }
+
       try {
         const status = await getStatus(taskId);
 
         // Update UI with mapped status fields
-        setProgress(status.progress || 0);
+        const currentProgress = status.progress || 0;
+        setProgress(currentProgress);
         setStatusMessage(status.message || 'Procesando...');
 
         // Use processed_rows and total_rows if available
@@ -92,10 +111,35 @@ export const AnalyzerPage: React.FC = () => {
           setTotalRows(status.total_rows);
         }
 
+        // Check for stall (no progress for 60 seconds)
+        if (status.status === 'processing' || status.status === 'pending') {
+          if (currentProgress > lastProgressRef.current || status.processed_rows > lastProgressRef.current) {
+            lastProgressRef.current = Math.max(currentProgress, status.processed_rows || 0);
+            stallTimeRef.current = Date.now();
+          } else {
+            const stallDuration = Date.now() - stallTimeRef.current;
+            if (stallDuration > 60000) { // 60 seconds timeout
+              setError('El análisis se ha detenido. El proceso puede estar tardando más de lo esperado. Por favor, intente con un archivo más pequeño.');
+              setAppState('error');
+              if (intervalRef.current) {
+                clearInterval(intervalRef.current);
+                intervalRef.current = null;
+              }
+              return;
+            }
+          }
+        }
+
         if (status.status === 'completed') {
-          const analysisResults = await getResults(taskId, 'json', true);
-          setResults(analysisResults);
-          setAppState('completed');
+          // Double-check we're still the current task before fetching results
+          if (currentTaskIdRef.current === taskId) {
+            const analysisResults = await getResults(taskId, 'json', true);
+            // Final check before setting results
+            if (currentTaskIdRef.current === taskId) {
+              setResults(analysisResults);
+              setAppState('completed');
+            }
+          }
           if (intervalRef.current) {
             clearInterval(intervalRef.current);
             intervalRef.current = null;

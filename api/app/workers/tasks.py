@@ -19,6 +19,8 @@ from app.workers.celery_app import celery_app
 from app.adapters.openai import openai_analyzer
 from app.schemas.base import Language, TaskStatus
 from app.utils.event_loop_monitor import monitor_event_loop, log_loop_state
+from app.utils.event_loop_manager import SafeEventLoopManager
+from app.utils.memory_monitor import MemoryMonitor
 from app.services import (
     analysis_service,
     status_service,
@@ -26,6 +28,10 @@ from app.services import (
 )
 from app.utils.logging import log_task_start, log_task_complete, log_task_error
 from app.utils.openai_logging import global_metrics
+
+# Import hybrid analyzer if enabled
+if settings.HYBRID_ANALYSIS_ENABLED:
+    from app.adapters.hybrid_analyzer import HybridAnalyzer
 
 logger = structlog.get_logger()
 redis_client = redis.from_url(settings.REDIS_URL)
@@ -64,8 +70,8 @@ def analyze_feedback(self, task_id_param: str, file_info: Dict[str, Any]) -> str
         if not file_data_str:
             raise FileNotFoundError(f"File not found in Redis: {file_key}")
 
-        # Parse file data
-        file_data = eval(file_data_str)  # Safe since we control the data format
+        # Parse file data safely using JSON
+        file_data = json.loads(file_data_str)
         content = base64.b64decode(file_data['content'])
         extension = file_data['extension']
 
@@ -99,7 +105,17 @@ def analyze_feedback(self, task_id_param: str, file_info: Dict[str, Any]) -> str
             task_id, 30,
             f"Procesando {filtered_count} comentarios únicos de {original_count} (ahorro: {savings_pct}%)"
         )
-        batches = openai_analyzer.optimize_batch_size(comments)
+
+        # Dynamic batch sizing based on memory
+        if settings.DYNAMIC_BATCH_SIZING:
+            batch_size = MemoryMonitor.calculate_safe_batch_size(
+                len(comments),
+                settings.BATCH_SIZE_OPTIMAL
+            )
+            logger.info(f"Dynamic batch size: {batch_size} (memory-aware)")
+            batches = [comments[i:i+batch_size] for i in range(0, len(comments), batch_size)]
+        else:
+            batches = openai_analyzer.optimize_batch_size(comments)
 
         logger.info("Created batches", task_id=task_id, batch_count=len(batches))
 
@@ -278,6 +294,7 @@ def analyze_batch(
 ) -> Dict[str, Any]:
     """
     Analyze a single batch of comments.
+    Now uses hybrid analysis if enabled.
 
     Args:
         comments: List of comments to analyze
@@ -293,32 +310,59 @@ def analyze_batch(
         "Processing batch",
         task_id=task_id,
         batch_index=batch_index,
-        comment_count=len(comments)
+        comment_count=len(comments),
+        hybrid_enabled=settings.HYBRID_ANALYSIS_ENABLED
     )
 
     try:
-        lang_hint = Language(language_hint) if language_hint else None
+        # Check memory before processing
+        memory_status = MemoryMonitor.check_memory_status()
+        if memory_status == 'critical':
+            logger.warning("Critical memory, reducing batch size")
+            comments = comments[:20]  # Reduce to 20 comments max
 
-        # Log event loop state before creating new loop
-        log_loop_state("Before creating new event loop", batch_index=batch_index)
+        # Choose analyzer based on configuration
+        if settings.HYBRID_ANALYSIS_ENABLED:
+            # Use hybrid analyzer
+            analyzer = HybridAnalyzer()
 
-        # Run async analysis
-        loop = asyncio.new_event_loop()
-        asyncio.set_event_loop(loop)
-
-        log_loop_state("After creating new event loop",
-                      batch_index=batch_index,
-                      loop_id=id(loop))
-
-        try:
-            result = loop.run_until_complete(
-                openai_analyzer.analyze_batch(comments, batch_index, lang_hint)
+            # Run hybrid analysis with proper event loop management
+            result = SafeEventLoopManager.run_async_in_worker(
+                analyzer.analyze_batch(comments, batch_index, language_hint or "es")
             )
+
+            # Log memory and token savings
+            logger.info(
+                "Hybrid analysis completed",
+                batch_index=batch_index,
+                memory_mb=MemoryMonitor.get_used_memory_mb()
+            )
+
             return result
-        finally:
-            log_loop_state("Before closing event loop", batch_index=batch_index)
-            loop.close()
-            log_loop_state("After closing event loop", batch_index=batch_index)
+        else:
+            # Legacy approach (old OpenAI-only analyzer)
+            lang_hint = Language(language_hint) if language_hint else None
+
+            # Log event loop state before creating new loop
+            log_loop_state("Before creating new event loop", batch_index=batch_index)
+
+            # Run async analysis
+            loop = asyncio.new_event_loop()
+            asyncio.set_event_loop(loop)
+
+            log_loop_state("After creating new event loop",
+                          batch_index=batch_index,
+                          loop_id=id(loop))
+
+            try:
+                result = loop.run_until_complete(
+                    openai_analyzer.analyze_batch(comments, batch_index, lang_hint)
+                )
+                return result
+            finally:
+                log_loop_state("Before closing event loop", batch_index=batch_index)
+                loop.close()
+                log_loop_state("After closing event loop", batch_index=batch_index)
 
     except Exception as e:
         logger.error(

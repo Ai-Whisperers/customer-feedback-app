@@ -110,7 +110,8 @@ class OpenAIAnalyzer:
                 },
                 temperature=0.3,
                 max_tokens=min(4096, len(comments) * 100),  # Scale with batch size
-                seed=42  # For reproducibility
+                seed=42,  # For reproducibility
+                timeout=settings.OPENAI_TIMEOUT_SECONDS  # Explicit timeout
             )
 
             # Extract content from Chat Completions response

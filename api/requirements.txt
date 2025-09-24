@@ -28,3 +28,9 @@ tenacity==8.2.3  # Required for retry logic
 
 # Logging
 structlog==24.4.0
+
+# Local Sentiment Analysis (New)
+vaderSentiment==3.3.2
+textblob==0.17.1
+spacy==3.7.2
+psutil==5.9.8  # For memory monitoring

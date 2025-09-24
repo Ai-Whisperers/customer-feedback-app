@@ -81,6 +81,9 @@ celery_app.conf.update(
     result_expires=settings.RESULTS_TTL_SECONDS,
     result_persistent=True,
 
+    # Connection retry configuration
+    broker_connection_retry_on_startup=True,
+
     # Task limits
     task_time_limit=600,  # 10 minutes
     task_soft_time_limit=540,  # 9 minutes warning

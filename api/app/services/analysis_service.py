@@ -10,35 +10,22 @@ from pathlib import Path
 import pandas as pd
 import structlog
 
-from app.core.validation import (
-    validate_required_columns,
-    normalize_feedback_data,
-    detect_dominant_language,
-    calculate_nps_category
-)
-from app.core.file_parser import get_parser
-from app.core.aggregation import (
-    aggregate_emotions,
-    aggregate_sentiments,
-    aggregate_languages,
-    aggregate_pain_points,
-    calculate_churn_metrics,
-    calculate_nps_metrics,
-    build_metadata
-)
-from app.services.deduplication_service import (
-    DeduplicationService,
-    filter_trivial_comments
-)
-from app.services.aggregation_service import (
-    aggregate_pain_points as aggregate_optimized_pain_points,
-    aggregate_emotions as aggregate_optimized_emotions,
-    calculate_nps_distribution,
-    calculate_churn_risk_stats
-)
+from app.core.unified_file_processor import UnifiedFileProcessor
+from app.core.unified_aggregation import UnifiedAggregator
+from app.services.efficient_deduplication import EfficientDeduplicationService
 from app.config import settings
 
 logger = structlog.get_logger()
+
+
+def calculate_nps_category(rating: int) -> str:
+    """Calculate NPS category from rating."""
+    if rating >= 9:
+        return 'promoter'
+    elif rating >= 7:
+        return 'passive'
+    else:
+        return 'detractor'
 
 
 def load_and_validate_file(file_path: str) -> pd.DataFrame:
@@ -55,26 +42,22 @@ def load_and_validate_file(file_path: str) -> pd.DataFrame:
         ValueError: If file is invalid or missing required columns
     """
     try:
-        # Use modular parser for loading and validation
-        parser = get_parser()
+        # Use unified processor for loading, validation, and normalization
+        processor = UnifiedFileProcessor()
         file_path_obj = Path(file_path)
 
-        # Parse file with validation
-        df, metadata = parser.parse_file(file_path_obj)
+        # Process file with integrated validation
+        df, metadata = processor.process_file(file_path_obj)
 
-        # Log parsing results
+        # Log processing results
         logger.info(
-            "File parsed successfully",
+            "File processed successfully",
             file_path=file_path,
             rows=metadata['total_rows'],
+            valid_rows=metadata['valid_rows'],
             has_nps=metadata.get('has_nps_column', False),
-            parser_mode=metadata.get('parser_mode', 'base')
+            detected_language=metadata.get('detected_language', 'es')
         )
-
-        # Additional validation if needed
-        missing_columns = validate_required_columns(df)
-        if missing_columns:
-            raise ValueError(f"Missing required columns: {missing_columns}")
 
         return df
 
@@ -93,39 +76,36 @@ def prepare_analysis_data(df: pd.DataFrame) -> tuple[List[str], List[int], Optio
     Returns:
         Tuple of (comments, ratings, language_hint, dedup_info)
     """
-    # Normalize data
-    df = normalize_feedback_data(df)
-
+    # Data is already normalized by UnifiedFileProcessor
     if df.empty:
-        raise ValueError("No valid data found after normalization")
+        raise ValueError("No valid data found")
 
     all_comments = df['Comentario Final'].tolist()
     all_ratings = df['Nota'].tolist()
 
-    # Apply deduplication
-    dedup_service = DeduplicationService(threshold=0.85)
-    unique_indices, duplicate_map = dedup_service.find_duplicates(all_comments)
+    # Apply efficient O(n) deduplication
+    dedup_service = EfficientDeduplicationService()
+    (
+        comments_for_api,
+        ratings,
+        filtered_indices,
+        duplicate_map,
+        dedup_info
+    ) = dedup_service.deduplicate_comments(
+        all_comments,
+        all_ratings,
+        similarity_threshold=0.85
+    )
 
-    # Filter trivial comments from unique set
-    filtered_indices = filter_trivial_comments(all_comments, unique_indices)
+    # Truncate comments for API processing
+    comments_for_api = [c[:150] for c in comments_for_api]
 
-    # Get unique comments for API processing
-    comments_for_api = [all_comments[i][:150] for i in filtered_indices]  # Truncate to 150 chars
-    ratings = [all_ratings[i] for i in filtered_indices]
-
-    # Detect dominant language
-    sample_size = min(10, len(comments_for_api))
-    language_hint = detect_dominant_language(comments_for_api[:sample_size]) if comments_for_api else None
-
-    dedup_info = {
-        'original_count': len(all_comments),
-        'unique_count': len(unique_indices),
-        'filtered_count': len(filtered_indices),
-        'duplicate_map': duplicate_map,
-        'filtered_indices': filtered_indices,
-        'all_comments': all_comments,
-        'all_ratings': all_ratings
-    }
+    # Get language hint from dataframe if available, otherwise detect
+    if 'detected_language' in df.columns and not df['detected_language'].empty:
+        language_hint = df['detected_language'].iloc[0]
+    else:
+        # Fallback detection if needed
+        language_hint = 'es'  # Default to Spanish
 
     logger.info(
         "Data prepared with deduplication",
@@ -180,52 +160,50 @@ def merge_batch_results(
     else:
         all_comments = api_results
 
-    # Aggregate metrics
-    avg_emotions = aggregate_emotions(all_comments)
-    sentiment_counts = aggregate_sentiments(all_comments)
-    language_counts = aggregate_languages(all_comments)
-    pain_points = aggregate_pain_points(all_comments)
-    churn_metrics = calculate_churn_metrics(all_comments)
+    # Use unified aggregator
+    aggregator = UnifiedAggregator()
 
-    # Calculate NPS from original data
+    # Calculate NPS from original data (not from comments)
     nps_counts = {"promoter": 0, "passive": 0, "detractor": 0}
     for _, row in original_df.iterrows():
         nps_cat = calculate_nps_category(row['Nota'])
         nps_counts[nps_cat] += 1
 
-    nps_metrics = calculate_nps_metrics(nps_counts)
+    # Calculate all NPS metrics
+    total = sum(nps_counts.values())
+    if total > 0:
+        promoters_pct = (nps_counts["promoter"] / total) * 100
+        detractors_pct = (nps_counts["detractor"] / total) * 100
+        passives_pct = (nps_counts["passive"] / total) * 100
+        nps_score = promoters_pct - detractors_pct
+    else:
+        promoters_pct = detractors_pct = passives_pct = nps_score = 0
+
+    nps_metrics = {
+        "score": round(nps_score, 1),
+        "promoters": nps_counts["promoter"],
+        "promoters_percentage": round(promoters_pct, 1),
+        "passives": nps_counts["passive"],
+        "passives_percentage": round(passives_pct, 1),
+        "detractors": nps_counts["detractor"],
+        "detractors_percentage": round(detractors_pct, 1)
+    }
 
     # Calculate processing time
     processing_time = time.time() - start_time
 
-    # Build metadata
-    metadata = build_metadata(
-        total_comments=len(all_comments),
+    # Use unified aggregator to format complete response
+    results = aggregator.format_complete_response(
+        task_id=task_id,
+        comments=all_comments,
         processing_time=processing_time,
         model_used=model_used or settings.AI_MODEL,
-        language_counts=language_counts,
-        batch_count=len(batch_results)
+        include_rows=True,
+        nps_metrics=nps_metrics
     )
 
-    # Build final results structure
-    results = {
-        "task_id": task_id,
-        "metadata": metadata,
-        "summary": {
-            "nps": nps_metrics,
-            "emotions": avg_emotions,
-            "churn_risk": churn_metrics,
-            "pain_points": pain_points,
-            "sentiment_distribution": sentiment_counts
-        },
-        "rows": all_comments,
-        "aggregated_insights": {
-            "top_positive_themes": [],
-            "top_negative_themes": [],
-            "recommendations": [],
-            "segment_analysis": {}
-        }
-    }
+    # Update batch count in metadata
+    results["metadata"]["batches_processed"] = len(batch_results)
 
     logger.info(
         "Results merged successfully",

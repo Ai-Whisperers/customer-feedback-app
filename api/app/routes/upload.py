@@ -115,7 +115,7 @@ async def upload_file(
         redis_client.setex(
             file_key,
             14400,  # 4 hour TTL to support retries
-            str(file_data)
+            json.dumps(file_data)
         )
 
         logger.info(
