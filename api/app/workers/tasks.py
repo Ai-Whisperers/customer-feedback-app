@@ -326,10 +326,8 @@ def analyze_batch(
             # Use hybrid analyzer
             analyzer = HybridAnalyzer()
 
-            # Run hybrid analysis with proper event loop management
-            result = SafeEventLoopManager.run_async_in_worker(
-                analyzer.analyze_batch(comments, batch_index, language_hint or "es")
-            )
+            # Run hybrid analysis (now synchronous)
+            result = analyzer.analyze_batch(comments, batch_index, language_hint or "es")
 
             # Log memory and token savings
             logger.info(

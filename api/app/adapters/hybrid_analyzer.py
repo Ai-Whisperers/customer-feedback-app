@@ -28,7 +28,7 @@ class HybridAnalyzer:
         self.openai_analyzer = OpenAIAnalyzer()
         self.executor = ThreadPoolExecutor(max_workers=2)
 
-    async def analyze_batch(
+    def analyze_batch(
         self,
         comments: List[str],
         batch_index: int = 0,
@@ -62,18 +62,22 @@ class HybridAnalyzer:
 
             # Step 2: Prepare optimized prompts for OpenAI
             # Include sentiment context to improve accuracy
-            local_results = await asyncio.get_event_loop().run_in_executor(
-                None, local_future.result, 5  # 5 second timeout
-            )
+            # Get local results from the future
+            local_results = local_future.result(timeout=5)
 
             enriched_prompts = self._prepare_insight_prompts(
                 comments, local_results
             )
 
             # Step 3: Get insights from OpenAI (only what we need)
-            insights = await self._get_ai_insights(
-                enriched_prompts, batch_index
-            )
+            # Run async operation in sync context
+            loop = asyncio.new_event_loop()
+            try:
+                insights = loop.run_until_complete(
+                    self._get_ai_insights(enriched_prompts, batch_index)
+                )
+            finally:
+                loop.close()
 
             # Step 4: Merge results
             final_results = self._merge_results(
@@ -90,7 +94,7 @@ class HybridAnalyzer:
             return {"comments": final_results}
 
         except Exception as e:
-            logger.error(f"Hybrid analysis failed: {e}")
+            logger.error(f"Hybrid analysis failed: {str(e)}", exc_info=True)
             # Fallback to local only
             return self._fallback_local_only(comments, local_results if 'local_results' in locals() else None)
 
