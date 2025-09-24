@@ -33,6 +33,7 @@ class Settings(BaseSettings):
     # OpenAI Configuration
     OPENAI_API_KEY: str = Field(default="", min_length=0)  # Allow empty for health checks
     AI_MODEL: str = Field(default="gpt-4o-mini")  # Stable Chat Completions API
+    OPENAI_TIMEOUT_SECONDS: int = Field(default=30, ge=10, le=120)
 
     # Redis Configuration
     REDIS_URL: str = Field(default="redis://localhost:6379/0")
@@ -45,12 +46,23 @@ class Settings(BaseSettings):
     RESULTS_TTL_SECONDS: int = Field(default=86400)  # 24 hours
 
     # Rate Limiting
-    MAX_RPS: int = Field(default=10)  # Increased for faster processing
+    MAX_RPS: int = Field(default=8)  # OpenAI rate limit
+
+    # Hybrid Analysis Configuration (New)
+    HYBRID_ANALYSIS_ENABLED: bool = Field(default=True)
+    LOCAL_SENTIMENT_LIBRARY: str = Field(default="vader")
+    SENTIMENT_CONFIDENCE_THRESHOLD: float = Field(default=0.05)
+
+    # Memory Management (New)
+    MEMORY_WARNING_MB: int = Field(default=400)
+    MEMORY_CRITICAL_MB: int = Field(default=450)
+    MIN_BATCH_SIZE: int = Field(default=10)
+    DYNAMIC_BATCH_SIZING: bool = Field(default=True)
 
     # Parallel Processing Configuration
     OPENAI_CONCURRENT_WORKERS: int = Field(default=4, ge=1, le=10)
-    BATCH_SIZE_OPTIMAL: int = Field(default=120, ge=50, le=200)
-    ENABLE_PARALLEL_PROCESSING: bool = Field(default=False)  # Disabled due to event loop conflict
+    BATCH_SIZE_OPTIMAL: int = Field(default=100, ge=50, le=200)
+    ENABLE_PARALLEL_PROCESSING: bool = Field(default=True)  # Re-enabled with event loop fix!
     ENABLE_COMMENT_CACHE: bool = Field(default=True)
     CACHE_TTL_DAYS: int = Field(default=7, ge=1, le=30)
 
