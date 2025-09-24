@@ -113,8 +113,8 @@ export const AnalyzerPage: React.FC = () => {
 
         // Check for stall (no progress for 60 seconds)
         if (status.status === 'processing' || status.status === 'pending') {
-          if (currentProgress > lastProgressRef.current || status.processed_rows > lastProgressRef.current) {
-            lastProgressRef.current = Math.max(currentProgress, status.processed_rows || 0);
+          if (currentProgress > lastProgressRef.current || (status.processed_rows ?? 0) > lastProgressRef.current) {
+            lastProgressRef.current = Math.max(currentProgress, status.processed_rows ?? 0);
             stallTimeRef.current = Date.now();
           } else {
             const stallDuration = Date.now() - stallTimeRef.current;
