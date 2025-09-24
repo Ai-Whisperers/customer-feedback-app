@@ -237,7 +237,7 @@ async def validate_file_structure(file_path: Path) -> FileInfo:
                     "suggestions": [
                         "Check that 'Nota' values are between 0 and 10",
                         "Check that 'Comentario Final' has at least 3 characters"
-                    ] + quality_stats.get('issues', [])
+                    ] + metadata.get('issues', [])
                 }
             )
 
@@ -246,7 +246,7 @@ async def validate_file_structure(file_path: Path) -> FileInfo:
 
         return FileInfo(
             name=file_path.name,
-            rows=quality_stats['valid_rows'],
+            rows=metadata['valid_rows'],
             size_mb=file_size_mb,
             columns_found=list(df.columns),
             has_nps_column=metadata['has_nps_column']
