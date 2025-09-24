@@ -110,9 +110,9 @@ def prepare_analysis_data(df: pd.DataFrame) -> tuple[List[str], List[int], Optio
     logger.info(
         "Data prepared with deduplication",
         original=dedup_info['original_count'],
-        unique=dedup_info['unique_count'],
+        unique=dedup_info['filtered_count'],  # filtered_count is the unique count
         filtered=dedup_info['filtered_count'],
-        reduction_pct=round((1 - dedup_info['filtered_count']/dedup_info['original_count']) * 100, 1),
+        reduction_pct=round((1 - dedup_info['filtered_count']/dedup_info['original_count']) * 100, 1) if dedup_info['original_count'] > 0 else 0,
         language_hint=language_hint
     )
 
