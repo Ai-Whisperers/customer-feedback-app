@@ -70,8 +70,8 @@ def analyze_feedback(self, task_id_param: str, file_info: Dict[str, Any]) -> str
         if not file_data_str:
             raise FileNotFoundError(f"File not found in Redis: {file_key}")
 
-        # Parse file data
-        file_data = eval(file_data_str)  # Safe since we control the data format
+        # Parse file data safely using JSON
+        file_data = json.loads(file_data_str)
         content = base64.b64decode(file_data['content'])
         extension = file_data['extension']
 

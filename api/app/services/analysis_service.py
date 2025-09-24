@@ -26,10 +26,7 @@ from app.core.aggregation import (
     calculate_nps_metrics,
     build_metadata
 )
-from app.services.deduplication_service import (
-    DeduplicationService,
-    filter_trivial_comments
-)
+from app.services.efficient_deduplication import EfficientDeduplicationService
 from app.services.aggregation_service import (
     aggregate_pain_points as aggregate_optimized_pain_points,
     aggregate_emotions as aggregate_optimized_emotions,
@@ -102,30 +99,26 @@ def prepare_analysis_data(df: pd.DataFrame) -> tuple[List[str], List[int], Optio
     all_comments = df['Comentario Final'].tolist()
     all_ratings = df['Nota'].tolist()
 
-    # Apply deduplication
-    dedup_service = DeduplicationService(threshold=0.85)
-    unique_indices, duplicate_map = dedup_service.find_duplicates(all_comments)
+    # Apply efficient O(n) deduplication
+    dedup_service = EfficientDeduplicationService()
+    (
+        comments_for_api,
+        ratings,
+        filtered_indices,
+        duplicate_map,
+        dedup_info
+    ) = dedup_service.deduplicate_comments(
+        all_comments,
+        all_ratings,
+        similarity_threshold=0.85
+    )
 
-    # Filter trivial comments from unique set
-    filtered_indices = filter_trivial_comments(all_comments, unique_indices)
-
-    # Get unique comments for API processing
-    comments_for_api = [all_comments[i][:150] for i in filtered_indices]  # Truncate to 150 chars
-    ratings = [all_ratings[i] for i in filtered_indices]
+    # Truncate comments for API processing
+    comments_for_api = [c[:150] for c in comments_for_api]
 
     # Detect dominant language
     sample_size = min(10, len(comments_for_api))
     language_hint = detect_dominant_language(comments_for_api[:sample_size]) if comments_for_api else None
-
-    dedup_info = {
-        'original_count': len(all_comments),
-        'unique_count': len(unique_indices),
-        'filtered_count': len(filtered_indices),
-        'duplicate_map': duplicate_map,
-        'filtered_indices': filtered_indices,
-        'all_comments': all_comments,
-        'all_ratings': all_ratings
-    }
 
     logger.info(
         "Data prepared with deduplication",
