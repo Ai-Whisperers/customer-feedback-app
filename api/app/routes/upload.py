@@ -225,10 +225,9 @@ async def validate_file_structure(file_path: Path) -> FileInfo:
                 }
             )
 
-        # Validate data quality
-        quality_stats = processor.validate_data_quality(df)
-
-        if quality_stats['valid_rows'] == 0:
+        # Data quality validation already done in process_file
+        # Check valid rows from metadata
+        if metadata.get('valid_rows', 0) == 0:
             raise HTTPException(
                 status_code=400,
                 detail={
