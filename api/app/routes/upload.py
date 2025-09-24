@@ -182,7 +182,7 @@ async def upload_file(
 
 async def validate_file_structure(file_path: Path) -> FileInfo:
     """
-    Validate the structure of uploaded file using modular parser.
+    Validate the structure of uploaded file using unified processor.
 
     Args:
         file_path: Path to the uploaded file
@@ -194,14 +194,14 @@ async def validate_file_structure(file_path: Path) -> FileInfo:
         HTTPException if validation fails
     """
     try:
-        # Get parser based on configuration
+        # Get processor based on configuration
         processor = UnifiedFileProcessor()
 
         # Parse file with validation
         try:
             df, metadata = processor.process_file(file_path)
         except ValueError as e:
-            # Handle parser validation errors
+            # Handle processor validation errors
             error_msg = str(e)
             suggestions = []
 
@@ -225,7 +225,7 @@ async def validate_file_structure(file_path: Path) -> FileInfo:
             )
 
         # Validate data quality
-        quality_stats = parser.validate_data_quality(df)
+        quality_stats = processor.validate_data_quality(df)
 
         if quality_stats['valid_rows'] == 0:
             raise HTTPException(

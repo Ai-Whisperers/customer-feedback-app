@@ -30,7 +30,7 @@ def calculate_nps_category(rating: int) -> str:
 
 def load_and_validate_file(file_path: str) -> pd.DataFrame:
     """
-    Load and validate uploaded file using modular parser.
+    Load and validate uploaded file using unified processor.
 
     Args:
         file_path: Path to the uploaded file
