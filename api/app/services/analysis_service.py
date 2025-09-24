@@ -10,18 +10,22 @@ from pathlib import Path
 import pandas as pd
 import structlog
 
-from app.core.validation import (
-    validate_required_columns,
-    normalize_feedback_data,
-    detect_dominant_language,
-    calculate_nps_category
-)
-from app.core.file_parser import get_parser
+from app.core.unified_file_processor import UnifiedFileProcessor
 from app.core.unified_aggregation import UnifiedAggregator
 from app.services.efficient_deduplication import EfficientDeduplicationService
 from app.config import settings
 
 logger = structlog.get_logger()
+
+
+def calculate_nps_category(rating: int) -> str:
+    """Calculate NPS category from rating."""
+    if rating >= 9:
+        return 'promoter'
+    elif rating >= 7:
+        return 'passive'
+    else:
+        return 'detractor'
 
 
 def load_and_validate_file(file_path: str) -> pd.DataFrame:
@@ -38,26 +42,22 @@ def load_and_validate_file(file_path: str) -> pd.DataFrame:
         ValueError: If file is invalid or missing required columns
     """
     try:
-        # Use modular parser for loading and validation
-        parser = get_parser()
+        # Use unified processor for loading, validation, and normalization
+        processor = UnifiedFileProcessor()
         file_path_obj = Path(file_path)
 
-        # Parse file with validation
-        df, metadata = parser.parse_file(file_path_obj)
+        # Process file with integrated validation
+        df, metadata = processor.process_file(file_path_obj)
 
-        # Log parsing results
+        # Log processing results
         logger.info(
-            "File parsed successfully",
+            "File processed successfully",
             file_path=file_path,
             rows=metadata['total_rows'],
+            valid_rows=metadata['valid_rows'],
             has_nps=metadata.get('has_nps_column', False),
-            parser_mode=metadata.get('parser_mode', 'base')
+            detected_language=metadata.get('detected_language', 'es')
         )
-
-        # Additional validation if needed
-        missing_columns = validate_required_columns(df)
-        if missing_columns:
-            raise ValueError(f"Missing required columns: {missing_columns}")
 
         return df
 
@@ -76,11 +76,9 @@ def prepare_analysis_data(df: pd.DataFrame) -> tuple[List[str], List[int], Optio
     Returns:
         Tuple of (comments, ratings, language_hint, dedup_info)
     """
-    # Normalize data
-    df = normalize_feedback_data(df)
-
+    # Data is already normalized by UnifiedFileProcessor
     if df.empty:
-        raise ValueError("No valid data found after normalization")
+        raise ValueError("No valid data found")
 
     all_comments = df['Comentario Final'].tolist()
     all_ratings = df['Nota'].tolist()
@@ -102,9 +100,12 @@ def prepare_analysis_data(df: pd.DataFrame) -> tuple[List[str], List[int], Optio
     # Truncate comments for API processing
     comments_for_api = [c[:150] for c in comments_for_api]
 
-    # Detect dominant language
-    sample_size = min(10, len(comments_for_api))
-    language_hint = detect_dominant_language(comments_for_api[:sample_size]) if comments_for_api else None
+    # Get language hint from dataframe if available, otherwise detect
+    if 'detected_language' in df.columns and not df['detected_language'].empty:
+        language_hint = df['detected_language'].iloc[0]
+    else:
+        # Fallback detection if needed
+        language_hint = 'es'  # Default to Spanish
 
     logger.info(
         "Data prepared with deduplication",
