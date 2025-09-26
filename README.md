@@ -20,7 +20,7 @@ Transforma comentarios de clientes en datos accionables:
 
 ### 1️⃣ Prepara tu archivo
 
-Crea un archivo Excel (.xlsx) o CSV con estas columnas:
+Crea o toma un archivo Excel (.xlsx) o CSV que contenga los comentarios que quieres analizar para obtener retroalimentación, el excel debe tener estas columnas necesariamente:
 
 | Nota | Comentario Final |
 |------|-----------------|
@@ -44,7 +44,7 @@ Crea un archivo Excel (.xlsx) o CSV con estas columnas:
 
 Una vez procesado, verás:
 - **📈 Dashboard General**: Resumen de métricas clave
-- **😊 Distribución de Emociones**: Gráfico de las 7 emociones detectadas
+- **😊 Distribución de Emociones**: Gráfico de las emociones detectadas
 - **⚠️ Pain Points**: Problemas más mencionados por tus clientes
 - **📊 Análisis NPS**: Distribución de promotores, pasivos y detractores
 - **🔥 Mapa de Calor**: Visualización de riesgo de churn por cliente
