@@ -1,6 +1,7 @@
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { Suspense, lazy } from 'react';
 import { UIProvider, DataProvider } from '@/contexts';
+import { ThemeToggle } from '@/components/ThemeToggle';
 
 // Lazy load pages
 const LandingPage = lazy(() => import('@/pages/LandingPage').then(m => ({ default: m.LandingPage })));
@@ -22,6 +23,12 @@ export function App() {
   return (
     <UIProvider>
       <DataProvider>
+        {/* Global fixed controls - top right */}
+        <div className="fixed top-4 right-4 z-50 flex gap-2">
+          <ThemeToggle />
+        </div>
+
+        {/* Main content */}
         <div className="min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors duration-300">
           <Suspense fallback={<LoadingFallback />}>
             <Routes>
