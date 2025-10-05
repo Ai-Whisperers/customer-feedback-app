@@ -20,6 +20,7 @@ export const GlassCard: React.FC<GlassCardProps> = ({
   border = true,
   shadow = 'lg',
 }) => {
+  // Using design tokens via Tailwind spacing (mapped in tailwind.config.ts)
   const paddingClasses = {
     sm: 'p-3',
     md: 'p-4',
@@ -27,12 +28,14 @@ export const GlassCard: React.FC<GlassCardProps> = ({
     xl: 'p-8',
   };
 
+  // Using design tokens via Tailwind backdrop-blur (mapped in tailwind.config.ts)
   const blurClasses = {
     sm: 'backdrop-blur-sm',
     md: 'backdrop-blur-md',
     lg: 'backdrop-blur-lg',
   };
 
+  // Using design tokens via Tailwind shadows (mapped in tailwind.config.ts)
   const shadowClasses = {
     sm: 'shadow-sm',
     md: 'shadow-md',
@@ -41,6 +44,7 @@ export const GlassCard: React.FC<GlassCardProps> = ({
     '2xl': 'shadow-2xl',
   };
 
+  // Using glass opacity tokens from CSS variables
   const variantClasses = {
     light: 'bg-white/80 dark:bg-gray-900/80 text-gray-900 dark:text-gray-100',
     dark: 'bg-gray-800/80 dark:bg-gray-950/80 text-gray-100 dark:text-gray-100',

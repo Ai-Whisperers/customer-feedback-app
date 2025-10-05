@@ -1,0 +1,199 @@
+/**
+ * CSS Custom Properties - Design Token Variables
+ * Runtime theming support for B2B multi-tenant
+ */
+
+/* ========================================
+   Light Theme (Default)
+   ======================================== */
+:root {
+  /* Brand Colors */
+  --color-brand-primary: #0ea5e9;
+  --color-brand-primary-light: #38bdf8;
+  --color-brand-primary-dark: #0284c7;
+  --color-brand-secondary: #9333ea;
+  --color-brand-secondary-light: #a855f7;
+  --color-brand-secondary-dark: #7e22ce;
+
+  /* Feedback Colors */
+  --color-success: #22c55e;
+  --color-success-light: #dcfce7;
+  --color-success-dark: #15803d;
+  --color-error: #ef4444;
+  --color-error-light: #fee2e2;
+  --color-error-dark: #b91c1c;
+  --color-warning: #eab308;
+  --color-warning-light: #fef9c3;
+  --color-warning-dark: #a16207;
+  --color-info: #0ea5e9;
+  --color-info-light: #e0f2fe;
+  --color-info-dark: #0369a1;
+
+  /* Surface Colors */
+  --color-surface-background: #f9fafb;
+  --color-surface-foreground: #ffffff;
+  --color-surface-card: #ffffff;
+  --color-surface-hover: #f3f4f6;
+  --color-surface-active: #e5e7eb;
+  --color-surface-border: #d1d5db;
+  --color-surface-divider: #e5e7eb;
+
+  /* Text Colors */
+  --color-text-primary: #111827;
+  --color-text-secondary: #4b5563;
+  --color-text-tertiary: #6b7280;
+  --color-text-disabled: #9ca3af;
+  --color-text-inverse: #ffffff;
+
+  /* Glass Design System */
+  --glass-light-base: rgba(255, 255, 255, 0.8);
+  --glass-light-medium: rgba(255, 255, 255, 0.6);
+  --glass-light-heavy: rgba(255, 255, 255, 0.4);
+  --glass-dark-base: rgba(17, 24, 39, 0.8);
+  --glass-dark-medium: rgba(17, 24, 39, 0.6);
+  --glass-dark-heavy: rgba(17, 24, 39, 0.4);
+
+  /* Shadows */
+  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  --shadow-base: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+  --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+
+  /* Spacing */
+  --spacing-xs: 0.5rem;   /* 8px */
+  --spacing-sm: 0.75rem;  /* 12px */
+  --spacing-base: 1rem;   /* 16px */
+  --spacing-lg: 1.5rem;   /* 24px */
+  --spacing-xl: 2rem;     /* 32px */
+  --spacing-2xl: 3rem;    /* 48px */
+
+  /* Border Radius */
+  --radius-sm: 0.125rem;  /* 2px */
+  --radius-base: 0.25rem; /* 4px */
+  --radius-md: 0.375rem;  /* 6px */
+  --radius-lg: 0.5rem;    /* 8px */
+  --radius-xl: 0.75rem;   /* 12px */
+  --radius-2xl: 1rem;     /* 16px */
+  --radius-full: 9999px;
+
+  /* Animation Durations */
+  --duration-fast: 150ms;
+  --duration-base: 300ms;
+  --duration-slow: 500ms;
+
+  /* Animation Easing */
+  --easing-ease-in: cubic-bezier(0.4, 0, 1, 1);
+  --easing-ease-out: cubic-bezier(0, 0, 0.2, 1);
+  --easing-ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* Backdrop Blur */
+  --backdrop-blur-sm: 2px;
+  --backdrop-blur-base: 8px;
+  --backdrop-blur-md: 12px;
+  --backdrop-blur-lg: 16px;
+}
+
+/* ========================================
+   Dark Theme
+   ======================================== */
+.dark {
+  /* Surface Colors (dark mode) */
+  --color-surface-background: #111827;
+  --color-surface-foreground: #1f2937;
+  --color-surface-card: #1f2937;
+  --color-surface-hover: #374151;
+  --color-surface-active: #4b5563;
+  --color-surface-border: #374151;
+  --color-surface-divider: #374151;
+
+  /* Text Colors (dark mode) */
+  --color-text-primary: #ffffff;
+  --color-text-secondary: #d1d5db;
+  --color-text-tertiary: #9ca3af;
+  --color-text-disabled: #4b5563;
+  --color-text-inverse: #111827;
+
+  /* Shadows (darker for dark mode) */
+  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.3);
+  --shadow-base: 0 1px 3px 0 rgb(0 0 0 / 0.4), 0 1px 2px -1px rgb(0 0 0 / 0.4);
+  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.4), 0 2px 4px -2px rgb(0 0 0 / 0.4);
+  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.4), 0 4px 6px -4px rgb(0 0 0 / 0.4);
+  --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.4), 0 8px 10px -6px rgb(0 0 0 / 0.4);
+}
+
+/* ========================================
+   Multi-Tenant Theme Overrides
+   Example: Custom brand colors per tenant
+   ======================================== */
+
+/* Example tenant: Acme Corp */
+[data-tenant="acme"] {
+  --color-brand-primary: #ff6b6b;
+  --color-brand-primary-light: #ff8787;
+  --color-brand-primary-dark: #fa5252;
+  --color-brand-secondary: #4c6ef5;
+  --color-brand-secondary-light: #748ffc;
+  --color-brand-secondary-dark: #3b5bdb;
+}
+
+/* Example tenant: TechStart Inc */
+[data-tenant="techstart"] {
+  --color-brand-primary: #10b981;
+  --color-brand-primary-light: #34d399;
+  --color-brand-primary-dark: #059669;
+  --color-brand-secondary: #8b5cf6;
+  --color-brand-secondary-light: #a78bfa;
+  --color-brand-secondary-dark: #7c3aed;
+}
+
+/* Example tenant: Enterprise Solutions */
+[data-tenant="enterprise"] {
+  --color-brand-primary: #0891b2;
+  --color-brand-primary-light: #06b6d4;
+  --color-brand-primary-dark: #0e7490;
+  --color-brand-secondary: #d946ef;
+  --color-brand-secondary-light: #e879f9;
+  --color-brand-secondary-dark: #c026d3;
+}
+
+/* ========================================
+   Accessibility: High Contrast Mode
+   ======================================== */
+[data-theme="high-contrast"] {
+  --color-surface-background: #000000;
+  --color-surface-foreground: #000000;
+  --color-surface-card: #000000;
+  --color-text-primary: #ffffff;
+  --color-text-secondary: #ffffff;
+  --color-surface-border: #ffffff;
+
+  /* Stronger shadows for high contrast */
+  --shadow-base: 0 0 0 2px #ffffff;
+  --shadow-md: 0 0 0 3px #ffffff;
+}
+
+/* ========================================
+   Reduced Motion (Accessibility)
+   ======================================== */
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --duration-fast: 0ms;
+    --duration-base: 0ms;
+    --duration-slow: 0ms;
+  }
+}
+
+/* ========================================
+   Print Styles
+   ======================================== */
+@media print {
+  :root {
+    --color-surface-background: #ffffff;
+    --color-surface-foreground: #ffffff;
+    --color-text-primary: #000000;
+    --shadow-base: none;
+    --shadow-md: none;
+    --shadow-lg: none;
+  }
+}
