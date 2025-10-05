@@ -4,6 +4,7 @@ import { ProgressTracker } from '@/components/progress/ProgressTracker';
 import { ResultsCharts } from '@/components/results/ResultsCharts';
 import { ExportResults } from '@/components/export/ExportResults';
 import { GlassCard } from '@/components/ui';
+import { useTranslations } from '@/i18n';
 import {
   uploadFile,
   getStatus,
@@ -16,6 +17,7 @@ import type { AnalysisResults } from '@/utils/api';
 type AppState = 'idle' | 'uploading' | 'processing' | 'completed' | 'error';
 
 export const AnalyzerPage: React.FC = () => {
+  const { t } = useTranslations();
   const [appState, setAppState] = useState<AppState>('idle');
   const [taskId, setTaskId] = useState<string>('');
   const [progress, setProgress] = useState(0);
@@ -51,7 +53,7 @@ export const AnalyzerPage: React.FC = () => {
           }
         }
       } else {
-        setError(response.message || 'Error al cargar el archivo');
+        setError(response.message || t('analyzer.upload.error'));
         setAppState('error');
       }
     } catch (error) {
@@ -59,7 +61,7 @@ export const AnalyzerPage: React.FC = () => {
       console.error('[AnalyzerPage] Upload error:', error);
 
       // Extract meaningful error message
-      let errorMessage = 'Error al cargar el archivo. Por favor, intente nuevamente.';
+      let errorMessage = t('analyzer.upload.errorRetry');
 
       if (error && typeof error === 'object') {
         if ('message' in error) {
@@ -100,7 +102,7 @@ export const AnalyzerPage: React.FC = () => {
         // Update UI with mapped status fields
         const currentProgress = status.progress || 0;
         setProgress(currentProgress);
-        setStatusMessage(status.message || 'Procesando...');
+        setStatusMessage(status.message || t('analyzer.analysis.inProgress'));
 
         // Use processed_rows and total_rows if available
         // These are now properly mapped from backend response
@@ -119,7 +121,7 @@ export const AnalyzerPage: React.FC = () => {
           } else {
             const stallDuration = Date.now() - stallTimeRef.current;
             if (stallDuration > 60000) { // 60 seconds timeout
-              setError('El análisis se ha detenido. El proceso puede estar tardando más de lo esperado. Por favor, intente con un archivo más pequeño.');
+              setError(t('analyzer.analysis.stalled'));
               setAppState('error');
               if (intervalRef.current) {
                 clearInterval(intervalRef.current);
@@ -145,7 +147,7 @@ export const AnalyzerPage: React.FC = () => {
             intervalRef.current = null;
           }
         } else if (status.status === 'failed') {
-          setError('El análisis falló. Por favor, verifique su archivo e intente nuevamente.');
+          setError(t('analyzer.analysis.failed'));
           setAppState('error');
           if (intervalRef.current) {
             clearInterval(intervalRef.current);
@@ -153,7 +155,7 @@ export const AnalyzerPage: React.FC = () => {
           }
         }
       } catch {
-        setError('Error al obtener el estado del análisis.');
+        setError(t('analyzer.analysis.statusError'));
         setAppState('error');
         if (intervalRef.current) {
           clearInterval(intervalRef.current);
@@ -221,11 +223,10 @@ export const AnalyzerPage: React.FC = () => {
       <div className="relative z-10 container mx-auto px-4 py-8">
         <header className="text-center mb-12">
           <h1 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-4">
-            Analizador de Comentarios con IA
+            {t('analyzer.title')}
           </h1>
           <p className="text-lg text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
-            Descubre insights valiosos de tus clientes mediante análisis avanzado de emociones,
-            riesgo de abandono y puntos de dolor
+            {t('analyzer.subtitle')}
           </p>
         </header>
 
@@ -245,7 +246,7 @@ export const AnalyzerPage: React.FC = () => {
                 <div className="text-center">
                   <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-blue-600 mx-auto mb-4"></div>
                   <p className="text-lg text-gray-700 dark:text-gray-300">
-                    Cargando archivo...
+                    {t('analyzer.upload.uploading')}
                   </p>
                 </div>
               </div>
@@ -274,7 +275,7 @@ export const AnalyzerPage: React.FC = () => {
                   onClick={handleReset}
                   className="px-6 py-3 bg-gradient-to-r from-gray-500 to-gray-600 text-white rounded-lg hover:from-gray-600 hover:to-gray-700 transition-all duration-300"
                 >
-                  Analizar Otro Archivo
+                  {t('analyzer.actions.analyzeAnother')}
                 </button>
               </div>
             </div>
@@ -289,7 +290,7 @@ export const AnalyzerPage: React.FC = () => {
                   </svg>
                 </div>
                 <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-100 mb-2">
-                  Ocurrió un Error
+                  {t('analyzer.error.title')}
                 </h2>
                 <p className="text-gray-600 dark:text-gray-400 mb-6">
                   {error}
@@ -298,7 +299,7 @@ export const AnalyzerPage: React.FC = () => {
                   onClick={handleReset}
                   className="px-6 py-3 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-lg hover:from-blue-600 hover:to-purple-700 transition-all duration-300"
                 >
-                  Intentar Nuevamente
+                  {t('analyzer.actions.tryAgain')}
                 </button>
               </div>
             </GlassCard>
@@ -307,7 +308,7 @@ export const AnalyzerPage: React.FC = () => {
 
         <footer className="text-center mt-16 pb-8">
           <p className="text-sm text-gray-500 dark:text-gray-400">
-            Powered by OpenAI GPT-4 - Análisis en Español e Inglés
+            {t('analyzer.footer.poweredBy')}
           </p>
         </footer>
       </div>

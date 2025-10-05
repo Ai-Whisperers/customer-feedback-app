@@ -70,17 +70,19 @@ export const en = {
 
   // Analyzer Page
   analyzer: {
-    title: 'Feedback Analyzer',
-    subtitle: 'Upload your file and get instant insights',
+    title: 'AI-Powered Comment Analyzer',
+    subtitle: 'Discover valuable insights from your customers through advanced emotion analysis, churn risk, and pain points',
     upload: {
       title: 'Upload File',
       description: 'Drag and drop your CSV or XLSX file here',
       browse: 'or click to browse',
       formats: 'Supported formats: .csv, .xlsx, .xls',
       maxSize: 'Max size: 20 MB',
+      uploading: 'Uploading file...',
       processing: 'Processing file...',
       success: 'File uploaded successfully',
       error: 'Error uploading file',
+      errorRetry: 'Error uploading file. Please try again.',
     },
     requirements: {
       title: 'File Requirements',
@@ -89,11 +91,23 @@ export const en = {
       optional: '"NPS" column (optional)',
     },
     analysis: {
-      inProgress: 'Analysis in progress...',
+      inProgress: 'Processing...',
       processing: 'Processing {{current}} of {{total}} rows',
       completed: 'Analysis completed',
-      failed: 'Analysis failed',
+      failed: 'Analysis failed. Please check your file and try again.',
+      stalled: 'Analysis has stalled. The process may be taking longer than expected. Please try with a smaller file.',
+      statusError: 'Error retrieving analysis status.',
       estimatedTime: 'Estimated time: {{time}}',
+    },
+    actions: {
+      analyzeAnother: 'Analyze Another File',
+      tryAgain: 'Try Again',
+    },
+    error: {
+      title: 'An Error Occurred',
+    },
+    footer: {
+      poweredBy: 'Powered by OpenAI GPT-4 - Spanish & English Analysis',
     },
   },
 

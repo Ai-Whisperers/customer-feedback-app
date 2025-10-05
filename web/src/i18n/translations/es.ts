@@ -70,17 +70,19 @@ export const es = {
 
   // Analyzer Page
   analyzer: {
-    title: 'Analizador de Feedback',
-    subtitle: 'Sube tu archivo y obtén insights instantáneos',
+    title: 'Analizador de Comentarios con IA',
+    subtitle: 'Descubre insights valiosos de tus clientes mediante análisis avanzado de emociones, riesgo de abandono y puntos de dolor',
     upload: {
       title: 'Subir Archivo',
       description: 'Arrastra y suelta tu archivo CSV o XLSX aquí',
       browse: 'o haz clic para seleccionar',
       formats: 'Formatos soportados: .csv, .xlsx, .xls',
       maxSize: 'Tamaño máximo: 20 MB',
+      uploading: 'Cargando archivo...',
       processing: 'Procesando archivo...',
       success: 'Archivo subido exitosamente',
       error: 'Error al subir archivo',
+      errorRetry: 'Error al cargar el archivo. Por favor, intente nuevamente.',
     },
     requirements: {
       title: 'Requisitos del Archivo',
@@ -89,11 +91,23 @@ export const es = {
       optional: 'Columna "NPS" (opcional)',
     },
     analysis: {
-      inProgress: 'Análisis en progreso...',
+      inProgress: 'Procesando...',
       processing: 'Procesando {{current}} de {{total}} filas',
       completed: 'Análisis completado',
-      failed: 'El análisis falló',
+      failed: 'El análisis falló. Por favor, verifique su archivo e intente nuevamente.',
+      stalled: 'El análisis se ha detenido. El proceso puede estar tardando más de lo esperado. Por favor, intente con un archivo más pequeño.',
+      statusError: 'Error al obtener el estado del análisis.',
       estimatedTime: 'Tiempo estimado: {{time}}',
+    },
+    actions: {
+      analyzeAnother: 'Analizar Otro Archivo',
+      tryAgain: 'Intentar Nuevamente',
+    },
+    error: {
+      title: 'Ocurrió un Error',
+    },
+    footer: {
+      poweredBy: 'Powered by OpenAI GPT-4 - Análisis en Español e Inglés',
     },
   },
 
