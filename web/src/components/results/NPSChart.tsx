@@ -1,4 +1,5 @@
 import React, { useMemo } from 'react';
+import { useTranslations } from '@/i18n';
 import type { AnalysisResults } from '@/utils/api';
 
 interface NPSChartProps {
@@ -6,6 +7,7 @@ interface NPSChartProps {
 }
 
 export const NPSChart: React.FC<NPSChartProps> = ({ rows }) => {
+  const { t } = useTranslations();
   const npsData = useMemo(() => {
     const counts = { promoters: 0, passives: 0, detractors: 0 };
 
@@ -32,20 +34,20 @@ export const NPSChart: React.FC<NPSChartProps> = ({ rows }) => {
 
   return (
     <div className="bg-white rounded-lg p-6 shadow-sm">
-      <h3 className="text-lg font-semibold mb-4">Distribución NPS</h3>
+      <h3 className="text-lg font-semibold mb-4">{t('results.nps.title')}</h3>
 
       <div className="mb-6 text-center">
         <div className="text-3xl font-bold text-blue-600">
           {npsData.npsScore.toFixed(0)}
         </div>
-        <div className="text-sm text-gray-600">NPS Score</div>
+        <div className="text-sm text-gray-600">{t('results.nps.score')}</div>
       </div>
 
       <div className="space-y-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center">
             <div className="w-3 h-3 bg-green-500 rounded-full mr-2"></div>
-            <span className="text-sm font-medium">Promotores</span>
+            <span className="text-sm font-medium">{t('results.nps.promoters')}</span>
           </div>
           <div className="text-sm">
             <span className="font-bold">{npsData.counts.promoters}</span>
@@ -56,7 +58,7 @@ export const NPSChart: React.FC<NPSChartProps> = ({ rows }) => {
         <div className="flex items-center justify-between">
           <div className="flex items-center">
             <div className="w-3 h-3 bg-yellow-500 rounded-full mr-2"></div>
-            <span className="text-sm font-medium">Pasivos</span>
+            <span className="text-sm font-medium">{t('results.nps.passives')}</span>
           </div>
           <div className="text-sm">
             <span className="font-bold">{npsData.counts.passives}</span>
@@ -67,7 +69,7 @@ export const NPSChart: React.FC<NPSChartProps> = ({ rows }) => {
         <div className="flex items-center justify-between">
           <div className="flex items-center">
             <div className="w-3 h-3 bg-red-500 rounded-full mr-2"></div>
-            <span className="text-sm font-medium">Detractores</span>
+            <span className="text-sm font-medium">{t('results.nps.detractors')}</span>
           </div>
           <div className="text-sm">
             <span className="font-bold">{npsData.counts.detractors}</span>

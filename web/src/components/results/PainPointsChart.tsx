@@ -1,4 +1,5 @@
 import React, { useMemo } from 'react';
+import { useTranslations } from '@/i18n';
 import type { AnalysisResults } from '@/utils/api';
 
 interface PainPointsChartProps {
@@ -6,6 +7,7 @@ interface PainPointsChartProps {
 }
 
 export const PainPointsChart: React.FC<PainPointsChartProps> = ({ rows }) => {
+  const { t } = useTranslations();
   const painPointsData = useMemo(() => {
     const painPointMap = new Map<string, number>();
 
@@ -26,11 +28,11 @@ export const PainPointsChart: React.FC<PainPointsChartProps> = ({ rows }) => {
 
   return (
     <div className="bg-white rounded-lg p-6 shadow-sm">
-      <h3 className="text-lg font-semibold mb-4">Principales Puntos de Dolor</h3>
+      <h3 className="text-lg font-semibold mb-4">{t('results.painPoints.title')}</h3>
 
       {painPointsData.length === 0 ? (
         <p className="text-gray-500 text-center py-8">
-          No se encontraron puntos de dolor en los comentarios
+          {t('results.painPoints.noData')}
         </p>
       ) : (
         <div className="space-y-3">

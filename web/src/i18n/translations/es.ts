@@ -123,7 +123,8 @@ export const es = {
       churnRisk: 'Riesgo de Abandono',
     },
     emotions: {
-      title: 'Análisis de Emociones',
+      title: 'Distribución de Emociones',
+      chartTitle: 'Análisis de Emociones',
       satisfaction: 'Satisfacción',
       frustration: 'Frustración',
       anger: 'Enojo',
@@ -133,17 +134,29 @@ export const es = {
       anticipation: 'Anticipación',
     },
     painPoints: {
-      title: 'Puntos de Dolor',
+      title: 'Principales Puntos de Dolor',
+      noData: 'No se encontraron puntos de dolor en los comentarios',
       frequency: 'Frecuencia',
       impact: 'Impacto',
       category: 'Categoría',
     },
     nps: {
       title: 'Distribución NPS',
+      score: 'NPS Score',
       promoters: 'Promotores',
       passives: 'Pasivos',
       detractors: 'Detractores',
-      score: 'Puntuación',
+    },
+    churnRisk: {
+      title: 'Riesgo de Abandono',
+      averageRisk: 'Riesgo Promedio',
+      levels: {
+        veryLow: 'Muy Bajo',
+        low: 'Bajo',
+        medium: 'Medio',
+        high: 'Alto',
+        veryHigh: 'Muy Alto',
+      },
     },
     export: {
       title: 'Exportar Resultados',

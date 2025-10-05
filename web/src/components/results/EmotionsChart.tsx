@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslations } from '@/i18n';
 import type { AnalysisResults } from '@/utils/api';
 
 interface EmotionsChartProps {
@@ -6,6 +7,7 @@ interface EmotionsChartProps {
 }
 
 export const EmotionsChart: React.FC<EmotionsChartProps> = ({ rows }) => {
+  const { t } = useTranslations();
   // Calculate emotion averages
   const emotionTotals = (rows || []).reduce((acc, row) => {
     Object.entries(row.emotions).forEach(([emotion, value]) => {
@@ -25,7 +27,7 @@ export const EmotionsChart: React.FC<EmotionsChartProps> = ({ rows }) => {
 
   return (
     <div className="bg-white rounded-lg p-6 shadow-sm">
-      <h3 className="text-lg font-semibold mb-4">Distribución de Emociones</h3>
+      <h3 className="text-lg font-semibold mb-4">{t('results.emotions.title')}</h3>
       <div className="space-y-3">
         {emotionAverages.slice(0, 8).map(({ emotion, average }) => (
           <div key={emotion} className="flex items-center">

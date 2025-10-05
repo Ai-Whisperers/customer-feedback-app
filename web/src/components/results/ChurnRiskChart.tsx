@@ -1,4 +1,5 @@
 import React, { useMemo } from 'react';
+import { useTranslations } from '@/i18n';
 import type { AnalysisResults } from '@/utils/api';
 
 interface ChurnRiskChartProps {
@@ -6,6 +7,7 @@ interface ChurnRiskChartProps {
 }
 
 export const ChurnRiskChart: React.FC<ChurnRiskChartProps> = ({ rows }) => {
+  const { t } = useTranslations();
   const riskDistribution = useMemo(() => {
     const bins = {
       veryLow: 0,
@@ -42,22 +44,22 @@ export const ChurnRiskChart: React.FC<ChurnRiskChartProps> = ({ rows }) => {
   }, [rows]);
 
   const riskLevels = [
-    { key: 'veryLow', label: 'Muy Bajo', color: 'bg-green-600', range: '0-20%' },
-    { key: 'low', label: 'Bajo', color: 'bg-green-400', range: '20-40%' },
-    { key: 'medium', label: 'Medio', color: 'bg-yellow-500', range: '40-60%' },
-    { key: 'high', label: 'Alto', color: 'bg-orange-500', range: '60-80%' },
-    { key: 'veryHigh', label: 'Muy Alto', color: 'bg-red-600', range: '80-100%' },
+    { key: 'veryLow', label: t('results.churnRisk.levels.veryLow'), color: 'bg-green-600', range: '0-20%' },
+    { key: 'low', label: t('results.churnRisk.levels.low'), color: 'bg-green-400', range: '20-40%' },
+    { key: 'medium', label: t('results.churnRisk.levels.medium'), color: 'bg-yellow-500', range: '40-60%' },
+    { key: 'high', label: t('results.churnRisk.levels.high'), color: 'bg-orange-500', range: '60-80%' },
+    { key: 'veryHigh', label: t('results.churnRisk.levels.veryHigh'), color: 'bg-red-600', range: '80-100%' },
   ];
 
   return (
     <div className="bg-white rounded-lg p-6 shadow-sm">
-      <h3 className="text-lg font-semibold mb-4">Riesgo de Abandono</h3>
+      <h3 className="text-lg font-semibold mb-4">{t('results.churnRisk.title')}</h3>
 
       <div className="mb-6 text-center">
         <div className="text-3xl font-bold text-orange-600">
           {(riskDistribution.avgRisk * 100).toFixed(1)}%
         </div>
-        <div className="text-sm text-gray-600">Riesgo Promedio</div>
+        <div className="text-sm text-gray-600">{t('results.churnRisk.averageRisk')}</div>
       </div>
 
       <div className="space-y-3">
