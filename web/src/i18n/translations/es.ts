@@ -38,24 +38,33 @@ export const es = {
 
   // Landing Page
   landing: {
-    title: 'Analizador de Feedback de Clientes',
+    title: 'Analizador de Feedback de Clientes con IA',
     subtitle: 'Analiza comentarios de clientes con IA avanzada',
     description: 'Extrae emociones, puntos de dolor, riesgo de abandono y NPS de manera automática',
     cta: {
       getStarted: 'Comenzar Análisis',
-      learnMore: 'Aprender Más',
+      learnMore: 'Saber Más',
       tryDemo: 'Probar Demo',
+      readyTitle: '¿Listo para Comenzar?',
+      readyDescription: 'Carga tus datos de comentarios de clientes y obtén insights instantáneos con IA',
+      startFree: 'Iniciar Análisis Gratuito',
     },
     features: {
       title: 'Características',
-      aiPowered: 'Impulsado por IA',
-      aiPoweredDesc: 'Análisis avanzado con OpenAI GPT-4o-mini',
+      aiPowered: 'Análisis con IA',
+      aiPoweredDesc: 'Usa GPT-4 para extraer emociones, puntos de dolor y riesgo de abandono de los comentarios',
       emotions: 'Análisis de Emociones',
       emotionsDesc: 'Detecta 7 emociones principales en cada comentario',
       nps: 'Cálculo NPS',
       npsDesc: 'Calcula automáticamente el Net Promoter Score',
       painPoints: 'Puntos de Dolor',
       painPointsDesc: 'Identifica problemas y áreas de mejora',
+    },
+    stats: {
+      emotions: 'Emociones Analizadas',
+      batchSize: 'Comentarios/Lote',
+      processingTime: 'Tiempo de Procesamiento',
+      languages: 'Idiomas',
     },
   },
 

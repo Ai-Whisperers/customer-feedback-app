@@ -38,24 +38,33 @@ export const en = {
 
   // Landing Page
   landing: {
-    title: 'Customer Feedback Analyzer',
+    title: 'AI-Powered Customer Feedback Analyzer',
     subtitle: 'Analyze customer feedback with advanced AI',
     description: 'Automatically extract emotions, pain points, churn risk, and NPS',
     cta: {
       getStarted: 'Get Started',
       learnMore: 'Learn More',
       tryDemo: 'Try Demo',
+      readyTitle: 'Ready to Get Started?',
+      readyDescription: 'Upload your customer feedback data and get instant AI-powered insights',
+      startFree: 'Start Free Analysis',
     },
     features: {
       title: 'Features',
-      aiPowered: 'AI Powered',
-      aiPoweredDesc: 'Advanced analysis with OpenAI GPT-4o-mini',
+      aiPowered: 'AI-Powered Analysis',
+      aiPoweredDesc: 'Uses GPT-4 to extract emotions, pain points, and churn risk from comments',
       emotions: 'Emotion Analysis',
       emotionsDesc: 'Detect 7 main emotions in each comment',
       nps: 'NPS Calculation',
       npsDesc: 'Automatically calculate Net Promoter Score',
       painPoints: 'Pain Points',
       painPointsDesc: 'Identify issues and areas for improvement',
+    },
+    stats: {
+      emotions: 'Emotions Analyzed',
+      batchSize: 'Comments/Batch',
+      processingTime: 'Processing Time',
+      languages: 'Languages',
     },
   },
 

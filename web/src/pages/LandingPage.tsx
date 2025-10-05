@@ -1,9 +1,11 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { GlassCard, GlassButton } from '@/components/ui';
+import { useTranslations } from '@/i18n';
 
 export const LandingPage: React.FC = () => {
   const navigate = useNavigate();
+  const { t } = useTranslations();
   if (import.meta.env.DEV) console.log('[LandingPage] Component rendering');
 
   React.useEffect(() => {
@@ -25,16 +27,12 @@ export const LandingPage: React.FC = () => {
         <section className="text-center py-20">
           <h1 className="text-5xl md:text-7xl font-bold mb-6">
             <span className="bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 bg-clip-text text-transparent">
-              Analizador de Comentarios
-            </span>
-            <br />
-            <span className="bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
-              con IA
+              {t('landing.title')}
             </span>
           </h1>
 
           <p className="text-xl md:text-2xl text-gray-600 dark:text-gray-300 mb-8 max-w-3xl mx-auto">
-            Transforma los comentarios de clientes en insights accionables con análisis avanzado de IA
+            {t('landing.subtitle')}
           </p>
 
           <div className="flex gap-4 justify-center">
@@ -43,14 +41,14 @@ export const LandingPage: React.FC = () => {
               size="lg"
               onClick={() => navigate('/analyzer')}
             >
-              Comenzar Análisis
+              {t('landing.cta.getStarted')}
             </GlassButton>
             <GlassButton
               variant="secondary"
               size="lg"
               onClick={() => navigate('/about')}
             >
-              Saber Más
+              {t('landing.cta.learnMore')}
             </GlassButton>
           </div>
         </section>
@@ -59,7 +57,7 @@ export const LandingPage: React.FC = () => {
         <section className="py-20">
           <h2 className="text-3xl md:text-4xl font-bold text-center mb-12">
             <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-              Características Potentes
+              {t('landing.features.title')}
             </span>
           </h2>
 
@@ -72,10 +70,10 @@ export const LandingPage: React.FC = () => {
                   </svg>
                 </div>
                 <h3 className="text-xl font-semibold mb-2 text-gray-800 dark:text-gray-100">
-                  Análisis con IA
+                  {t('landing.features.aiPowered')}
                 </h3>
                 <p className="text-gray-600 dark:text-gray-300">
-                  Usa GPT-4 para extraer emociones, puntos de dolor y riesgo de abandono de los comentarios
+                  {t('landing.features.aiPoweredDesc')}
                 </p>
               </div>
             </GlassCard>
@@ -88,10 +86,10 @@ export const LandingPage: React.FC = () => {
                   </svg>
                 </div>
                 <h3 className="text-xl font-semibold mb-2 text-gray-800 dark:text-gray-100">
-                  Visualizaciones Avanzadas
+                  {t('landing.features.emotions')}
                 </h3>
                 <p className="text-gray-600 dark:text-gray-300">
-                  Gráficos interactivos y dashboards para visualizar patrones de sentimiento y puntajes NPS
+                  {t('landing.features.emotionsDesc')}
                 </p>
               </div>
             </GlassCard>
@@ -104,10 +102,10 @@ export const LandingPage: React.FC = () => {
                   </svg>
                 </div>
                 <h3 className="text-xl font-semibold mb-2 text-gray-800 dark:text-gray-100">
-                  Exportar Resultados
+                  {t('landing.features.painPoints')}
                 </h3>
                 <p className="text-gray-600 dark:text-gray-300">
-                  Descarga los resultados del análisis en formato CSV o Excel para procesamiento adicional
+                  {t('landing.features.painPointsDesc')}
                 </p>
               </div>
             </GlassCard>
@@ -120,27 +118,27 @@ export const LandingPage: React.FC = () => {
             <div className="grid grid-cols-1 md:grid-cols-4 gap-8 text-center">
               <div>
                 <div className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-                  16
+                  7
                 </div>
-                <p className="text-gray-600 dark:text-gray-300 mt-2">Emociones Analizadas</p>
+                <p className="text-gray-600 dark:text-gray-300 mt-2">{t('landing.stats.emotions')}</p>
               </div>
               <div>
                 <div className="text-4xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
                   3000+
                 </div>
-                <p className="text-gray-600 dark:text-gray-300 mt-2">Comentarios/Lote</p>
+                <p className="text-gray-600 dark:text-gray-300 mt-2">{t('landing.stats.batchSize')}</p>
               </div>
               <div>
                 <div className="text-4xl font-bold bg-gradient-to-r from-pink-600 to-red-600 bg-clip-text text-transparent">
                   30s
                 </div>
-                <p className="text-gray-600 dark:text-gray-300 mt-2">Tiempo de Procesamiento</p>
+                <p className="text-gray-600 dark:text-gray-300 mt-2">{t('landing.stats.processingTime')}</p>
               </div>
               <div>
                 <div className="text-4xl font-bold bg-gradient-to-r from-green-600 to-blue-600 bg-clip-text text-transparent">
                   2
                 </div>
-                <p className="text-gray-600 dark:text-gray-300 mt-2">Idiomas</p>
+                <p className="text-gray-600 dark:text-gray-300 mt-2">{t('landing.stats.languages')}</p>
               </div>
             </div>
           </GlassCard>
@@ -151,11 +149,11 @@ export const LandingPage: React.FC = () => {
           <GlassCard variant="gradient" padding="xl">
             <h2 className="text-3xl md:text-4xl font-bold mb-6">
               <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-                ¿Listo para Comenzar?
+                {t('landing.cta.readyTitle')}
               </span>
             </h2>
             <p className="text-xl text-gray-600 dark:text-gray-300 mb-8 max-w-2xl mx-auto">
-              Carga tus datos de comentarios de clientes y obtén insights instantáneos con IA
+              {t('landing.cta.readyDescription')}
             </p>
             <GlassButton
               variant="primary"
@@ -163,7 +161,7 @@ export const LandingPage: React.FC = () => {
               onClick={() => navigate('/analyzer')}
               className="text-lg px-8 py-4"
             >
-              Iniciar Análisis Gratuito
+              {t('landing.cta.startFree')}
             </GlassButton>
           </GlassCard>
         </section>
