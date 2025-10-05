@@ -182,12 +182,67 @@ export const es = {
 
   // About
   about: {
-    title: 'Acerca del Proyecto',
+    title: 'Acerca del Analizador de Comentarios',
+    subtitle: 'Análisis avanzado con IA para insights de clientes',
     version: 'Versión',
     description: 'Analizador de Feedback de Clientes impulsado por IA para empresas B2B',
     features: 'Características',
     documentation: 'Documentación',
     support: 'Soporte',
+    overview: {
+      title: 'Descripción del Proyecto',
+      paragraph1: 'Customer AI Driven Feedback Analyzer es una aplicación de vanguardia diseñada para transformar comentarios de clientes en insights de negocio accionables usando inteligencia artificial avanzada.',
+      paragraph2: 'Nuestro sistema procesa comentarios de clientes en español e inglés, extrayendo emociones, identificando puntos de dolor, calculando riesgo de abandono y determinando puntajes NPS para ayudar a las empresas a entender mejor a sus clientes.',
+    },
+    techStack: {
+      title: 'Arquitectura Técnica',
+      frontend: 'Stack Frontend',
+      backend: 'Stack Backend',
+      frontendItems: {
+        react: 'React + TypeScript para desarrollo seguro',
+        tailwind: 'Tailwind CSS con diseño glassmorphism',
+        plotly: 'Plotly.js para visualización interactiva de datos',
+        bff: 'Node.js BFF proxy para comunicación con API',
+      },
+      backendItems: {
+        fastapi: 'FastAPI para APIs REST de alto rendimiento',
+        celery: 'Celery para procesamiento distribuido de tareas',
+        redis: 'Redis para caché y message brokering',
+        openai: 'OpenAI GPT-4 para análisis inteligente',
+      },
+    },
+    howItWorks: {
+      title: 'Cómo Funciona',
+      step1: {
+        title: 'Carga tus Datos',
+        description: 'Carga archivos CSV o Excel con comentarios de clientes y calificaciones. Los archivos deben incluir columnas \'Nota\' (0-10) y \'Comentario Final\'.',
+      },
+      step2: {
+        title: 'Procesamiento con IA',
+        description: 'Nuestro sistema procesa comentarios en lotes usando GPT-4 de OpenAI, extrayendo 7 emociones diferentes, identificando puntos de dolor y calculando puntajes de riesgo de abandono.',
+      },
+      step3: {
+        title: 'Visualizar Insights',
+        description: 'Ve gráficos interactivos mostrando distribuciones de emociones, desgloses de NPS, análisis de riesgo de abandono y frecuencias de puntos de dolor.',
+      },
+      step4: {
+        title: 'Exportar Resultados',
+        description: 'Descarga resultados completos del análisis en formato CSV o Excel para procesamiento adicional o integración con tus herramientas de inteligencia de negocio.',
+      },
+    },
+    performance: {
+      title: 'Métricas de Rendimiento',
+      metric1: '850-1200 filas',
+      metric1Desc: '5-10 segundos de procesamiento',
+      metric2: '1800 filas',
+      metric2Desc: '~18 segundos de procesamiento',
+      metric3: '3000 filas',
+      metric3Desc: '~30 segundos de procesamiento',
+    },
+    cta: {
+      tryAnalyzer: 'Probar el Analizador',
+      backHome: 'Volver al Inicio',
+    },
   },
 
   // Notifications

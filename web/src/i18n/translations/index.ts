@@ -14,12 +14,19 @@ export const translations = {
 
 export type SupportedLanguage = keyof typeof translations;
 
-// Generic translation structure (flexible - accepts any language)
-export type TranslationKeys = {
-  [K in keyof ESTranslationKeys]: ESTranslationKeys[K] extends object
-    ? { [P in keyof ESTranslationKeys[K]]: ESTranslationKeys[K][P] extends object ? Record<string, string> : string }
-    : string;
+// Recursive type to support deep nesting (any depth) - converts all leaf values to generic string
+type DeepTranslationStructure<T> = {
+  [K in keyof T]: T[K] extends string
+    ? string
+    : T[K] extends object
+    ? T[K] extends readonly any[]
+      ? T[K]
+      : DeepTranslationStructure<T[K]>
+    : T[K];
 };
+
+// Translation structure type (supports unlimited nesting depth, language-agnostic)
+export type TranslationKeys = DeepTranslationStructure<ESTranslationKeys>;
 
 // Helper type for nested translation keys (dot notation)
 type DotPrefix<T extends string> = T extends '' ? '' : `.${T}`;

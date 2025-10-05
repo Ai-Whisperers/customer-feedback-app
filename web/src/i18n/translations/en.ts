@@ -182,12 +182,67 @@ export const en = {
 
   // About
   about: {
-    title: 'About the Project',
+    title: 'About the Feedback Analyzer',
+    subtitle: 'Advanced AI analysis for customer insights',
     version: 'Version',
     description: 'AI-powered Customer Feedback Analyzer for B2B enterprises',
     features: 'Features',
     documentation: 'Documentation',
     support: 'Support',
+    overview: {
+      title: 'Project Overview',
+      paragraph1: 'Customer AI Driven Feedback Analyzer is a cutting-edge application designed to transform customer feedback into actionable business insights using advanced artificial intelligence.',
+      paragraph2: 'Our system processes customer feedback in Spanish and English, extracting emotions, identifying pain points, calculating churn risk, and determining NPS scores to help businesses better understand their customers.',
+    },
+    techStack: {
+      title: 'Technical Architecture',
+      frontend: 'Frontend Stack',
+      backend: 'Backend Stack',
+      frontendItems: {
+        react: 'React + TypeScript for type-safe development',
+        tailwind: 'Tailwind CSS with glassmorphism design',
+        plotly: 'Plotly.js for interactive data visualization',
+        bff: 'Node.js BFF proxy for API communication',
+      },
+      backendItems: {
+        fastapi: 'FastAPI for high-performance REST APIs',
+        celery: 'Celery for distributed task processing',
+        redis: 'Redis for caching and message brokering',
+        openai: 'OpenAI GPT-4 for intelligent analysis',
+      },
+    },
+    howItWorks: {
+      title: 'How It Works',
+      step1: {
+        title: 'Upload Your Data',
+        description: 'Upload CSV or Excel files with customer feedback and ratings. Files must include \'Nota\' (0-10) and \'Comentario Final\' columns.',
+      },
+      step2: {
+        title: 'AI Processing',
+        description: 'Our system processes feedback in batches using OpenAI\'s GPT-4, extracting 7 different emotions, identifying pain points, and calculating churn risk scores.',
+      },
+      step3: {
+        title: 'Visualize Insights',
+        description: 'View interactive charts showing emotion distributions, NPS breakdowns, churn risk analysis, and pain point frequencies.',
+      },
+      step4: {
+        title: 'Export Results',
+        description: 'Download complete analysis results in CSV or Excel format for further processing or integration with your business intelligence tools.',
+      },
+    },
+    performance: {
+      title: 'Performance Metrics',
+      metric1: '850-1200 rows',
+      metric1Desc: '5-10 seconds processing',
+      metric2: '1800 rows',
+      metric2Desc: '~18 seconds processing',
+      metric3: '3000 rows',
+      metric3Desc: '~30 seconds processing',
+    },
+    cta: {
+      tryAnalyzer: 'Try the Analyzer',
+      backHome: 'Back to Home',
+    },
   },
 
   // Notifications
