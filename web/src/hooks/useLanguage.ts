@@ -1,19 +1,8 @@
 /**
  * useLanguage Hook
  * Convenient hook for language/i18n management
+ * DEPRECATED: Import directly from @/i18n/hooks instead
+ * This re-export exists for backward compatibility
  */
 
-import { useUIContext } from '@/contexts';
-
-export const useLanguage = () => {
-  const { language, setLanguage, toggleLanguage } = useUIContext();
-
-  return {
-    language,
-    setLanguage,
-    toggleLanguage,
-    isSpanish: language === 'es',
-    isEnglish: language === 'en',
-    t: (key: string) => key, // Placeholder for future i18n implementation
-  };
-};
+export { useLanguage } from '@/i18n/hooks';

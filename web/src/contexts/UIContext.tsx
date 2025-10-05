@@ -1,9 +1,8 @@
 import React, { createContext, useContext, useState, useEffect, useCallback, useMemo } from 'react';
-import type { UIContextValue, UIState, Theme, Language, AnimationSpeed, Notification, UIPreferences } from '@/types';
+import type { UIContextValue, UIState, Theme, AnimationSpeed, Notification, UIPreferences } from '@/types';
 
 const DEFAULT_PREFERENCES: UIPreferences = {
   theme: 'system',
-  language: 'es',
   animationsEnabled: true,
   animationSpeed: 'normal',
   reducedMotion: false,
@@ -44,7 +43,6 @@ export const UIProvider: React.FC<{ children: React.ReactNode }> = ({ children }
   useEffect(() => {
     const preferences: UIPreferences = {
       theme: state.theme,
-      language: state.language,
       animationsEnabled: state.animationsEnabled,
       animationSpeed: state.animationSpeed,
       reducedMotion: state.reducedMotion,
@@ -114,20 +112,6 @@ export const UIProvider: React.FC<{ children: React.ReactNode }> = ({ children }
       theme: prev.theme === 'light' ? 'dark' : prev.theme === 'dark' ? 'system' : 'light',
     }));
   }, []);
-
-  // Language functions
-  const setLanguage = useCallback((language: Language) => {
-    setState(prev => ({ ...prev, language }));
-    document.documentElement.lang = language;
-  }, []);
-
-  const toggleLanguage = useCallback(() => {
-    setState(prev => ({
-      ...prev,
-      language: prev.language === 'es' ? 'en' : 'es',
-    }));
-    document.documentElement.lang = state.language === 'es' ? 'en' : 'es';
-  }, [state.language]);
 
   // Animation functions
   const setAnimationsEnabled = useCallback((enabled: boolean) => {
@@ -211,11 +195,8 @@ export const UIProvider: React.FC<{ children: React.ReactNode }> = ({ children }
     () => ({
       state,
       theme: state.theme,
-      language: state.language,
       setTheme,
       toggleTheme,
-      setLanguage,
-      toggleLanguage,
       setAnimationsEnabled,
       setAnimationSpeed,
       setReducedMotion,
@@ -232,8 +213,6 @@ export const UIProvider: React.FC<{ children: React.ReactNode }> = ({ children }
       state,
       setTheme,
       toggleTheme,
-      setLanguage,
-      toggleLanguage,
       setAnimationsEnabled,
       setAnimationSpeed,
       setReducedMotion,

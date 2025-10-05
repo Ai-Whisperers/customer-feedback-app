@@ -1,17 +1,15 @@
 /**
  * UI State Types
  * Global state for UI preferences, theming, and frontend behavior
+ * NOTE: Language/i18n moved to dedicated i18nContext
  */
 
 export type Theme = 'light' | 'dark' | 'system';
-
-export type Language = 'es' | 'en';
 
 export type AnimationSpeed = 'none' | 'reduced' | 'normal' | 'fast';
 
 export interface UIPreferences {
   theme: Theme;
-  language: Language;
   animationsEnabled: boolean;
   animationSpeed: AnimationSpeed;
   reducedMotion: boolean;
@@ -37,11 +35,8 @@ export interface Notification {
 export interface UIContextValue {
   state: UIState;
   theme: Theme;
-  language: Language;
   setTheme: (theme: Theme) => void;
   toggleTheme: () => void;
-  setLanguage: (language: Language) => void;
-  toggleLanguage: () => void;
   setAnimationsEnabled: (enabled: boolean) => void;
   setAnimationSpeed: (speed: AnimationSpeed) => void;
   setReducedMotion: (enabled: boolean) => void;

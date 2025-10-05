@@ -1,7 +1,9 @@
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { Suspense, lazy } from 'react';
 import { UIProvider, DataProvider } from '@/contexts';
+import { I18nProvider } from '@/i18n';
 import { ThemeToggle } from '@/components/ThemeToggle';
+import { LanguageToggle } from '@/i18n/components/LanguageToggle';
 
 // Lazy load pages
 const LandingPage = lazy(() => import('@/pages/LandingPage').then(m => ({ default: m.LandingPage })));
@@ -21,25 +23,28 @@ export function App() {
   if (import.meta.env.DEV) console.log('[App] Rendering App component');
 
   return (
-    <UIProvider>
-      <DataProvider>
-        {/* Global fixed controls - top right */}
-        <div className="fixed top-4 right-4 z-50 flex gap-2">
-          <ThemeToggle />
-        </div>
+    <I18nProvider>
+      <UIProvider>
+        <DataProvider>
+          {/* Global fixed controls - top right */}
+          <div className="fixed top-4 right-4 z-50 flex gap-2">
+            <LanguageToggle />
+            <ThemeToggle />
+          </div>
 
-        {/* Main content */}
-        <div className="min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors duration-300">
-          <Suspense fallback={<LoadingFallback />}>
-            <Routes>
-              <Route path="/" element={<LandingPage />} />
-              <Route path="/about" element={<AboutPage />} />
-              <Route path="/analyzer" element={<AnalyzerPage />} />
-              <Route path="*" element={<Navigate to="/" replace />} />
-            </Routes>
-          </Suspense>
-        </div>
-      </DataProvider>
-    </UIProvider>
+          {/* Main content */}
+          <div className="min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors duration-300">
+            <Suspense fallback={<LoadingFallback />}>
+              <Routes>
+                <Route path="/" element={<LandingPage />} />
+                <Route path="/about" element={<AboutPage />} />
+                <Route path="/analyzer" element={<AnalyzerPage />} />
+                <Route path="*" element={<Navigate to="/" replace />} />
+              </Routes>
+            </Suspense>
+          </div>
+        </DataProvider>
+      </UIProvider>
+    </I18nProvider>
   );
 }
