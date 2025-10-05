@@ -1,6 +1,6 @@
 # 📊 Customer Feedback Analyzer - Análisis Inteligente con IA
 
-[![Version](https://img.shields.io/badge/version-4.2.0-blue.svg)](https://github.com/Ai-Whisperers/customer-feedback-app)
+[![Version](https://img.shields.io/badge/version-3.2.0-blue.svg)](https://github.com/Ai-Whisperers/customer-feedback-app)
 [![Cost Reduction](https://img.shields.io/badge/cost%20reduction-87%25-success.svg)](https://github.com/Ai-Whisperers/customer-feedback-app)
 [![Status](https://img.shields.io/badge/status-production-success.svg)](https://customer-feedback-app.onrender.com)
 [![OpenAI](https://img.shields.io/badge/OpenAI-GPT--4o--mini-412991.svg)](https://openai.com/)
@@ -79,7 +79,7 @@ Puedes descargar:
 - **7 Emociones** (0-100%): Satisfacción, Frustración, Enojo, Confianza, Decepción, Confusión, Anticipación
 - **Riesgo de Churn** (0-100%): Probabilidad de perder al cliente
 - **Categoría NPS**: Promotor (9-10), Pasivo (7-8), Detractor (0-6)
-- **Pain Points**: Palabras clave de problemas identificados
+- **Pain Points**: Palabras clave de problemas identificados (máximo 5 por comentario)
 - **Sentiment Score** (-1 a 1): Sentimiento general
 
 ### Resumen global:
@@ -149,19 +149,20 @@ Puedes descargar:
 ### Características Técnicas Destacadas
 
 #### 🚀 Optimización Ultra-Eficiente
-- **87% reducción en costos** de OpenAI API
-- Procesamiento de **200-300 tokens/comentario** optimizado
-- Sistema de **deduplicación inteligente** (15-20% ahorro)
+- **87% reducción en costos** de OpenAI API con análisis híbrido
+- **Análisis local gratuito**: Sentiment (VADER/TextBlob) sin costo
+- **OpenAI selectivo**: Solo para churn risk y pain points complejos
+- Procesamiento de **25-30 tokens/comentario** (antes: 250)
+- Sistema de **deduplicación inteligente SHA256** (15-20% ahorro)
 - **Cache de comentarios** en Redis (7 días TTL)
-- **Batching dinámico** de 50-120 comentarios
-- **NPS modular** con método shifted (escala 0-100 positiva)
+- **Batching dinámico** de 50-100 comentarios con gestión de memoria
 
-#### 🎨 Nuevas Funcionalidades v4.2
-- **Excel profesional** con 5 hojas formateadas y gráficos
-- **Parser flexible** con detección dinámica de columnas
-- **Monitor de event loops** para debugging avanzado
-- **Formato condicional** en exportaciones Excel
-- **Deduplicación SHA256** de comentarios repetidos
+#### 🎨 Funcionalidades Clave v3.2
+- **Excel profesional** con hojas formateadas, gráficos y formato condicional
+- **Parser flexible** con detección dinámica de columnas (Nota, Comentario Final, NPS)
+- **Monitor de event loops** para debugging de procesamiento asíncrono
+- **Hybrid Analyzer**: Combina análisis local + IA para máxima eficiencia
+- **Gestión de memoria**: Batch sizing adaptativo según recursos disponibles
 
 #### 🔧 Arquitectura Robusta
 ```
@@ -214,20 +215,21 @@ AI_MODEL=gpt-4o-mini
 BATCH_SIZE_OPTIMAL=120
 CELERY_WORKER_CONCURRENCY=4
 NPS_CALCULATION_METHOD=shifted  # Nuevo: NPS siempre positivo
-EXCEL_FORMATTING_ENABLED=true   # Nuevo: Excel profesional
-ENABLE_COMMENT_CACHE=true       # Nuevo: Cache de comentarios
-PARSER_TYPE=flexible             # Nuevo: Parser dinámico
-ENABLE_PARALLEL_PROCESSING=false # Deshabilitado temporalmente
+EXCEL_FORMATTING_ENABLED=true   # Excel profesional con gráficos
+ENABLE_COMMENT_CACHE=true       # Cache de comentarios (7 días TTL)
+PARSER_TYPE=flexible             # Parser dinámico de columnas
+ENABLE_PARALLEL_PROCESSING=true # Procesamiento paralelo habilitado
+HYBRID_ANALYSIS_ENABLED=true    # Análisis híbrido (local + OpenAI)
 ```
 
 ### API REST
 
-#### Upload File
+#### Subir Archivo
 ```bash
-POST /api/v1/feedback/upload
+POST /upload
 Content-Type: multipart/form-data
 
-Response:
+Respuesta:
 {
   "task_id": "uuid-v4",
   "status": "pending",
@@ -235,24 +237,25 @@ Response:
 }
 ```
 
-#### Check Status
+#### Consultar Estado
 ```bash
-GET /api/v1/feedback/status/{task_id}
+GET /status/{task_id}
 
-Response:
+Respuesta:
 {
   "task_id": "uuid-v4",
   "status": "completed",
   "progress": 100,
-  "message": "Analysis complete"
+  "message": "Analysis complete",
+  "processed_rows": 500
 }
 ```
 
-#### Get Results
+#### Obtener Resultados
 ```bash
-GET /api/v1/feedback/results/{task_id}
+GET /results/{task_id}
 
-Response:
+Respuesta:
 {
   "summary": {
     "total_comments": 500,
@@ -263,6 +266,13 @@ Response:
   "pain_points": [...],
   "detailed_results": [...]
 }
+```
+
+#### Exportar Resultados
+```bash
+GET /export/{task_id}?format=xlsx
+
+Formatos disponibles: csv, xlsx, all
 ```
 
 ### Deployment en Render.com
@@ -308,10 +318,11 @@ El sistema incluye logging estructurado completo:
 ### Documentación Técnica Completa
 
 Para más detalles técnicos, consulta:
-- [Documentación Técnica Completa](docs/TECHNICAL_DOCUMENTATION.md)
-- [Arquitectura Frontend](docs/FRONTEND_ARCHITECTURE.md)
-- [Guía de Deployment](docs/RENDER_DEPLOYMENT.md)
-- [Pipeline Status Report](local-reports/pipeline-status-report.md)
+- [Índice de Documentación](docs/README.md) - Punto de entrada a toda la documentación
+- [Documentación Técnica Completa](docs/TECHNICAL_DOCUMENTATION.md) - Arquitectura y detalles de implementación
+- [Arquitectura Frontend](docs/FRONTEND_ARCHITECTURE.md) - Estructura y componentes del frontend
+- [Guía de Deployment en Render](docs/RENDER_DEPLOYMENT.md) - Configuración de despliegue
+- [Integración de Servicios](docs/SERVICE_INTEGRATION.md) - Comunicación entre servicios
 
 </details>
 
@@ -334,14 +345,24 @@ Este proyecto está licenciado bajo MIT License - ver [LICENSE](LICENSE) para m�
 
 ---
 
-**Desarrollado con ❤️ por AI Whisperers Team**
+**Desarrollado por AI Whisperers Team**
 
-*Versión 4.2.0 - Estado: PRODUCCIÓN - Última actualización: 21 de Septiembre 2025*
+*Versión 3.2.0 - Estado: PRODUCCIÓN - Última actualización: 27 de Septiembre 2024*
 
-### Cambios Recientes (v4.2.0)
-- ✅ NPS modular con escala positiva (0-100)
-- ✅ Parser flexible para diferentes formatos de archivo
-- ✅ Excel profesional con formato y gráficos
-- ✅ Monitor de event loops para debugging
-- ✅ Deduplicación inteligente de comentarios
-- ⚠️ Procesamiento paralelo temporalmente deshabilitado
+### Cambios Recientes (v3.2.0)
+
+#### Frontend
+- ✅ Refactorización completa de componentes (Clean Architecture)
+- ✅ Code splitting y lazy loading (65% reducción de bundle)
+- ✅ Componentes modulares: ResultsCharts (380→65 líneas), FileUpload (251→100 líneas)
+- ✅ Glass Design System implementado
+- ✅ TypeScript estricto con tipos explícitos
+
+#### Backend
+- ✅ Análisis híbrido: Sentiment local (VADER/TextBlob) + OpenAI
+- ✅ Procesamiento paralelo con event loop optimizado
+- ✅ Deduplicación inteligente SHA256 (15-20% ahorro)
+- ✅ Excel profesional con gráficos y formato condicional
+- ✅ Parser flexible con detección dinámica de columnas
+- ✅ Gestión de memoria dinámica (batch sizing adaptativo)
+- ✅ Cache de comentarios con 7 días TTL

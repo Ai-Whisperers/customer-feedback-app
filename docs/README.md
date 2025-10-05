@@ -2,54 +2,35 @@
 
 Sistema de análisis inteligente de comentarios de clientes mediante IA, diseñado para extraer insights valiosos de retroalimentación masiva con arquitectura escalable y modular.
 
+**Versión:** 3.2.0
+**Estado:** Producción
+**Última actualización:** Septiembre 2024
+
 ## Índice de Documentación
 
-### Arquitectura y Diseño
-- [Arquitectura del Sistema](./arquitectura/sistema.md) - Visión general de la arquitectura monorepo
+### Documentación Principal
+- [Documentación Técnica Completa](./TECHNICAL_DOCUMENTATION.md) - Arquitectura, API, optimizaciones y deployment
+- [Arquitectura Frontend](./FRONTEND_ARCHITECTURE.md) - Estructura modular, componentes y optimizaciones
+- [Guía de Deployment en Render](./RENDER_DEPLOYMENT.md) - Configuración de servicios y variables de entorno
+- [Integración de Servicios](./SERVICE_INTEGRATION.md) - Comunicación entre web, API y worker
+- [CI/CD](./CICD.md) - Pipeline de integración continua
+- [Reglas del Proyecto](./PROJECT_RULES.md) - Convenciones y estándares de código
+
+### Guías Específicas
+
+#### Arquitectura
+- [Sistema General](./arquitectura/sistema.md) - Visión general de la arquitectura monorepo
 - [Flujo de Datos](./arquitectura/flujo-datos.md) - Pipeline de procesamiento end-to-end
-- [Decisiones Técnicas](./arquitectura/decisiones-tecnicas.md) - Razonamiento detrás de las elecciones arquitectónicas
 
-### Guías de Implementación
-- [Configuración Inicial](./guias/configuracion.md) - Setup del entorno de desarrollo
-- [API Reference](./guias/api-reference.md) - Contratos y endpoints de la API
-- [Integración OpenAI](./guias/openai-integration.md) - Uso de Responses API y Structured Outputs
-- [Procesamiento Batch](./guias/batch-processing.md) - Sistema de chunking y paralelización
+#### Implementación
+- [API Reference](./guias/api-reference.md) - Endpoints y contratos de la API
+- [Integración OpenAI](./guias/openai-integration.md) - Uso de API y Structured Outputs
 
-### Módulos de Análisis
-- [Motor de Emociones](./modulos/emociones.md) - Sistema de detección de 16 emociones
-- [Análisis NPS](./modulos/nps.md) - Cálculo y categorización Net Promoter Score
-- [Predicción de Churn](./modulos/churn.md) - Modelo de riesgo de abandono
-- [Extracción Pain Points](./modulos/pain-points.md) - Identificación de problemas recurrentes
+#### Módulos de Análisis
+- [Motor de Emociones](./modulos/emociones.md) - Sistema de detección de 7 emociones
 
-### Despliegue y Operaciones
-- [Guía de Despliegue Render](./deployment/render.md) - Configuración de servicios en Render
-- [Variables de Entorno](./deployment/variables.md) - Configuración de secrets y variables
-- [Monitoreo y Logs](./deployment/monitoreo.md) - Observabilidad y debugging
-- [Optimización de Costos](./deployment/costos.md) - Control de uso de API y recursos
-
-### Visualización y Frontend
-- [Componentes UI](./frontend/componentes.md) - Biblioteca de componentes React
-- [Gráficas Plotly](./frontend/graficas.md) - Configuración y personalización de charts
-- [Estado y Context](./frontend/estado.md) - Manejo de estado global con Context API
-- [Diseño Responsive](./frontend/responsive.md) - Implementación con Tailwind CSS
-
-### Seguridad y Compliance
-- [Validación de Datos](./seguridad/validacion.md) - Sanitización y límites
-- [Manejo de Errores](./seguridad/errores.md) - Estrategias de recuperación
-- [TTL y Limpieza](./seguridad/ttl.md) - Gestión de datos temporales
-- [Rate Limiting](./seguridad/rate-limit.md) - Control de llamadas a API
-
-### Testing y Calidad
-- [Estrategia de Testing](./testing/estrategia.md) - Niveles y tipos de tests
-- [Tests de Integración](./testing/integracion.md) - Testing del pipeline completo
-- [Benchmarks de Performance](./testing/performance.md) - Métricas y objetivos SLA
-- [Validación de Outputs](./testing/validacion.md) - Aseguramiento de calidad de IA
-
-### Guías de Usuario
-- [Manual de Usuario](./usuario/manual.md) - Guía completa para usuarios finales
-- [Interpretación de Resultados](./usuario/interpretacion.md) - Cómo leer los análisis
-- [Casos de Uso](./usuario/casos-uso.md) - Ejemplos prácticos y escenarios
-- [FAQ](./usuario/faq.md) - Preguntas frecuentes
+#### Deployment
+- [Render.com](./deployment/render.md) - Configuración detallada de servicios en Render
 
 ## Quick Start
 
@@ -112,20 +93,22 @@ MAX_RPS=8
 
 ## Capacidades del Sistema
 
-- **Volumen**: 850-3000 comentarios por análisis
-- **Velocidad**: <10s para 1200 comentarios
+- **Volumen**: 100-3000 comentarios por análisis
+- **Velocidad**: ~3s para 100 comentarios, ~30s para 3000 comentarios
 - **Idiomas**: Español e Inglés (detección automática)
-- **Emociones**: 16 estados emocionales con probabilidades
-- **Métricas**: NPS, Churn Risk, Pain Points
-- **Formatos**: XLSX, XLS, CSV (entrada) | JSON, CSV, XLSX (salida)
+- **Emociones**: 7 estados emocionales con probabilidades (Satisfacción, Frustración, Enojo, Confianza, Decepción, Confusión, Anticipación)
+- **Métricas**: NPS, Churn Risk (0-1), Pain Points (hasta 5 por comentario), Sentiment Score (-1 a 1)
+- **Formatos**: XLSX, XLS, CSV (entrada) | JSON, CSV, XLSX (salida con formato profesional)
 
 ## Stack Tecnológico
 
-- **Frontend**: React 18 + TypeScript + Tailwind CSS + Plotly
-- **Backend**: FastAPI + Celery + Pydantic
-- **IA**: OpenAI Responses API + Structured Outputs
-- **Infra**: Render.com + Redis (Upstash)
-- **Observabilidad**: JSON Logging + Health Checks
+- **Frontend**: React 18.3 + TypeScript 5.6 + Tailwind CSS 3.4 + Plotly.js + Vite 5.4
+- **Backend**: FastAPI 0.115 + Python 3.11+ + Pydantic 2.9
+- **Workers**: Celery 5.4 con 4 workers concurrentes
+- **IA**: OpenAI GPT-4o-mini + VADER Sentiment + TextBlob (análisis híbrido)
+- **Cache/Queue**: Redis 7.0+ (24h TTL para resultados)
+- **Infra**: Render.com (4 servicios: web, api, worker, redis)
+- **Observabilidad**: Structlog + Health Checks + Métricas de performance
 
 ## Contribución
 
@@ -146,6 +129,6 @@ Este proyecto sigue los principios de:
 
 ---
 
-**Versión**: 3.1.0
-**Última actualización**: 2025-09-16
-**Mantenedor**: Equipo de Ingeniería
+**Versión**: 3.2.0
+**Última actualización**: Septiembre 2024
+**Mantenido por**: AI Whisperers Team

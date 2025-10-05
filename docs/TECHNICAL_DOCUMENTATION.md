@@ -1,4 +1,4 @@
-# Documentación Técnica - Customer Feedback Analyzer v4.1.0
+# Documentación Técnica - Customer Feedback Analyzer v3.2.0
 
 ## Índice
 1. [Arquitectura del Sistema](#arquitectura-del-sistema)
@@ -74,46 +74,59 @@ graph TB
 
 ## Optimizaciones Implementadas
 
-### 1. Ultra-Optimización OpenAI (87% Reducción)
+### 1. Análisis Híbrido (87% Reducción de Costos)
 
-#### Formato Anterior (250 tokens/comentario)
-```json
-{
-  "emotions": {
-    "satisfaccion": 0.8,
-    "frustracion": 0.2,
-    "enojo": 0.1,
-    // ... 16 emociones
-  },
-  "pain_points": [
-    "El precio es muy alto comparado con la competencia",
-    "El servicio al cliente no responde rápido"
-  ],
-  "nps_category": "promoter",
-  "churn_risk": 0.3,
-  "sentiment_score": 0.7
-}
-```
+#### Arquitectura de Dos Niveles
 
-#### Formato Optimizado (25-30 tokens/comentario)
+**Nivel 1: Análisis Local (Gratuito)**
+- **VADER Sentiment**: Análisis de sentimiento en español/inglés
+- **TextBlob**: Extracción de emociones básicas
+- **Procesamiento**: 100% local, sin costo, instantáneo
+- **Output**: Sentiment score (-1 a 1) y emociones base
+
+**Nivel 2: OpenAI Insights (Selectivo)**
+- **Solo para**: Churn risk y pain points complejos
+- **Tokens**: 25-30 por comentario (antes: 250)
+- **Formato optimizado**: JSON compacto con arrays
+- **Costo**: ~$0.02 por 1000 comentarios
+
+#### Formato OpenAI Optimizado
 ```json
 {
   "r": [
-    {"e": [0.8,0.2,0.1,0.7,0.1,0.2,0.6], "c": 0.3, "p": "precio"}
+    {"c": 0.3, "p": ["precio", "tiempo"]}
   ]
 }
 ```
 
-**Mapeo de Arrays**:
-- `e[0]`: satisfaccion
-- `e[1]`: frustracion
-- `e[2]`: enojo
-- `e[3]`: confianza
-- `e[4]`: decepcion
-- `e[5]`: confusion
-- `e[6]`: anticipacion
-- `c`: churn_risk
-- `p`: pain_point keyword (opcional)
+**Mapeo**:
+- `c`: churn_risk (0-1)
+- `p`: pain_points (array de keywords, máx 5)
+
+#### Resultado Final Consolidado
+```json
+{
+  "emotions": {
+    "satisfaccion": 0.8,    // De VADER/TextBlob
+    "frustracion": 0.2,
+    "enojo": 0.1,
+    "confianza": 0.7,
+    "decepcion": 0.1,
+    "confusion": 0.2,
+    "anticipacion": 0.6
+  },
+  "sentiment_score": 0.65,  // De VADER
+  "churn_risk": 0.3,        // De OpenAI
+  "pain_points": ["precio", "tiempo"]  // De OpenAI
+}
+```
+
+**Ventajas del Enfoque Híbrido**:
+- 87% reducción de costos vs. OpenAI puro
+- Análisis local instantáneo y confiable
+- IA solo donde realmente agrega valor
+- Fallback graceful si OpenAI falla
+- Escalable a millones de comentarios
 
 ### 2. Sistema de Deduplicación Inteligente
 
@@ -195,7 +208,7 @@ Frontend → Poll Status → API → Redis
 
 ### API Endpoints
 
-#### POST /api/v1/feedback/upload
+#### POST /upload
 ```python
 # Request
 {
@@ -211,18 +224,19 @@ Frontend → Poll Status → API → Redis
 }
 ```
 
-#### GET /api/v1/feedback/status/{task_id}
+#### GET /status/{task_id}
 ```python
 # Response
 {
   "task_id": "uuid-v4",
   "status": "processing|completed|failed",
   "progress": 85,
-  "message": "Procesando lote 9/12"
+  "message": "Procesando lote 9/12",
+  "processed_rows": 425
 }
 ```
 
-#### GET /api/v1/feedback/results/{task_id}
+#### GET /results/{task_id}
 ```python
 # Response
 {
@@ -236,6 +250,17 @@ Frontend → Poll Status → API → Redis
   "pain_points": [...],
   "detailed_results": [...]
 }
+```
+
+#### GET /export/{task_id}?format=xlsx
+```python
+# Query Parameters
+{
+  "format": "csv|xlsx|all"
+}
+
+# Response
+Binary file download (CSV o XLSX con formato profesional)
 ```
 
 ### Schemas de Datos
@@ -430,21 +455,28 @@ import requests
 # Upload file
 with open('feedback.csv', 'rb') as f:
     response = requests.post(
-        'https://your-app.onrender.com/api/v1/feedback/upload',
+        'https://customer-feedback-app.onrender.com/upload',
         files={'file': f}
     )
     task_id = response.json()['task_id']
 
 # Check status
 status = requests.get(
-    f'https://your-app.onrender.com/api/v1/feedback/status/{task_id}'
+    f'https://customer-feedback-app.onrender.com/status/{task_id}'
 ).json()
 
 # Get results
 if status['status'] == 'completed':
     results = requests.get(
-        f'https://your-app.onrender.com/api/v1/feedback/results/{task_id}'
+        f'https://customer-feedback-app.onrender.com/results/{task_id}'
     ).json()
+
+# Export to Excel
+excel_file = requests.get(
+    f'https://customer-feedback-app.onrender.com/export/{task_id}?format=xlsx'
+)
+with open('resultados.xlsx', 'wb') as f:
+    f.write(excel_file.content)
 ```
 
 ### Cliente JavaScript
@@ -453,7 +485,7 @@ if status['status'] == 'completed':
 const formData = new FormData();
 formData.append('file', fileInput.files[0]);
 
-const response = await fetch('/api/v1/feedback/upload', {
+const response = await fetch('/upload', {
   method: 'POST',
   body: formData
 });
@@ -461,16 +493,27 @@ const { task_id } = await response.json();
 
 // Poll status
 const pollStatus = async () => {
-  const status = await fetch(`/api/v1/feedback/status/${task_id}`);
+  const status = await fetch(`/status/${task_id}`);
   const data = await status.json();
 
   if (data.status === 'completed') {
-    const results = await fetch(`/api/v1/feedback/results/${task_id}`);
+    const results = await fetch(`/results/${task_id}`);
     return await results.json();
   }
 
   // Retry after 2 seconds
   setTimeout(pollStatus, 2000);
+};
+
+// Export results
+const downloadExcel = async (taskId) => {
+  const response = await fetch(`/export/${taskId}?format=xlsx`);
+  const blob = await response.blob();
+  const url = window.URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'resultados.xlsx';
+  a.click();
 };
 ```
 
@@ -498,6 +541,6 @@ const pollStatus = async () => {
 
 ---
 
-*Última actualización: 2025-09-21*
-*Versión: 4.1.0*
+*Última actualización: Septiembre 2024*
+*Versión: 3.2.0*
 *Estado: PRODUCCIÓN*

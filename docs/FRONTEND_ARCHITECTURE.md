@@ -270,5 +270,6 @@ Para mantener la calidad del código:
 
 ---
 
-*Última actualización: Septiembre 2024*
-*Versión: 3.2.0*
+**Última actualización:** Septiembre 2024
+**Versión:** 3.2.0
+**Estado:** Producción
