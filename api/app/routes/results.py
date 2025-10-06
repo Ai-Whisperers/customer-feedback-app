@@ -7,6 +7,7 @@ from typing import Optional
 
 from app.config import settings
 from app.schemas.analysis import AnalysisResults
+from app.schemas.base import TaskStatus
 
 router = APIRouter()
 logger = structlog.get_logger()
@@ -52,7 +53,7 @@ async def get_results(
 
             if status_data:
                 status_info = json.loads(status_data)
-                if status_info.get("status") != "completed":
+                if status_info.get("status") != TaskStatus.COMPLETED.value:
                     raise HTTPException(
                         status_code=404,
                         detail={

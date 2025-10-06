@@ -17,6 +17,29 @@ class NPSMethod(Enum):
     SHIFTED = "shifted"    # Shifted formula: ((promoters - detractors) / total + 1) * 50
 
 
+def categorize_rating(rating: int) -> str:
+    """
+    Categorize a rating into NPS category (promoter/passive/detractor).
+
+    Standard NPS categorization:
+    - 9-10: promoter
+    - 7-8: passive
+    - 0-6: detractor
+
+    Args:
+        rating: Integer rating from 0-10
+
+    Returns:
+        NPS category string: 'promoter', 'passive', or 'detractor'
+    """
+    if rating >= 9:
+        return 'promoter'
+    elif rating >= 7:
+        return 'passive'
+    else:
+        return 'detractor'
+
+
 def calculate_nps_score(
     promoter_count: int,
     passive_count: int,

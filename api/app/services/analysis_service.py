@@ -12,20 +12,11 @@ import structlog
 
 from app.core.unified_file_processor import UnifiedFileProcessor
 from app.core.unified_aggregation import UnifiedAggregator
+from app.core.nps_calculator import categorize_rating
 from app.services.efficient_deduplication import EfficientDeduplicationService
 from app.config import settings
 
 logger = structlog.get_logger()
-
-
-def calculate_nps_category(rating: int) -> str:
-    """Calculate NPS category from rating."""
-    if rating >= 9:
-        return 'promoter'
-    elif rating >= 7:
-        return 'passive'
-    else:
-        return 'detractor'
 
 
 def load_and_validate_file(file_path: str) -> pd.DataFrame:
@@ -166,7 +157,7 @@ def merge_batch_results(
     # Calculate NPS from original data (not from comments)
     nps_counts = {"promoter": 0, "passive": 0, "detractor": 0}
     for _, row in original_df.iterrows():
-        nps_cat = calculate_nps_category(row['Nota'])
+        nps_cat = categorize_rating(row['Nota'])
         nps_counts[nps_cat] += 1
 
     # Calculate all NPS metrics

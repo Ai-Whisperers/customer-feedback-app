@@ -12,6 +12,7 @@ import structlog
 from datetime import datetime
 
 from app.config import settings
+from app.core.nps_calculator import categorize_rating
 
 logger = structlog.get_logger()
 
@@ -248,7 +249,7 @@ class UnifiedFileProcessor:
         """Add calculated fields."""
         # Calculate NPS category from Nota if NPS column doesn't exist
         if 'Nota' in df.columns:
-            df['nps_calculated'] = df['Nota'].apply(self._calculate_nps_category)
+            df['nps_calculated'] = df['Nota'].apply(categorize_rating)
 
         # Detect language (sample-based for performance)
         if 'Comentario Final' in df.columns:
@@ -258,15 +259,6 @@ class UnifiedFileProcessor:
             df['detected_language'] = dominant_language
 
         return df
-
-    def _calculate_nps_category(self, rating: int) -> str:
-        """Calculate NPS category from rating."""
-        if rating >= 9:
-            return 'promoter'
-        elif rating >= 7:
-            return 'passive'
-        else:
-            return 'detractor'
 
     def _detect_language(self, comments: List[str]) -> str:
         """Detect dominant language from comments."""

@@ -83,7 +83,7 @@ async def get_task_status(
         # Build response
         response = StatusResponse(
             task_id=task_id,
-            status=TaskStatus(status_info.get("status", "queued")),
+            status=TaskStatus(status_info.get("status", TaskStatus.QUEUED.value)),
             progress=status_info.get("progress", 0),
             current_step=status_info.get("current_step"),
             messages=status_info.get("messages", [])

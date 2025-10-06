@@ -138,12 +138,12 @@ def analyze_feedback(self, task_id_param: str, file_info: Dict[str, Any]) -> str
         # Improved progress monitoring with detailed logging
         import time as time_module
         max_wait = 180  # 3 minutes max
-        poll_interval = 1  # Check more frequently
-        elapsed = 0
+        backoff = 1  # Start with 1 second, will increase exponentially
+        start_time = time_module.time()
         last_ready_count = 0
         failed_batches = []
 
-        while elapsed < max_wait:
+        while (time_module.time() - start_time) < max_wait:
             if batch_results.ready():
                 break
 
@@ -161,7 +161,7 @@ def analyze_feedback(self, task_id_param: str, file_info: Dict[str, Any]) -> str
                             total_batches=len(batches)
                         )
 
-            # Update progress based on actual completion
+            # Update progress only when count changes
             if completed_count > last_ready_count:
                 last_ready_count = completed_count
                 progress_pct = 50 + int(40 * completed_count / len(batches))
@@ -169,13 +169,18 @@ def analyze_feedback(self, task_id_param: str, file_info: Dict[str, Any]) -> str
                     task_id, progress_pct,
                     f"Completados {completed_count}/{len(batches)} lotes (fallos: {len(failed_batches)})"
                 )
+                # Reset backoff on progress
+                backoff = 1
+            else:
+                # Increase backoff when no progress (exponential up to 10s max)
+                backoff = min(backoff * 1.5, 10)
 
-            time_module.sleep(poll_interval)
-            elapsed += poll_interval
+            time_module.sleep(backoff)
 
         if not batch_results.ready():
             # Try to get partial results and log summary
             completed_count = sum(1 for result in batch_results.results if result.ready())
+            elapsed_time = time_module.time() - start_time
 
             # Log detailed timeout info
             logger.warning(
@@ -184,7 +189,7 @@ def analyze_feedback(self, task_id_param: str, file_info: Dict[str, Any]) -> str
                 completed=completed_count,
                 total=len(batches),
                 failed_batches=failed_batches,
-                timeout_after_seconds=elapsed
+                timeout_after_seconds=int(elapsed_time)
             )
 
             # Log OpenAI metrics summary
