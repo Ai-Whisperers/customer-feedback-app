@@ -2,6 +2,7 @@
 
 import redis
 import structlog
+from datetime import datetime
 from fastapi import APIRouter, HTTPException
 from typing import Dict, Any
 
@@ -20,7 +21,7 @@ async def simple_health_check() -> Dict[str, Any]:
         "status": "healthy",
         "service": "customer-feedback-api",
         "version": "3.1.0",
-        "timestamp": __import__('datetime').datetime.utcnow().isoformat() + "Z"
+        "timestamp": datetime.utcnow().isoformat() + "Z"
     }
 
 
@@ -77,7 +78,6 @@ async def health_check() -> Dict[str, Any]:
         }
 
     # Add timestamp
-    from datetime import datetime
     health_status["timestamp"] = datetime.utcnow().isoformat() + "Z"
 
     # Set overall status - only mark unhealthy for critical services

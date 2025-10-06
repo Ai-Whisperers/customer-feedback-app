@@ -58,10 +58,17 @@ class UnifiedFileProcessor:
         # Step 1: Read file
         df = self._read_file(file_path)
 
-        # Step 2: Map columns to standard names
+        # Step 2: Validate row count
+        if len(df) > self.settings.MAX_ROWS:
+            raise ValueError(
+                f"File has {len(df)} rows, maximum allowed is {self.settings.MAX_ROWS}. "
+                f"Please split your file into smaller chunks."
+            )
+
+        # Step 3: Map columns to standard names
         df = self._map_columns(df)
 
-        # Step 3: Validate structure
+        # Step 4: Validate structure
         validation_errors = self._validate_structure(df)
         if validation_errors:
             raise ValueError(f"Validation failed: {'; '.join(validation_errors)}")
@@ -69,13 +76,13 @@ class UnifiedFileProcessor:
         if validate_only:
             return df, {"validated": True, "row_count": len(df)}
 
-        # Step 4: Clean and normalize data
+        # Step 5: Clean and normalize data
         df = self._normalize_data(df)
 
-        # Step 5: Validate data quality
+        # Step 6: Validate data quality
         df = self._validate_data_quality(df)
 
-        # Step 6: Calculate derived fields
+        # Step 7: Calculate derived fields
         df = self._add_derived_fields(df)
 
         # Build metadata

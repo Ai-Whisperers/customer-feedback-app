@@ -42,6 +42,7 @@ class Settings(BaseSettings):
 
     # File Processing
     FILE_MAX_MB: int = Field(default=20)
+    MAX_ROWS: int = Field(default=10000, ge=1, le=100000)  # Maximum rows per file
     MAX_BATCH_SIZE: int = Field(default=50)  # Optimized for token limits
     RESULTS_TTL_SECONDS: int = Field(default=86400)  # 24 hours
 
@@ -52,6 +53,10 @@ class Settings(BaseSettings):
     HYBRID_ANALYSIS_ENABLED: bool = Field(default=True)
     LOCAL_SENTIMENT_LIBRARY: str = Field(default="vader")
     SENTIMENT_CONFIDENCE_THRESHOLD: float = Field(default=0.05)
+
+    # NPS Calculation Configuration
+    NPS_CALCULATION_METHOD: str = Field(default="shifted")  # standard, absolute, weighted, shifted
+    NPS_PASSIVE_WEIGHT: float = Field(default=0.5, ge=0.0, le=1.0)
 
     # Memory Management (New)
     MEMORY_WARNING_MB: int = Field(default=400)

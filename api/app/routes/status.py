@@ -20,7 +20,11 @@ redis_client = redis.from_url(settings.REDIS_URL)
 
 @router.get("/{task_id}", response_model=StatusResponse)
 async def get_task_status(
-    task_id: str = Path(..., description="Task ID from upload endpoint")
+    task_id: str = Path(
+        ...,
+        description="Task ID from upload endpoint",
+        pattern=r"^t_[a-f0-9]{12}$"
+    )
 ):
     """
     Get the current status of an analysis task.

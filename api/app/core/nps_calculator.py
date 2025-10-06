@@ -1,11 +1,12 @@
 """
 NPS calculation module with configurable formulas.
-Supports different NPS calculation methods via environment configuration.
+Supports different NPS calculation methods via configuration.
 """
 
-import os
 from typing import Dict, Any
 from enum import Enum
+
+from app.config import settings
 
 
 class NPSMethod(Enum):
@@ -35,7 +36,7 @@ def calculate_nps_score(
         NPS score value
     """
     if method is None:
-        method = os.getenv("NPS_CALCULATION_METHOD", NPSMethod.SHIFTED.value)
+        method = settings.NPS_CALCULATION_METHOD
 
     total_responses = promoter_count + passive_count + detractor_count
 
@@ -49,7 +50,7 @@ def calculate_nps_score(
 
     elif method == NPSMethod.WEIGHTED.value:
         # Includes passive contribution with weight
-        passive_weight = float(os.getenv("NPS_PASSIVE_WEIGHT", "0.5"))
+        passive_weight = settings.NPS_PASSIVE_WEIGHT
         weighted_score = (
             promoter_count - detractor_count + (passive_count * passive_weight)
         ) / total_responses * 100
@@ -78,7 +79,7 @@ def get_nps_interpretation(score: float, method: str = None) -> str:
         Interpretation string
     """
     if method is None:
-        method = os.getenv("NPS_CALCULATION_METHOD", NPSMethod.SHIFTED.value)
+        method = settings.NPS_CALCULATION_METHOD
 
     if method == NPSMethod.SHIFTED.value:
         # Shifted scale interpretation (0-100)
@@ -119,7 +120,7 @@ def calculate_nps_metrics_modular(nps_counts: Dict[str, int]) -> Dict[str, Any]:
     if total_responses == 0:
         return {
             "score": 50,  # Neutral score for shifted method when no data
-            "method": os.getenv("NPS_CALCULATION_METHOD", NPSMethod.SHIFTED.value),
+            "method": settings.NPS_CALCULATION_METHOD,
             "promoters": 0,
             "promoters_percentage": 0,
             "passives": 0,
@@ -135,7 +136,7 @@ def calculate_nps_metrics_modular(nps_counts: Dict[str, int]) -> Dict[str, Any]:
         nps_counts.get("detractor", 0)
     )
 
-    method = os.getenv("NPS_CALCULATION_METHOD", NPSMethod.SHIFTED.value)
+    method = settings.NPS_CALCULATION_METHOD
 
     return {
         "score": round(nps_score, 1),

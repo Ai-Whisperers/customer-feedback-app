@@ -17,7 +17,11 @@ logger = structlog.get_logger()
 
 @router.get("/{task_id}")
 async def export_results(
-    task_id: str = Path(..., description="Task ID from upload endpoint"),
+    task_id: str = Path(
+        ...,
+        description="Task ID from upload endpoint",
+        pattern=r"^t_[a-f0-9]{12}$"
+    ),
     format: ExportFormat = Query(..., description="Export format (csv or xlsx)"),
     include: ExportInclude = Query(ExportInclude.ALL, description="What to include in export")
 ):
