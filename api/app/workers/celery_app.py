@@ -3,17 +3,12 @@ Celery application configuration.
 Handles async processing of feedback analysis tasks.
 """
 
-import os
 from celery import Celery
 from kombu import serialization
 import structlog
 
-# Force environment variable reading for Render deployment
-# This ensures we get the correct Redis URL from Render's environment
-REDIS_URL = os.environ.get('REDIS_URL', 'redis://localhost:6379/0')
-CELERY_BROKER_URL = os.environ.get('CELERY_BROKER_URL', REDIS_URL)
-CELERY_RESULT_BACKEND = os.environ.get('CELERY_RESULT_BACKEND', REDIS_URL)
-
+# Use Pydantic settings as SINGLE source of truth
+# Render environment variables are read by Pydantic Settings
 from app.config import settings
 
 # Setup logging for workers
@@ -37,20 +32,18 @@ logger = structlog.get_logger()
 # Log configuration values for debugging
 logger.info(
     "Celery configuration loaded",
-    broker_url_env=CELERY_BROKER_URL,
-    result_backend_env=CELERY_RESULT_BACKEND,
-    broker_url_settings=settings.CELERY_BROKER_URL,
-    result_backend_settings=settings.CELERY_RESULT_BACKEND,
-    redis_url_settings=settings.REDIS_URL,
+    broker_url=settings.CELERY_BROKER_URL,
+    result_backend=settings.CELERY_RESULT_BACKEND,
+    redis_url=settings.REDIS_URL,
     app_env=settings.APP_ENV,
     celery_worker_concurrency=settings.CELERY_WORKER_CONCURRENCY
 )
 
-# Create Celery app - Use environment variables directly if available
+# Create Celery app - Use Pydantic settings exclusively
 celery_app = Celery(
     "feedback_analyzer",
-    broker=CELERY_BROKER_URL or settings.CELERY_BROKER_URL,
-    backend=CELERY_RESULT_BACKEND or settings.CELERY_RESULT_BACKEND,
+    broker=settings.CELERY_BROKER_URL,
+    backend=settings.CELERY_RESULT_BACKEND,
     include=["app.workers.tasks"]
 )
 
@@ -128,14 +121,13 @@ def health_check():
     """Health check task."""
     import redis
 
-    # Check Redis connection - use environment variable directly
-    redis_url = REDIS_URL or settings.REDIS_URL
+    # Check Redis connection using Pydantic settings
     try:
-        r = redis.from_url(redis_url)
+        r = redis.from_url(settings.REDIS_URL)
         r.ping()
-        return {"status": "healthy", "redis": "connected", "url": redis_url}
+        return {"status": "healthy", "redis": "connected", "url": settings.REDIS_URL}
     except Exception as e:
-        return {"status": "unhealthy", "redis": f"error: {str(e)}", "url": redis_url}
+        return {"status": "unhealthy", "redis": f"error: {str(e)}", "url": settings.REDIS_URL}
 
 
 if __name__ == "__main__":

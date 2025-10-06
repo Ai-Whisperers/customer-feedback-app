@@ -3,7 +3,7 @@
 import os
 from pathlib import Path
 from typing import Optional, List
-from pydantic import Field
+from pydantic import Field, field_validator, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -87,6 +87,16 @@ class Settings(BaseSettings):
     SENTRY_DSN: Optional[str] = Field(default=None)
     LOG_LEVEL: str = Field(default="INFO")
     DATABASE_URL: Optional[str] = Field(default=None)
+
+    @model_validator(mode='after')
+    def validate_openai_key(self):
+        """Validate OPENAI_API_KEY is set when hybrid analysis is enabled."""
+        if self.HYBRID_ANALYSIS_ENABLED and not self.OPENAI_API_KEY:
+            raise ValueError(
+                "OPENAI_API_KEY is required when HYBRID_ANALYSIS_ENABLED=True. "
+                "Please set the OPENAI_API_KEY environment variable."
+            )
+        return self
 
     @property
     def file_max_bytes(self) -> int:
