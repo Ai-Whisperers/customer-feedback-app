@@ -11,6 +11,8 @@ import numpy as np
 import structlog
 from datetime import datetime
 
+from app.config import settings
+
 logger = structlog.get_logger()
 
 
@@ -59,9 +61,9 @@ class UnifiedFileProcessor:
         df = self._read_file(file_path)
 
         # Step 2: Validate row count
-        if len(df) > self.settings.MAX_ROWS:
+        if len(df) > settings.MAX_ROWS:
             raise ValueError(
-                f"File has {len(df)} rows, maximum allowed is {self.settings.MAX_ROWS}. "
+                f"File has {len(df)} rows, maximum allowed is {settings.MAX_ROWS}. "
                 f"Please split your file into smaller chunks."
             )
 
