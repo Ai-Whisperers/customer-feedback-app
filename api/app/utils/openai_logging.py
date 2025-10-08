@@ -58,7 +58,7 @@ class OpenAIMetricsCollector:
     ) -> None:
         """Log detailed response information."""
         duration = time.time() - context['timestamp']
-        
+
         # Extract token usage from response
         usage = getattr(response, 'usage', None)
         tokens_used = {
@@ -66,7 +66,7 @@ class OpenAIMetricsCollector:
             'completion_tokens': usage.completion_tokens if usage else 0,
             'total_tokens': usage.total_tokens if usage else 0
         }
-        
+
         # Check if response is truncated
         is_truncated = not is_complete or response_text.endswith('...')
         if response.choices and response.choices[0].finish_reason:
@@ -74,10 +74,10 @@ class OpenAIMetricsCollector:
             is_truncated = is_truncated or finish_reason == 'length'
         else:
             finish_reason = 'unknown'
-        
+
         # Extract rate limit info from response headers (if available)
         rate_limit_info = self._extract_rate_limits(response)
-        
+
         # Calculate response metrics
         response_metrics = {
             'batch_index': context['batch_index'],
@@ -90,13 +90,27 @@ class OpenAIMetricsCollector:
             'rate_limits': rate_limit_info,
             'tokens_per_comment': round(tokens_used['total_tokens'] / context['comment_count'], 2) if context['comment_count'] > 0 else 0
         }
-        
+
         # Update global metrics
         self.metrics['total_requests'] += 1
         self.metrics['total_tokens'] += tokens_used['total_tokens']
         if is_truncated:
             self.metrics['truncated_responses'] += 1
-        
+
+        # Update MetricsService (for persistence and dashboard)
+        try:
+            from app.services.metrics_service import MetricsService
+            MetricsService.update_global_metrics(
+                prompt_tokens=tokens_used['prompt_tokens'],
+                completion_tokens=tokens_used['completion_tokens'],
+                total_tokens=tokens_used['total_tokens'],
+                comments_processed=context['comment_count'],
+                batches_processed=1,
+                duration_seconds=duration
+            )
+        except Exception as e:
+            logger.warning("Failed to update MetricsService", error=str(e))
+
         # Log with appropriate level
         if is_truncated:
             logger.warning(

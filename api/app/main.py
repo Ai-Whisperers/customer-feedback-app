@@ -11,7 +11,7 @@ from fastapi.responses import JSONResponse
 import time
 
 from app.config import settings
-from app.routes import upload, status, results, export, health
+from app.routes import upload, status, results, export, health, metrics
 from app.utils.logging import setup_logging
 
 
@@ -111,6 +111,7 @@ app.include_router(upload.router, prefix="/upload", tags=["upload"])
 app.include_router(status.router, prefix="/status", tags=["status"])
 app.include_router(results.router, prefix="/results", tags=["results"])
 app.include_router(export.router, prefix="/export", tags=["export"])
+app.include_router(metrics.router)  # Metrics router (already has /api/metrics prefix)
 
 
 @app.get("/")
