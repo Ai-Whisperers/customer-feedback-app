@@ -86,8 +86,8 @@ emoji_patterns = [
     "[\U0001F700-\U0001F77F]",  # alchemical symbols
     "[\U0001F780-\U0001F7FF]",  # geometric shapes extended
     "[\U0001F800-\U0001F8FF]",  # supplemental arrows-c
-    "[\U0002600-\U000026FF]",  # miscellaneous symbols
-    "[\U0002700-\U000027BF]",  # dingbats
+    "[\U00002600-\U000026FF]",  # miscellaneous symbols
+    "[\U00002700-\U000027BF]",  # dingbats
     "[\U0001F900-\U0001F9FF]",  # supplemental symbols and pictographs
     "[\U0001FA70-\U0001FAFF]",  # symbols and pictographs extended-a
 ]
@@ -111,6 +111,6 @@ exclude_lines = [
     "raise NotImplementedError",
     "if 0:",
     "if __name__ == .__main__.:",
-    "class .*\bProtocol\):",
-    "@(abc\.)?abstractmethod",
+    "class .*\\bProtocol\\):",
+    "@(abc\\.)?abstractmethod",
 ]
