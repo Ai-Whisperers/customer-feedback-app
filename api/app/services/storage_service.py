@@ -5,15 +5,15 @@ Handles storing and retrieving analysis results from Redis.
 
 import json
 from typing import Optional, Dict, Any
-import redis
 import structlog
 
 from app.config import settings
+from app.infrastructure.cache import CacheClient
 
 logger = structlog.get_logger()
 
 # Redis client instance
-redis_client = redis.from_url(settings.REDIS_URL)
+redis_client = CacheClient.get_client()
 
 
 def store_analysis_results(task_id: str, results: Dict[str, Any]) -> None:

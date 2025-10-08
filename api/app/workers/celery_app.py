@@ -119,11 +119,11 @@ def debug_task(self):
 @celery_app.task
 def health_check():
     """Health check task."""
-    import redis
+    from app.infrastructure.cache import CacheClient
 
     # Check Redis connection using Pydantic settings
     try:
-        r = redis.from_url(settings.REDIS_URL)
+        r = CacheClient.get_client()
         r.ping()
         return {"status": "healthy", "redis": "connected", "url": settings.REDIS_URL}
     except Exception as e:

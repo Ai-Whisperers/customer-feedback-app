@@ -36,6 +36,13 @@ class Language(str, Enum):
     ENGLISH = "en"
 
 
+class FileType(str, Enum):
+    """Supported file types for upload."""
+    CSV = ".csv"
+    XLSX = ".xlsx"
+    XLS = ".xls"
+
+
 class EmotionProfile(BaseModel):
     """16 emotions profile with probabilities."""
     # Positive emotions

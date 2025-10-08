@@ -1,12 +1,12 @@
 """Health check endpoints."""
 
-import redis
 import structlog
 from datetime import datetime
 from fastapi import APIRouter, HTTPException
 from typing import Dict, Any
 
 from app.config import settings
+from app.infrastructure.cache import CacheClient
 
 router = APIRouter()
 logger = structlog.get_logger()
@@ -46,7 +46,7 @@ async def health_check() -> Dict[str, Any]:
 
     # Check Redis
     try:
-        r = redis.from_url(settings.REDIS_URL, socket_timeout=5, socket_connect_timeout=5)
+        r = CacheClient.get_client()
         r.ping()
         redis_info = r.info()
 

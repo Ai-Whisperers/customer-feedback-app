@@ -16,11 +16,11 @@ def create_analyzer():
         try:
             # Try to import and use parallel processor
             from app.adapters.openai.parallel_processor import ParallelProcessor
-            import redis
+            from app.infrastructure.cache import CacheClient
 
             # Try to create Redis connection for caching
             try:
-                redis_client = redis.from_url(settings.REDIS_URL)
+                redis_client = CacheClient.get_client()
                 redis_client.ping()  # Test connection
             except Exception as e:
                 redis_client = None

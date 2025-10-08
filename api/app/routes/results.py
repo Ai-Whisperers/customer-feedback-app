@@ -6,6 +6,7 @@ from fastapi import APIRouter, HTTPException, Path, Query
 from typing import Optional
 
 from app.config import settings
+from app.infrastructure.cache import CacheClient
 from app.schemas.analysis import AnalysisResults
 from app.schemas.base import TaskStatus
 
@@ -13,8 +14,7 @@ router = APIRouter()
 logger = structlog.get_logger()
 
 # Redis client
-import redis
-redis_client = redis.from_url(settings.REDIS_URL)
+redis_client = CacheClient.get_client()
 
 
 @router.get("/{task_id}")

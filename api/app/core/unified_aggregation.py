@@ -8,6 +8,8 @@ from collections import defaultdict, Counter
 import structlog
 from datetime import datetime
 
+from app.schemas.processing import ProcessingMetadata
+
 logger = structlog.get_logger()
 
 
@@ -224,22 +226,38 @@ class UnifiedAggregator:
 
     @staticmethod
     def build_metadata(
-        total_comments: int,
-        processing_time: float,
-        model_used: str,
+        total_comments: Optional[int] = None,
+        processing_time: Optional[float] = None,
+        model_used: Optional[str] = None,
         language_counts: Optional[Dict[str, int]] = None,
-        batch_count: int = 1
+        batch_count: Optional[int] = None,
+        metadata: Optional[ProcessingMetadata] = None
     ) -> Dict[str, Any]:
         """
         Build metadata for response.
         Format must match frontend expectations exactly.
+
+        Args:
+            Can accept either individual parameters (legacy) or ProcessingMetadata object (preferred)
         """
+        # Use ProcessingMetadata if provided (preferred)
+        if metadata:
+            return {
+                "total_comments": metadata.total_comments,
+                "processing_time_seconds": round(metadata.processing_time_seconds, 2),
+                "model_used": metadata.model_used,
+                "timestamp": datetime.utcnow().isoformat() + "Z",
+                "batches_processed": metadata.batch_count,
+                "languages": metadata.language_counts or {"es": metadata.total_comments}
+            }
+
+        # Legacy fallback: use individual parameters
         return {
             "total_comments": total_comments,
             "processing_time_seconds": round(processing_time, 2),
             "model_used": model_used,
             "timestamp": datetime.utcnow().isoformat() + "Z",
-            "batches_processed": batch_count,
+            "batches_processed": batch_count or 1,
             "languages": language_counts or {"es": total_comments}
         }
 
@@ -275,27 +293,38 @@ class UnifiedAggregator:
     def format_complete_response(
         task_id: str,
         comments: List[Dict[str, Any]],
-        processing_time: float,
-        model_used: str,
+        processing_time: Optional[float] = None,
+        model_used: Optional[str] = None,
         include_rows: bool = True,
-        nps_metrics: Optional[Dict[str, Any]] = None
+        nps_metrics: Optional[Dict[str, Any]] = None,
+        metadata: Optional[ProcessingMetadata] = None
     ) -> Dict[str, Any]:
         """
         Format complete response for frontend.
         Ensures all required fields are present and correctly typed.
+
+        Args:
+            Can accept either individual parameters (legacy) or ProcessingMetadata object (preferred)
         """
         aggregator = UnifiedAggregator()
 
-        # Get language distribution
-        language_counts = aggregator.calculate_language_distribution(comments)
+        # Get language distribution (calculate if not in metadata)
+        if metadata and metadata.language_counts:
+            language_counts = metadata.language_counts
+        else:
+            language_counts = aggregator.calculate_language_distribution(comments)
+            # Update metadata with language counts if available
+            if metadata:
+                metadata.set_language_counts(language_counts)
 
-        # Build metadata
-        metadata = aggregator.build_metadata(
-            total_comments=len(comments),
+        # Build metadata for response
+        response_metadata = aggregator.build_metadata(
+            total_comments=len(comments) if not metadata else None,
             processing_time=processing_time,
             model_used=model_used,
             language_counts=language_counts,
-            batch_count=1  # Will be updated by caller if needed
+            batch_count=1 if not metadata else None,
+            metadata=metadata  # Use ProcessingMetadata if provided
         )
 
         # Build summary
@@ -322,7 +351,7 @@ class UnifiedAggregator:
         # Build complete response
         response = {
             "task_id": task_id,
-            "metadata": metadata,
+            "metadata": response_metadata,
             "summary": summary,
             "rows": rows,
             "aggregated_insights": {

@@ -14,6 +14,7 @@ from app.core.unified_file_processor import UnifiedFileProcessor
 from app.core.unified_aggregation import UnifiedAggregator
 from app.core.nps_calculator import categorize_rating
 from app.services.efficient_deduplication import EfficientDeduplicationService
+from app.schemas.processing import ProcessingMetadata
 from app.config import settings
 
 logger = structlog.get_logger()
@@ -113,10 +114,7 @@ def prepare_analysis_data(df: pd.DataFrame) -> tuple[List[str], List[int], Optio
 def merge_batch_results(
     batch_results: List[Dict[str, Any]],
     original_df: pd.DataFrame,
-    task_id: str,
-    start_time: float,
-    model_used: str = None,
-    dedup_info: Dict[str, Any] = None
+    metadata: ProcessingMetadata
 ) -> Dict[str, Any]:
     """
     Merge results from all batches into final results.
@@ -124,14 +122,12 @@ def merge_batch_results(
     Args:
         batch_results: List of batch analysis results
         original_df: Original dataframe with data
-        task_id: Task identifier
-        start_time: Processing start time
-        model_used: AI model used for analysis
+        metadata: Processing metadata containing task_id, model, dedup info, etc.
 
     Returns:
         Final merged results dictionary
     """
-    logger.info("Merging batch results", task_id=task_id, batch_count=len(batch_results))
+    logger.info("Merging batch results", task_id=metadata.task_id, batch_count=len(batch_results))
 
     # Extract all comments from batch results
     api_results = []
@@ -140,13 +136,13 @@ def merge_batch_results(
         api_results.extend(comments)
 
     # If we have dedup info, expand results to include duplicates
-    if dedup_info:
+    if metadata.dedup_info:
         all_comments = expand_results_with_duplicates(
             api_results,
-            dedup_info['all_comments'],
-            dedup_info['filtered_indices'],
-            dedup_info['duplicate_map'],
-            dedup_info.get('all_ratings', [])
+            metadata.dedup_info['all_comments'],
+            metadata.dedup_info['filtered_indices'],
+            metadata.dedup_info['duplicate_map'],
+            metadata.dedup_info.get('all_ratings', [])
         )
     else:
         all_comments = api_results
@@ -180,17 +176,13 @@ def merge_batch_results(
         "detractors_percentage": round(detractors_pct, 1)
     }
 
-    # Calculate processing time
-    processing_time = time.time() - start_time
-
     # Use unified aggregator to format complete response
     results = aggregator.format_complete_response(
-        task_id=task_id,
+        task_id=metadata.task_id,
         comments=all_comments,
-        processing_time=processing_time,
-        model_used=model_used or settings.AI_MODEL,
         include_rows=True,
-        nps_metrics=nps_metrics
+        nps_metrics=nps_metrics,
+        metadata=metadata
     )
 
     # Update batch count in metadata
@@ -221,10 +213,49 @@ def expand_results_with_duplicates(
         all_comments: All original comments
         filtered_indices: Indices that were sent to API
         duplicate_map: Map of duplicate indices to original
+        all_ratings: Optional ratings for each comment
 
     Returns:
         Expanded list with results for all comments
+
+    Raises:
+        ValueError: If input validation fails
     """
+    # Input validation
+    if not all_comments:
+        raise ValueError("all_comments cannot be empty")
+
+    max_comment_idx = len(all_comments) - 1
+
+    # Validate filtered_indices are within bounds
+    if filtered_indices:
+        max_filtered_idx = max(filtered_indices)
+        if max_filtered_idx > max_comment_idx:
+            raise ValueError(
+                f"filtered_indices contains index {max_filtered_idx} "
+                f"but all_comments only has {len(all_comments)} items (max index {max_comment_idx})"
+            )
+
+    # Validate duplicate_map indices are within bounds
+    if duplicate_map:
+        all_dup_indices = set(duplicate_map.keys()) | set(duplicate_map.values())
+        max_dup_idx = max(all_dup_indices) if all_dup_indices else 0
+
+        if max_dup_idx > max_comment_idx:
+            raise ValueError(
+                f"duplicate_map contains index {max_dup_idx} "
+                f"but all_comments only has {len(all_comments)} items (max index {max_comment_idx})"
+            )
+
+    # Validate ratings length matches comments if provided
+    if all_ratings is not None and len(all_ratings) != len(all_comments):
+        logger.warning(
+            "all_ratings length mismatch",
+            ratings_len=len(all_ratings),
+            comments_len=len(all_comments)
+        )
+        # Don't raise, just log - we handle this with bounds checking below
+
     # Create mapping from filtered index to api result
     index_to_result = {}
     for i, filtered_idx in enumerate(filtered_indices):

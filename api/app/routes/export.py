@@ -9,10 +9,14 @@ from fastapi import APIRouter, HTTPException, Path, Query
 from fastapi.responses import StreamingResponse
 
 from app.schemas.export import ExportFormat, ExportInclude
-from app.services import storage_service, export_service
+from app.services import storage_service
+from app.services.export import ExportFacade
 
 router = APIRouter()
 logger = structlog.get_logger()
+
+# Initialize export facade (singleton pattern)
+export_facade = ExportFacade()
 
 
 @router.get("/{task_id}")
@@ -54,8 +58,8 @@ async def export_results(
                 }
             )
 
-        # Generate export
-        file_content, filename, media_type = export_service.generate_export(
+        # Generate export using new facade
+        file_content, filename, media_type = export_facade.generate_export(
             results=results,
             format=format,
             include=include,

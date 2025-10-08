@@ -10,9 +10,10 @@ from fastapi import APIRouter, UploadFile, File, HTTPException, Form
 from typing import Optional
 import pandas as pd
 import aiofiles
-import redis
 
 from app.config import settings
+from app.infrastructure.cache import CacheClient
+from app.schemas.base import FileType
 from app.schemas.upload import UploadResponse, UploadError, FileInfo, UploadOptions
 from app.workers.tasks import analyze_feedback
 from app.core.unified_file_processor import UnifiedFileProcessor
@@ -21,12 +22,12 @@ router = APIRouter()
 logger = structlog.get_logger()
 
 # Allowed file extensions
-ALLOWED_EXTENSIONS = {'.xlsx', '.xls', '.csv'}
+ALLOWED_EXTENSIONS = {FileType.CSV.value, FileType.XLSX.value, FileType.XLS.value}
 TEMP_DIR = Path("/tmp/feedback_uploads")
 TEMP_DIR.mkdir(exist_ok=True, parents=True)
 
 # Redis client for file storage
-redis_client = redis.from_url(settings.REDIS_URL)
+redis_client = CacheClient.get_client()
 
 
 @router.post("", response_model=UploadResponse)  # No trailing slash to prevent redirects

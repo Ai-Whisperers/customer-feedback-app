@@ -6,10 +6,10 @@ import asyncio
 import time
 from typing import Optional
 import structlog
-import redis
 from openai import AsyncOpenAI
 
 from app.config import settings
+from app.infrastructure.cache import CacheClient
 
 logger = structlog.get_logger()
 
@@ -25,7 +25,7 @@ class GlobalRateLimiter:
             max_rps: Maximum requests per second across all workers
         """
         self.max_rps = max_rps
-        self.redis_client = redis.from_url(settings.REDIS_URL)
+        self.redis_client = CacheClient.get_client()
         self.key = "openai_rate_limit"
 
     async def acquire(self):

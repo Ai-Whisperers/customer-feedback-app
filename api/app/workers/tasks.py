@@ -12,12 +12,13 @@ import os
 from typing import Dict, List, Any
 from celery import group
 import structlog
-import redis
 
 from app.config import settings
+from app.infrastructure.cache import CacheClient
 from app.workers.celery_app import celery_app
 from app.adapters.openai import openai_analyzer
 from app.schemas.base import Language, TaskStatus
+from app.schemas.processing import ProcessingMetadata
 from app.utils.event_loop_monitor import monitor_event_loop, log_loop_state
 from app.utils.event_loop_manager import SafeEventLoopManager
 from app.utils.memory_monitor import MemoryMonitor
@@ -34,7 +35,7 @@ if settings.HYBRID_ANALYSIS_ENABLED:
     from app.adapters.hybrid_analyzer import HybridAnalyzer
 
 logger = structlog.get_logger()
-redis_client = redis.from_url(settings.REDIS_URL)
+redis_client = CacheClient.get_client()
 
 
 @celery_app.task(bind=True, max_retries=3)
@@ -95,6 +96,15 @@ def analyze_feedback(self, task_id_param: str, file_info: Dict[str, Any]) -> str
         status_service.update_task_progress(task_id, 20, "Normalizando y deduplicando datos")
         comments, ratings, language_hint, dedup_info = analysis_service.prepare_analysis_data(df)
 
+        # Create processing metadata to track task execution
+        processing_metadata = ProcessingMetadata(
+            task_id=task_id,
+            model_used=settings.AI_MODEL,
+            total_comments=dedup_info['original_count'],
+            valid_comments=dedup_info['filtered_count'],
+            dedup_info=dedup_info
+        )
+
         # Create batches
         # Show deduplication savings
         original_count = dedup_info['original_count']
@@ -116,6 +126,9 @@ def analyze_feedback(self, task_id_param: str, file_info: Dict[str, Any]) -> str
             batches = [comments[i:i+batch_size] for i in range(0, len(comments), batch_size)]
         else:
             batches = openai_analyzer.optimize_batch_size(comments)
+
+        # Update metadata with batch count
+        processing_metadata.update_counts(batch_count=len(batches))
 
         logger.info("Created batches", task_id=task_id, batch_count=len(batches))
 
@@ -238,9 +251,7 @@ def analyze_feedback(self, task_id_param: str, file_info: Dict[str, Any]) -> str
                     )
 
         final_results = analysis_service.merge_batch_results(
-            batch_analysis_results, df, task_id, start_time,
-            model_used=settings.AI_MODEL,
-            dedup_info=dedup_info
+            batch_analysis_results, df, processing_metadata
         )
 
         # Store results
@@ -422,7 +433,7 @@ def cleanup_expired_tasks() -> Dict[str, Any]:
 
     try:
         # Connect to Redis
-        r = redis.from_url(settings.REDIS_URL)
+        r = CacheClient.get_client()
 
         # Get current time and expiry threshold
         now = datetime.utcnow()

@@ -49,8 +49,11 @@ class AggregatedInsights(BaseModel):
     )
 
 
-class ProcessingMetadata(BaseModel):
-    """Processing metadata."""
+class ResponseMetadata(BaseModel):
+    """
+    Metadata for API responses (Pydantic model for serialization).
+    Note: For internal processing, use ProcessingMetadata from schemas.processing
+    """
     total_comments: int = Field(ge=0)
     processing_time_seconds: float = Field(ge=0)
     model_used: str
@@ -72,7 +75,7 @@ class AnalysisSummary(BaseModel):
 class AnalysisResults(BaseModel):
     """Complete analysis results."""
     task_id: str
-    metadata: ProcessingMetadata
+    metadata: ResponseMetadata
     summary: AnalysisSummary
     rows: List[CommentAnalysis] = Field(description="Per-comment analysis")
     aggregated_insights: AggregatedInsights
