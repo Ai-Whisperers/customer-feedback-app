@@ -11,8 +11,9 @@ import path from 'path';
 import dotenv from 'dotenv';
 import { createProxyMiddleware } from 'http-proxy-middleware';
 
-// Load environment variables
-dotenv.config();
+// Load environment variables (.env.local overrides .env)
+dotenv.config({ path: path.join(__dirname, '..', '..', '.env') });
+dotenv.config({ path: path.join(__dirname, '..', '..', '.env.local'), override: true });
 
 const app = express();
 // Support both PORT and WEB_PORT for backward compatibility
@@ -34,19 +35,19 @@ console.log(`[CONFIG] HELMET DISABLED - DEBUGGING MODE`);
 app.use(compression());
 
 // API Proxy MUST come before helmet CSP to avoid blocking
-// API Proxy configuration
+// API Proxy configuration with pathRewrite (FIXED: preserve port)
 const apiProxy = createProxyMiddleware({
   target: API_TARGET,
   changeOrigin: true,
   secure: false, // IMPORTANT: Allow HTTP for internal services
-  pathRewrite: {
-    '^/api': '', // Remove /api prefix when forwarding
-  },
   followRedirects: false, // Don't follow redirects
+  pathRewrite: {
+    '^/api': '', // Strip /api prefix
+  },
   on: {
     proxyReq: (proxyReq: any, req: any, res: any) => {
-      console.log(`[PROXY] Forwarding ${req.method} ${req.path} to ${API_TARGET}`);
-      console.log(`[PROXY] Target URL: ${proxyReq.protocol}//${proxyReq.host}${proxyReq.path}`);
+      console.log(`[PROXY] Forwarding ${req.method} ${req.originalUrl} to ${API_TARGET}`);
+      console.log(`[PROXY] ProxyReq path: ${proxyReq.path}`);
       // Add custom headers if needed
       proxyReq.setHeader('X-Forwarded-Host', req.headers.host || '');
       proxyReq.setHeader('X-Real-IP', (req as any).ip || req.socket.remoteAddress || '');
@@ -76,13 +77,6 @@ const apiProxy = createProxyMiddleware({
   },
   logger: console, // Always log in production for debugging
 } as any);
-
-// Intercept /api requests BEFORE proxy to log them
-app.use('/api', (req, res, next) => {
-  console.log(`[API REQUEST] ${req.method} ${req.path}`);
-  console.log(`[API REQUEST] Headers:`, req.headers.host);
-  next();
-});
 
 // Proxy API requests BEFORE other middleware
 app.use('/api', apiProxy);

@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { FileUpload } from '@/components/upload/FileUpload';
 import { ProgressTracker } from '@/components/progress/ProgressTracker';
 import { ResultsCharts } from '@/components/results/ResultsCharts';
@@ -18,6 +19,7 @@ type AppState = 'idle' | 'uploading' | 'processing' | 'completed' | 'error';
 
 export const AnalyzerPage: React.FC = () => {
   const { t } = useTranslations();
+  const [searchParams] = useSearchParams();
   const [appState, setAppState] = useState<AppState>('idle');
   const [taskId, setTaskId] = useState<string>('');
   const [progress, setProgress] = useState(0);
@@ -30,6 +32,16 @@ export const AnalyzerPage: React.FC = () => {
   const lastProgressRef = useRef<number>(0);
   const stallTimeRef = useRef<number>(Date.now());
   const currentTaskIdRef = useRef<string>('');
+
+  // Load existing task from URL parameter
+  useEffect(() => {
+    const taskParam = searchParams.get('task');
+    if (taskParam && !taskId) {
+      console.log('[AnalyzerPage] Loading task from URL:', taskParam);
+      setTaskId(taskParam);
+      setAppState('processing');
+    }
+  }, [searchParams, taskId]);
 
   const handleFileUpload = async (file: File) => {
     setAppState('uploading');

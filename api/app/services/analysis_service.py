@@ -190,9 +190,8 @@ def merge_batch_results(
 
     logger.info(
         "Results merged successfully",
-        task_id=task_id,
-        total_comments=len(all_comments),
-        processing_time=processing_time
+        task_id=metadata.task_id,
+        total_comments=len(all_comments)
     )
 
     return results
